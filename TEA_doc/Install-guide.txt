@@ -1,0 +1,214 @@
+
+            =============== Install guide for TEA ==================
+                                Version 1.0
+
+This is an installation guide for the Thermochemical Equilibrium Abundances 
+(TEA) code. The code calculates equilibrium abundances of the gaseous molecular
+species present in hot-Jupiter atmospheres. It works with high numerical 
+precision, without adjustments, for fractional abundances (mixing fractions) 
+up to 10e-14 and a temperature range of 1000 - 4000 K. For temperatures below 
+1000 K and mixing fractions below 10e-14, the code produces results with low 
+precision. The output can be improved with fine adjustments to the lambda 
+exploration variables in lambdacorr.py module (see documentation).
+
+
+******************************* END LICENSE *******************************
+Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
+abundances for hot-Jupiter atmospheres under thermochemical equilibrium
+conditions.
+
+Copyright (C) 2014 University of Central Florida.  All rights reserved.
+
+This is a test version only, and may not be redistributed to any third
+party.  Please refer such requests to us.  This program is distributed
+in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.
+
+We welcome your feedback, but do not guarantee support.  Please send
+feedback or inquiries to both:
+
+Jasmina Blecic <jasmina@physics.ucf.edu>
+Joseph Harrington <jh@physics.ucf.edu>
+
+or alternatively,
+
+Jasmina Blecic and Joseph Harrington
+UCF PSB 441
+4000 Central Florida Blvd
+Orlando, FL 32816-2385
+USA
+
+Thank you for testing TEA!
+******************************* END LICENSE *******************************
+
+
+1. ==== Packages ====
+
+   Ensure following python packages are installed:
+    Python: 2.7.3+
+    NumPy:  1.6.2+
+    SymPy:  0.7.1.rc1 (This version ensures maximum performance)
+   
+    Sympy download:
+            https://github.com/sympy/sympy/releases/tag/sympy/0.7.1.rc1
+
+
+2. ==== Content ====
+
+   Extract TEA from the TEA.zip file:
+
+   The following should be included (in root directory unless otherwise noted):
+
+   ---- TEA Document ----
+    Document containing theory part of the code.
+    The TEA Document is placed in the TEA_doc/ directory.
+
+   ---- Auxillary files ----
+    install_guide.txt - this file is placed in the TEA_doc/ directory.
+    abundances.txt    - elemental abundances file 
+                        (Asplund et al 2009, IUPAC)
+    TEA_config.py     - configuration file
+
+   ---- Directories ---- 
+    TEA_doc   - directory that stores TEA Document and intall_guide.txt
+    inputs    - directory that stores inputs, Example subdirectory included    
+    rawtables - directory that contains JANAF tables in their raw format
+                (last download from October 2012)
+
+   ---- Source modules ---- 
+    balance.py (*)
+    format.py
+    iterate.py (*)
+    lagrange.py
+    lambdacorr.py
+    makeheader.py
+    makestoich.py (*)
+    prepipe.py (*)
+    readatm.py
+    readJANAF.py (*)
+    runatm.py (*)
+    runsingle.py (*)
+     
+   ---- Supporting modules ---- 
+    makeatm.py (*)
+    plot_TEA.py (*)
+
+   Asterisk (*) indicates modules that must be executable in 
+    *nix (e.g., Linux) systems.
+
+
+3. ==== Run pre-pipeline ====
+
+   Open TEA_config.py and adjust parameters.
+
+   From TEA folder:
+    - run prepipe.py
+
+   OPTIONAL (run separately):
+    - run makestoch.py
+    - run readJANAF.py
+
+   This will create the gdata/ directory and stoich.txt, used by TEA to read
+    thermochemical and stoichiometric data, and conversion-record.txt, required
+    for the user to track the species available in the JANAF tables and compare
+    them with the names produced by TEA. This ensures the correct pre-atmospheric
+    file is made.
+    
+
+4. ==== Produce input file ====
+
+   Use the conversion-record.txt to look up the correct names and
+    states of input/output species that TEA can accept.
+
+   For single-TP:
+     See example in inputs/Examples/inp_Example.txt
+     == To create a custom input file, follow the key in the example. ==
+
+   For multiple-TP: 
+     See example in inputs/Examples/atm_Example.dat
+     == To create a custom pre-atm file, execute makeatm.py == 
+     with desired variables assigned within it or follow design of the
+     example. The pre-atm file will be placed in the inputs/ directory.
+
+   Place appropriate input file in inputs/
+
+
+5. ==== TEA_config.py ====
+
+   Modify TEA_config.py with desired run parameters and booleans.
+
+
+6. ==== Execute TEA ====
+
+   For single-TP: 
+    In shell from TEA directory:
+    runsingle.py inputs/<FILENAME>.txt <DESCRIPTION-OF-RUN>
+    Example: runsingle.py inputs/Examples/inp_Example.txt single_Example
+
+    Results will be placed in results/<DESCRIPTION-OF-RUN>/
+    Example: results/single_Example/
+
+    This runs TEA for just one temperature and pressure. The current iteration
+    number is printed on-screen as the code progresses. The execution time
+    for the example given should be around 15 seconds.
+
+   For multiple-TP: 
+    In shell from TEA directory:
+    runatm.py inputs/<FILENAME>.dat <DESCRIPTION-OF-RUN>
+    Example: runatm.py inputs/Examples/atm_Example.dat atm_Example
+
+    This will run every T-P line of the pre-atm file. The current line number
+    of the pre-atm file and current iteration number is printed on-screen
+    as the code progresses. The execution time for the example given should
+    be around 10 minutes.
+    
+    Results will be places in results/<DESCRIPTION-OF-RUN>/
+    Example: results/atm_Example/
+
+
+7.  ==== Output ====
+
+    After running TEA, the following directories and files should be created:
+    
+     stoich.txt - stoichiometric data
+     conversion_record.txt - record of converted JANAF files
+                             To sort the content alphabetically, do:
+                      sort conversion_record.txt >conversion_record_sorted.txt
+     gdata/     - contains thermochemical data of interest from JANAF tables
+     results/   - directory that contains final results
+
+     If doprint, save_headers, and save_outputs are set to 'True' in
+      TEA_config.py, the following are also created:
+    
+     headers/              - directory that stores all headers
+     outputs/              - directory that stores all intermediate files
+     stochcoeff/           - contains a file per species with stoichiometric
+                             values for each species
+
+8. ==== Plot TEA ====
+
+   To plot the final results, run plot_TEA.py. Instructions on how
+    to execute the code are found in plot_TEA.py documentation.
+    Example: plot_TEA.py results/atm_Example/atm_Example.dat CO,CH4,H2O,N2,NH3 8,9,10,11,12 
+    Plots will be placed in plots/ directory.
+
+    Recall, TEA numerical precision is limited to fractional abundances 
+    of 10e-14.
+
+
+======================
+POTENTIAL USER ERRORS 
+======================
+
+1. All elements present in the system must be included explicitly in the 
+    output species list.
+
+2. Species names must be identical to those in the thermodynamic directory
+    (gdata/) produced by readJANAF.py. See sorted conversion_record.txt
+    file (or gdata/ file) for correct species names.
+
+2. Hydrogen is the most abundant element in the universe. As such, if H_g
+    is listed as an input elemental species, H2_ref must be included as an
+    output molecular species to get a valid result.
+
