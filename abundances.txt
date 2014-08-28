@@ -1,3 +1,6 @@
+# This file contains solar abundances as found by Asplund et al. 2009.
+# The file is in the public domain. Contact: jasmina@physics.ucf.edu
+# Columns: ordinal, symbol, dex abundances, name, molar mass.
 0   D   7.30  Deuterium     2.014101
 1   H   12.00 Hydrogen      1.008
 2   He  10.93 Helium        4.002602

@@ -3,7 +3,12 @@
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
 # abundances for hot-Jupiter atmospheres under thermochemical equilibrium
 # conditions.
-# 
+#
+# This project was completed with the support of the NASA Earth and Space 
+# Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
+# PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
+# assistant coder for the first pre-release Oliver M. Bowman. 
+#
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
 # This is a test version only, and may not be redistributed to any third

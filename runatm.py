@@ -4,7 +4,12 @@
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
 # abundances for hot-Jupiter atmospheres under thermochemical equilibrium
 # conditions.
-# 
+#
+# This project was completed with the support of the NASA Earth and Space 
+# Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
+# PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
+# assistant coder for the first pre-release Oliver M. Bowman. 
+#
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
 # This is a test version only, and may not be redistributed to any third
@@ -46,27 +51,32 @@ import subprocess
 import format as form
 import makeheader as mh
 import readatm as ra
+from radpress import *
 
 # =============================================================================
 # This program runs TEA over a pre-atm file that contains multiple T-P's.
 # The code first retrieves the pre-atm file, and the current directory
 # name given by the user. Then, it sets locations of all necessary modules
-# and directories of files that will be used. The program loops over all lines
-# (T-P's) in the pre-atm file and writes results in the final atm file. It 
-# executes the modules in the following order: readatm.py, makeheader.py, 
-# balance,py, iterate.py, and readoutput.py. Iterate.py executes lagrange.py 
-# and lambdacorr.py. Readoutput() reads results from the TEA iteration loop 
-# executed in iterate.py and pass them for writing in the atm file. The code 
-# has a condition to save or delete all intermediate files, time stamps
-# for checking the speed of execution, and is verbose for debugging purposes.
-# If these files are saved, the function will create a unique directory for
-# each T-P point. This functionality is controlled in TEA_config file. The 
-# final results with the input and the configuration files are saved in the 
-# results/ directory.
+# and directories of files that will be used. It allocates an array to store
+# the final abundances for each species of each T-P run. The program loops over
+# all lines (T-P's) in the pre-atm file and executes the modules in the 
+# following order: readatm.py, makeheader.py, balance,py, iterate.py, and 
+# readoutput.py. Iterate.py executes lagrange.py and lambdacorr.py. 
+# Readoutput.py reads results from the TEA iteration loop executed in 
+# iterate.py. The abundances are calculated and stored in an abundance array.
+# Then, the rad() function is called from the radpress.py module to calculate
+# radii for each pressure in the atmosphere. The code then opens the final
+# atm file to write the results. It takes first common lines from the pre-atm
+# file and writes the data from the stored radii, temperature, pressure and
+# abundances array. The code has a condition to save or delete all intermediate
+# files, time stamps for checking the speed of execution, and is verbose for 
+# debugging purposes. If these files are saved, the function will create a 
+# unique directory for each T-P point. This functionality is controlled in the
+# TEA_config file. The final results with the input and the configuration files
+# are saved in the results/ directory.
 #
-# This module prints on screen the code progress: the current T-P line from the 
-# pre-atm file, the current iteration number, and informs the user that
-# minimization is done.
+# This module prints on screen the current T-P line from the pre-atm file, the
+# current iteration number, and informs the user that minimization is done.
 # Example:
 # 5
 #  100
@@ -76,6 +86,12 @@ import readatm as ra
 # runatm.py <pre-atm file> <name of the result directory>
 # Example: runatm.py inputs/Examples/atm_Example.dat Atm_Example
 # =============================================================================
+
+# 2014-06-01      Oliver Bowman and Jasmina Blecic made original version for
+#                 first TEA release
+# 2014-07-02      Jasmina Blecic, jasmina@physics.ucf.edu   
+#                 Modified: added radii calculation with new radpress module
+#                           and re-arranged previous version for BART project. 
 
 # Time / speed testing
 if times:
@@ -134,40 +150,14 @@ for i in np.arange(np.size(spec_list)):
 # Update list of valid species
 spec_list = np.copy(good_spec)
 
-# Open final atm file for writing, keep open to add new lines
+# If does not exist make out_dir
 if not os.path.exists(out_dir): os.makedirs(out_dir)
-fout_name = out_dir + desc + '.dat'
-fout = open(fout_name, 'w+')
 
 # Copy configuration file used for this run to results directory
-shutil.copyfile("TEA_config.py", out_dir + "TEA_config.py")
+shutil.copyfile(cwd + "TEA_config.py", out_dir + "TEA_config.py")
 
 # Copy pre-atmosphere file used for this run to results directory
 shutil.copyfile(infile, out_dir + infile.split("/")[-1][:-4] + "-preatm.dat")
-
-# Read pre-atm file
-fin  = open(infile, 'r+')
-inlines = fin.readlines()
-fin.close()
-
-# From pre-atm file take all lines to marker[0]=end_head and write to atm file
-# Those include header, species names, and labels for data
-for i in np.arange(end_head):
-    fout.writelines([l for l in inlines[i]])
-
-# Write corrected species list into pre-atm file and continue
-for i in np.arange(np.size(spec_list)):
-    fout.write(spec_list[i] + ' ')
-fout.write("\n\n")
-fout.write("#FINDTEA\n")
-
-# Write data from pre-atm file into each column of atm file 
-fout.write(radi_arr[0].rjust(10) + ' ')
-fout.write(pres_arr[0].rjust(10) + ' ')
-fout.write(temp_arr[0].rjust(7) + ' ')
-for i in np.arange(np.size(spec_list)):
-    fout.write(spec_list[i].rjust(10)+' ')
-fout.write('\n')
 
 # Times / speed check for pre-loop runtime
 if times:
@@ -179,6 +169,11 @@ if times:
 if os.name == 'nt': inshell = True    # Windows
 else:               inshell = False   # OSx / Linux
 
+# Allocate abundances matrix for all species and all T-Ps
+abun_matrix = np.zeros(np.size(spec_list))
+
+
+# ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
 for q in np.arange(n_runs)[1:]:
 
@@ -216,16 +211,20 @@ for q in np.arange(n_runs)[1:]:
     # Read output of TEA loop
     header, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar \
         = form.readoutput('results/' + desc + '/' + single_res[0])
-    
-    # Insert results from the current line (T-P) to atm file
-    fout.write(radi.rjust(10) + ' ')
-    fout.write(pres.rjust(10) + ' ')
-    fout.write(temp.rjust(7) + ' ')
+
+    # Allocate abundances for current T-P
+    cur_abn_row = np.zeros(np.size(spec_list))
+
+    # Fill out current abundances
     for i in np.arange(np.size(spec_list)):
+        # Calculate abundances for each species
         cur_abn = x[i] / x_bar
-        fout.write('%1.4e'%cur_abn + ' ')
-    fout.write('\n')    
-    
+        # Fill out all species current T-P abundances
+        cur_abn_row[i] = cur_abn 
+
+    # Fill out abundances array
+    abun_matrix = np.vstack((abun_matrix, cur_abn_row))
+   
     # Save or delete intermediate headers
     if save_headers:
         # Save header files for each T-P
@@ -272,6 +271,64 @@ for q in np.arange(n_runs)[1:]:
         # Delete single T-P result directories and files
         for file in single_res:
             os.remove(out_dir + file)
+
+
+# ========== Calculate radii for each pressure ========== 
+# Call radpress module
+rad = rad(tepfile, atom_arr, temp, pres, spec_list, \
+      thermo_dir, n_runs, q, abun_matrix, temp_arr, pres_arr)
+
+
+# =================== Write atm file =================== 
+# Open final atm file for writing, keep open to add new lines
+fout_name = out_dir + desc + '.tea'
+fout = open(fout_name, 'w+')
+
+# Read pre-atm file
+fin  = open(infile, 'r+')
+inlines = fin.readlines()
+fin.close()
+
+# From pre-atm file take all lines to marker[0]=end_head and write to atm file
+# Those include header, species names, and labels for data
+for i in np.arange(end_head):
+    fout.writelines([l for l in inlines[i]])
+
+# Write corrected species list into pre-atm file and continue
+for i in np.arange(np.size(spec_list)):
+    fout.write(spec_list[i] + ' ')
+fout.write("\n\n")
+fout.write("#FINDTEA\n")
+
+# Write data header from the pre-atm file into each column of atm file 
+fout.write(radi_arr[0].ljust(10) + ' ')
+fout.write(pres_arr[0].ljust(10) + ' ')
+fout.write(temp_arr[0].ljust(7) + ' ')
+for i in np.arange(np.size(spec_list)):
+    fout.write(spec_list[i].ljust(10)+' ')
+fout.write('\n')
+
+# Take abundances
+abund = abun_matrix[1:]
+
+# Write atm file for each run
+for q in np.arange(n_runs)[1:]: 
+    # Radius, pressure, and temp for the current line
+    radi = str('%8.3f'%rad[q-1])
+    pres = pres_arr[q]
+    temp = temp_arr[q]
+
+    # Insert radii array
+    fout.write(radi.ljust(10) + ' ')
+
+    # Insert results from the current line (T-P) to atm file
+    fout.write(pres.ljust(10) + ' ')
+    fout.write(temp.ljust(7) + ' ')
+
+    # Write current abundances
+    for i in np.arange(np.size(spec_list)):
+        fout.write('%1.4e'%abund[q-1][i] + ' ')
+    fout.write('\n')
 
 # Close atm file
 fout.close()

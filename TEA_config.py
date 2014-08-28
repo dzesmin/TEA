@@ -3,6 +3,11 @@
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
 # abundances for hot-Jupiter atmospheres under thermochemical equilibrium
 # conditions.
+#
+# This project was completed with the support of the NASA Earth and Space 
+# Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
+# PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
+# assistant coder for the first pre-release Oliver M. Bowman.  
 # 
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
@@ -29,6 +34,8 @@
 # Thank you for testing TEA!
 # ******************************* END LICENSE *******************************
 
+import os
+
 # ============================================================================= 
 # Configuration file containing parameters and booleans to run or debug TEA.
 # Change the parameters below to control how TEA runs. The default number of 
@@ -36,16 +43,22 @@
 # ============================================================================= 
 
 # ========    Sets maximum number of iteration   ======== 
-maxiter      = 100    # (Def: 100)   Number of iterations the main pipeline
-                      #              will run for each T-P point 
+maxiter      = 100      # (Def: 100)   Number of iterations the main pipeline
+                        #              will run for each T-P point 
 
 # ========          Controls output files        ======== 
-save_headers = False  # (Def: False) Preserve headers for multi-T-P 
-                      #              pre-atm files 
-save_outputs = False  # (Def: False) Preserve intermediate outputs for 
-                      #              multi-T-P pre-atm files
+save_headers = False    # (Def: False) Preserve headers for multi-T-P 
+                        #              pre-atm files 
+save_outputs = False    # (Def: False) Preserve intermediate outputs for 
+                        #              multi-T-P pre-atm files
 
 # ========   Controls debugging and tracking     ========
-doprint      = False  # (Def: False) Enable various debug printouts 
-times        = False  # (Def: False) Enable time printing for speed tests 
+doprint      = False    # (Def: False) Enable various debug printouts 
+times        = False    # (Def: False) Enable time printing for speed tests 
+
+
+# ========         Tep and pressure file         ========
+cwd     = os.getcwd()   # Get current directory name
+tepfile = cwd + '/inputs/tepfile/HD209458b.tep'  # Tepfile
+
 
