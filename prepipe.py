@@ -8,7 +8,7 @@
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
 # PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
-# assistant coder for the first pre-release Oliver M. Bowman. 
+# assistant coder Oliver M. Bowman.  
 # 
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
@@ -276,9 +276,9 @@ def comp(specie):
             # Create array containing only the elements used in this run 
             # This is not explicitly returned but can easy be if desired
             if result == [[]]:
-                result = np.append(result, [[ele, np.float(weight)]], axis=1)
+                result = np.append(result, [[ele, weight]], axis=1)
             else:
-                result = np.append(result, [[ele, np.float(weight)]], axis=0)
+                result = np.append(result, [[ele, weight]], axis=0)
     
     # Return full array of elements and stoichiometry
     return elements

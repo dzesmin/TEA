@@ -8,7 +8,7 @@
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
 # PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
-# assistant coder for the first pre-release Oliver M. Bowman. 
+# assistant coder Oliver M. Bowman.  
 #
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
@@ -35,7 +35,7 @@
 # Thank you for testing TEA!
 # ******************************* END LICENSE *******************************
 
-from TEA_config import *
+from readconf import *
 
 # Setup for time/speed testing
 if times:
@@ -51,7 +51,6 @@ import subprocess
 import format as form
 import makeheader as mh
 import readatm as ra
-from radpress import *
 
 # =============================================================================
 # This program runs TEA over a pre-atm file that contains multiple T-P's.
@@ -119,12 +118,13 @@ desc    = sys.argv[1:][1]
 
 # Set up locations of necessary scripts and directories of files
 cwd = os.getcwd() + '/'
-thermo_dir       = cwd + "gdata"
-loc_readatm      = cwd + "readatm.py"
-loc_makeheader   = cwd + "makeheader.py"
-loc_balance      = cwd + "balance.py"
-loc_iterate      = cwd + "iterate.py"
-loc_headerfile   = cwd + "/headers/" + desc + "/header_" + desc + ".txt"
+thermo_dir       = location_TEA + "gdata"
+loc_readatm      = location_TEA + "readatm.py"
+loc_makeheader   = location_TEA + "makeheader.py"
+loc_balance      = location_TEA + "balance.py"
+loc_iterate      = location_TEA + "iterate.py"
+loc_headerfile   = cwd + "/headers/" + desc + "/header_" \
+                                              + desc + ".txt"
 loc_outputs      = cwd + "/outputs/" + desc + "/"
 loc_transient    = cwd + "/outputs/" + "transient/"
 loc_outputs_temp = loc_transient + desc + "/"
@@ -132,7 +132,7 @@ out_dir          = cwd + "/results/" + desc + "/"
 single_res       = ["results-machine-read.txt", "results-visual.txt"]
 
 # Read pre-atm file
-n_runs, spec_list, radi_arr, pres_arr, temp_arr, atom_arr, end_head = \
+n_runs, spec_list, pres_arr, temp_arr, atom_arr, end_head = \
                                                  ra.readatm(infile)
 
 # Correct species list for only species found in thermo_dir
@@ -154,10 +154,10 @@ spec_list = np.copy(good_spec)
 if not os.path.exists(out_dir): os.makedirs(out_dir)
 
 # Copy configuration file used for this run to results directory
-shutil.copyfile(cwd + "TEA_config.py", out_dir + "TEA_config.py")
+shutil.copyfile("TEA.cfg", out_dir + "TEA.cfg")
 
 # Copy pre-atmosphere file used for this run to results directory
-shutil.copyfile(infile, out_dir + infile.split("/")[-1][:-4] + "-preatm.dat")
+shutil.copyfile(infile, out_dir + infile.split("/")[-1])
 
 # Times / speed check for pre-loop runtime
 if times:
@@ -184,7 +184,6 @@ for q in np.arange(n_runs)[1:]:
         print('\n'+ str(q))
     
     # Radius, pressure, and temp for the current line    
-    radi = radi_arr[q]
     pres = pres_arr[q]
     temp = temp_arr[q]
     
@@ -272,13 +271,6 @@ for q in np.arange(n_runs)[1:]:
         for file in single_res:
             os.remove(out_dir + file)
 
-
-# ========== Calculate radii for each pressure ========== 
-# Call radpress module
-rad = rad(tepfile, atom_arr, temp, pres, spec_list, \
-      thermo_dir, n_runs, q, abun_matrix, temp_arr, pres_arr)
-
-
 # =================== Write atm file =================== 
 # Open final atm file for writing, keep open to add new lines
 fout_name = out_dir + desc + '.tea'
@@ -289,19 +281,19 @@ fin  = open(infile, 'r+')
 inlines = fin.readlines()
 fin.close()
 
-# From pre-atm file take all lines to marker[0]=end_head and write to atm file
-# Those include header, species names, and labels for data
-for i in np.arange(end_head):
-    fout.writelines([l for l in inlines[i]])
+# Write a header file
+header      = "# This is a final TEA output file with calculated abundances (mixing fractions) for all listed species.\n\
+# Units: pressure (bar), temperature (K), abundance (unitless)."
+fout.write(header + '\n\n')
+fout.write('#SPECIES\n')
 
 # Write corrected species list into pre-atm file and continue
 for i in np.arange(np.size(spec_list)):
     fout.write(spec_list[i] + ' ')
 fout.write("\n\n")
-fout.write("#FINDTEA\n")
+fout.write("#TEADATA\n")
 
 # Write data header from the pre-atm file into each column of atm file 
-fout.write(radi_arr[0].ljust(10) + ' ')
 fout.write(pres_arr[0].ljust(10) + ' ')
 fout.write(temp_arr[0].ljust(7) + ' ')
 for i in np.arange(np.size(spec_list)):
@@ -313,13 +305,9 @@ abund = abun_matrix[1:]
 
 # Write atm file for each run
 for q in np.arange(n_runs)[1:]: 
-    # Radius, pressure, and temp for the current line
-    radi = str('%8.3f'%rad[q-1])
+    # Pressure, and temp for the current line
     pres = pres_arr[q]
     temp = temp_arr[q]
-
-    # Insert radii array
-    fout.write(radi.ljust(10) + ' ')
 
     # Insert results from the current line (T-P) to atm file
     fout.write(pres.ljust(10) + ' ')
@@ -332,6 +320,8 @@ for q in np.arange(n_runs)[1:]:
 
 # Close atm file
 fout.close()
+
+print("\n  Species abundances calculated.\n  Created TEA atmospheric file.")
 
 # Time / speed testing
 if times:

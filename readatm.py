@@ -7,7 +7,7 @@
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
 # PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
-# assistant coder for the first pre-release Oliver M. Bowman. 
+# assistant coder Oliver M. Bowman.  
 #
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
@@ -37,7 +37,7 @@
 import numpy as np
 import os
 
-def readatm(atm_file, spec_mark='#FINDSPEC', tea_mark='#FINDTEA'):
+def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     '''
     This function reads a pre-atm file and returns data that TEA will use.
     It opens a pre-atmosphere file to find markers for species and TEA data,
@@ -123,15 +123,13 @@ def readatm(atm_file, spec_mark='#FINDSPEC', tea_mark='#FINDTEA'):
         data[i] = np.array(info[marker[1] + i])
     
     # Take column numbers of non-element data
-    iradi = np.where(data_label == '#Radius'  )[0][0]
-    ipres = np.where(data_label == 'Pressure')[0][0]
-    itemp = np.where(data_label == 'Temp'    )[0][0]
+    ipres = np.where(data_label == '#Pressure')[0][0]
+    itemp = np.where(data_label == 'Temp'     )[0][0]
 
     # Mark number of columns preceding element columns
-    iatom = 3 
+    iatom = 2 
     
-    # Place data into corresponding arrays
-    radi_arr = data[:,iradi]      
+    # Place data into corresponding arrays     
     pres_arr = data[:,ipres]      
     temp_arr = data[:,itemp]      
     atom_arr = data[:,iatom:]    
@@ -139,6 +137,6 @@ def readatm(atm_file, spec_mark='#FINDSPEC', tea_mark='#FINDTEA'):
     # Number of times TEA will have to be executed for each T-P
     n_runs = data.shape[0]  
     
-    return n_runs, spec_list, radi_arr, pres_arr, temp_arr, atom_arr, marker[0]
+    return n_runs, spec_list, pres_arr, temp_arr, atom_arr, marker[0]
 
 

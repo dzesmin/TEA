@@ -8,7 +8,7 @@
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
 # PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
-# assistant coder for the first pre-release Oliver M. Bowman. 
+# assistant coder Oliver M. Bowman.  
 # 
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
@@ -133,15 +133,6 @@ def plot_TEA():
     # Count number of species
     spec = len(species)
 
-    # Include H2O condensate below 273 K
-    for i in np.arange(spec):
-        if species[i]=='H2O':
-            data[i+1][data[0] < 273] = 1e-100
-        elif species[i]=='TiO':
-            data[i+1][data[0] < 1930] = 1e-100
-        elif species[i]=='VO':
-            data[i+1][data[0] < 1710] = 1e-100
-
     # Open a figure
     plt.figure(1)
     plt.clf()
@@ -163,8 +154,8 @@ def plot_TEA():
     plt.legend(loc='best', prop={'size':10})
 
     # Temperature range (plt.xlim) and pressure range (plt.ylim)
-    plt.ylim(-10, -2)     
-    plt.xlim(200, 3000)
+    #plt.ylim(-10, -2)     
+    #plt.xlim(200, 3000)
     
     # Place plot into plots directory with appropriate name 
     plot_out = plots_dir + filename.split("/")[-1][:-4] + '.png'

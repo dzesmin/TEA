@@ -8,7 +8,7 @@
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
 # PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
-# assistant coder for the first pre-release Oliver M. Bowman. 
+# assistant coder Oliver M. Bowman.  
 #
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
