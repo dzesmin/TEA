@@ -80,7 +80,6 @@ import format as form
 # This code is called by runatm.py and runsingle.py.
 # =============================================================================
 
-
 # Read run-time arguments
 header = argv[1:][0]              # Name of header file
 desc   = argv[1:][1]              # Description of the run
