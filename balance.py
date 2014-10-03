@@ -80,6 +80,9 @@ import format as form
 # This code is called by runatm.py and runsingle.py.
 # =============================================================================
 
+# Correct location_TEA name
+if location_TEA[-1] != '/':
+    location_TEA += '/'
 
 # Read run-time arguments
 header = argv[1:][0]              # Name of header file

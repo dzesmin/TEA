@@ -75,6 +75,10 @@ from   format import printout
 # input: iterate.py <header file> <name of the result directory>
 # =============================================================================
 
+# Correct location_TEA name
+if location_TEA[-1] != '/':
+    location_TEA += '/'
+
 # Time / speed testing
 if times:
     end = time.time()

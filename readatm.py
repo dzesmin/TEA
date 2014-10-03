@@ -35,7 +35,6 @@
 # ******************************* END LICENSE *******************************
 
 import numpy as np
-import os
 
 def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     '''
@@ -76,8 +75,7 @@ def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
                Marks line number in pre-atm file where data start.
     '''
 
-    # Get current working directory and pre-atm file name
-    #file = os.getcwd() + '/' + atm_file
+    # Get pre-atm file name
     file = atm_file
     
     # Open file to read

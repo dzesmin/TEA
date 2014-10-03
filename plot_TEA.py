@@ -124,11 +124,11 @@ def plot_TEA():
 
     # Concatenate species with temperature for data and columns
     data    = tuple(np.concatenate((['T'], species)))
-    usecols = tuple(np.concatenate(([2], columns)))
+    usecols = tuple(np.concatenate(([1], columns)))
 
     # Load all data for all interested species
     data = np.loadtxt(filename, dtype=float, comments='#', delimiter=None,    \
-                    converters=None, skiprows=13, usecols=usecols, unpack=True)
+                    converters=None, skiprows=7, usecols=usecols, unpack=True)
 
     # Count number of species
     spec = len(species)
@@ -154,8 +154,8 @@ def plot_TEA():
     plt.legend(loc='best', prop={'size':10})
 
     # Temperature range (plt.xlim) and pressure range (plt.ylim)
-    #plt.ylim(-10, -2)     
-    #plt.xlim(200, 3000)
+    plt.ylim(-10, -2)     
+    plt.xlim(200, 3000)
     
     # Place plot into plots directory with appropriate name 
     plot_out = plots_dir + filename.split("/")[-1][:-4] + '.png'

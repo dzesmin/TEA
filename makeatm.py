@@ -161,12 +161,9 @@ Joseph Harrington <jh@physics.ucf.edu>          \n\
     # Get pre_atm directory
     pre_atm_dir = "inputs/pre_atm/"
     if not os.path.exists(pre_atm_dir): os.makedirs(pre_atm_dir)
- 
-    # Get the name of the configuration file
-    conf_name = sys.argv[1]  
 
     # Get the name of the pressure file
-    PT_file = sys.argv[2] 
+    PT_file = sys.argv[1] 
 
     # Read pressure and temperature data
     pressure, temp = readPT(PT_file)

@@ -110,6 +110,10 @@ Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 Joseph Harrington <jh@physics.ucf.edu>          \n\
 ========================================================================\n")
 
+# Correct location_TEA name
+if location_TEA[-1] != '/':
+    location_TEA += '/'
+
 # Retrieve pre-atm file
 infile  = sys.argv[1:][0]
 
@@ -123,12 +127,12 @@ loc_readatm      = location_TEA + "readatm.py"
 loc_makeheader   = location_TEA + "makeheader.py"
 loc_balance      = location_TEA + "balance.py"
 loc_iterate      = location_TEA + "iterate.py"
-loc_headerfile   = cwd + "/headers/" + desc + "/header_" \
+loc_headerfile   = cwd + "headers/" + desc + "/header_" \
                                               + desc + ".txt"
-loc_outputs      = cwd + "/outputs/" + desc + "/"
-loc_transient    = cwd + "/outputs/" + "transient/"
+loc_outputs      = cwd + "outputs/" + desc + "/"
+loc_transient    = cwd + "outputs/" + "transient/"
 loc_outputs_temp = loc_transient + desc + "/"
-out_dir          = cwd + "/results/" + desc + "/"
+out_dir          = cwd + "results/" + desc + "/"
 single_res       = ["results-machine-read.txt", "results-visual.txt"]
 
 # Read pre-atm file
@@ -321,6 +325,7 @@ for q in np.arange(n_runs)[1:]:
 # Close atm file
 fout.close()
 
+# Print on-screen
 print("\n  Species abundances calculated.\n  Created TEA atmospheric file.")
 
 # Time / speed testing

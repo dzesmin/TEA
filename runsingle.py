@@ -77,27 +77,31 @@ Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 Joseph Harrington <jh@physics.ucf.edu>          \n\
 ========================================================================\n")
 
+# Correct location_TEA name
+if location_TEA[-1] != '/':
+    location_TEA += '/'
+
 # Retrieve user inputs file
 infile  = argv[1:][0] 
 desc    = argv[1:][1]
 
 # Set up locations of necessary scripts and directories of files
 cwd = os.getcwd() + '/'
-thermo_dir     = cwd + "gdata"
-loc_makeheader = cwd + "makeheader.py"
-loc_balance    = cwd + "balance.py"
-loc_iterate    = cwd + "iterate.py"
-loc_headerfile   = cwd + "/headers/" + desc + "/header_" + desc + ".txt"
-loc_outputs      = cwd + "/outputs/" + desc + "/"
-loc_outputs_temp = cwd + "/outputs/" + "transient/" + desc + "/"
-out_dir          = cwd + "/results/" + desc + "/"
+thermo_dir     = location_TEA + "gdata"
+loc_makeheader = location_TEA + "makeheader.py"
+loc_balance    = location_TEA + "balance.py"
+loc_iterate    = location_TEA + "iterate.py"
+loc_headerfile   = cwd + "headers/" + desc + "/header_" + desc + ".txt"
+loc_outputs      = cwd + "outputs/" + desc + "/"
+loc_outputs_temp = cwd + "outputs/" + "transient/" + desc + "/"
+out_dir          = cwd + "results/" + desc + "/"
 single_res       = ["results-machine-read.txt", "results-visual.txt"]
 
 # Create results directory
 if not os.path.exists(out_dir): os.makedirs(out_dir)
 
 # Copy configuration file used for this run to results directory
-shutil.copyfile("TEA_config.py", out_dir + "TEA_config.py")
+shutil.copyfile("TEA.cfg", out_dir + "TEA.cfg")
 
 # Copy pre-atm file used for this run to results directory
 shutil.copyfile(infile, out_dir + infile.split("/")[-1])
@@ -119,3 +123,7 @@ if save_outputs:
     os.rename(old_name, new_name)
 else:
     shutil.rmtree(loc_outputs_temp)
+
+# Print on-screen
+print("\n  Species abundances calculated.\n  Created results file.")
+

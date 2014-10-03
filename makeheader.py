@@ -34,8 +34,6 @@
 # Thank you for testing TEA!
 # ******************************* END LICENSE *******************************
 
-from readconf import *
-
 import numpy as np
 import re
 import os
@@ -150,7 +148,7 @@ def header_setup(temp, pressure, spec_list,                      \
 
         # First term is divided by T in JANAF    
         # Second term needs to be converted to Joules (JANAF gives kJ)
-        g_RT[i] = - (gdata_term1 / R) + (gdata_term2 * 1000 / (temp * R))
+        g_RT[i] = - (gdata_term1 / R) + (gdata_term2 * 1000. / (temp * R))
         
     # Get number of elements that occur in species of interest
     nostate = np.copy(spec_list)
@@ -158,7 +156,7 @@ def header_setup(temp, pressure, spec_list,                      \
         nostate[i] = re.search('(.*?)_', spec_list[i]).group(1)
     
     # Get stoichiometric information for species of interest
-    f = open(location_TEA + stoich_file, 'r')
+    f = open(stoich_file, 'r')
     stoich_data = []
     bline = True
     for line in f.readlines():
