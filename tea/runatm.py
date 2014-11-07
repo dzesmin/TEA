@@ -2,8 +2,7 @@
 
 # ******************************* START LICENSE *******************************
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
-# abundances in planetary atmospheres under thermochemical equilibrium
-# conditions.
+# abundances under thermochemical equilibrium conditions.
 #
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
@@ -82,7 +81,7 @@ import readatm as ra
 # Maximum iteration reached, ending minimization.
 #
 # The program is executed with in-shell inputs:
-# runatm.py <MULTITP_INPUT_FILE> <DESCRIPTION_OF_RUN>
+# runatm.py <MULTITP_INPUT_FILE_PATH> <DIRECTORY_NAME>
 # Example: ../TEA/tea/runatm.py ../TEA/tea/doc/examples/multiTP/atm_inputs/multiTP_Example.atm example_multiTP
 # =============================================================================
 
@@ -95,8 +94,8 @@ if times:
 # Print license
 print("\n\
 ================= Thermal Equilibrium Abundances (TEA) =================\n\
-A code to calculate gaseous molecular abundances for planetary \n\
-atmospheres under thermochemical equilibrium conditions. \n\
+A code to calculate gaseous molecular abundances under thermochemical \n\
+equilibrium conditions. \n\
 Copyright (C) 2014 University of Central Florida.  All rights reserved. \n\
 Test version, not for redistribution.  \n\
 For feedback, contact: \n\

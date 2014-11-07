@@ -2,8 +2,7 @@
 
 # ******************************* START LICENSE *******************************
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
-# abundances in planetary atmospheres under thermochemical equilibrium
-# conditions.
+# abundances under thermochemical equilibrium conditions.
 # 
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
@@ -72,7 +71,7 @@ from   format import printout
 # in TEA.cfg. 
 #
 # The program is executed by runatm.py and can be executed alone with in-shell
-# input: iterate.py <HEADER_FILE> <DESCRIPTION_OF_RUN>
+# input: iterate.py <HEADER_FILE> <DIRECTORY_NAME>
 # =============================================================================
 
 # Correct location_TEA name
@@ -87,7 +86,7 @@ if times:
 
 # Read run-time arguments
 header = argv[1:][0]              # Name of header file
-desc   = argv[1:][1]              # Description of the run
+desc   = argv[1:][1]              # Directory name
 
 # Create and name outputs and results directories if they do not exist
 datadir   = location_out + desc + '/outputs/' + 'transient/'

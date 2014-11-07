@@ -2,8 +2,7 @@
 
 # ******************************* START LICENSE *******************************
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
-# abundances in planetary atmospheres under thermochemical equilibrium
-# conditions.
+# abundances under thermochemical equilibrium conditions.
 #
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
@@ -99,8 +98,7 @@ def lambdacorr(it_num, datadir, doprint, direct):
     Notes
     -----
     The code works without adjustments and with high precision for the
-    the fractional abundances (mixing fractions) up to 10e-14 and the
-    temperature range of 1000 - 4000 K. For temperatures below 1000 K and 
+    temperatures above ~600 K. For temperatures below 600 K and 
     mixing fractions below 10e-14, the code produces results with low 
     precision. To improve the precision, adjust the lambda exploration
     variables 'lower' and 'steps' to larger magnitudes (i.e., lower = -100,

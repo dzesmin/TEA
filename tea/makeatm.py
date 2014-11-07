@@ -2,8 +2,7 @@
 
 # ******************************* START LICENSE *******************************
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
-# abundances in planetary atmospheres under thermochemical equilibrium
-# conditions.
+# abundances under thermochemical equilibrium conditions.
 #
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
@@ -54,7 +53,7 @@ import sys
 # The TEA.cfg file need to be edit with the following information: PT file,
 # pre-atmospheric file name, input elemental species, and output species.
 #
-# Run the code as: makeatm.py <DESCRIPTION_OF_RUN>
+# Run the code as: makeatm.py <DIRECTORY_NAME>
 #
 # Possible user errors in configuring pre-atm section in the TEA.cfg that
 # conflicts with TEA:
@@ -71,7 +70,6 @@ import sys
 #    with their correct names
 # =============================================================================
 
-# Print license
 print("\n\
 ================= Thermal Equilibrium Abundances (TEA) =================\n\
 A code to calculate gaseous molecular abundances in planetary \n\
@@ -87,7 +85,7 @@ Joseph Harrington <jh@physics.ucf.edu>          \n\
 if location_out[-1] != '/':
     location_out += '/'
 
-# Retrieve user inputs file
+# Retrieve user directory name
 desc  = sys.argv[1:][0]
 
 # Check if output directory exists and inform user
@@ -156,8 +154,8 @@ def makeatm():
     file (default: abundances.txt, Asplund et al. 2009). The code trims the abundance
     data to the elements of interest, converts species dex abundances (logarithmic
     abundances, dex stands for decimal exponent) into number densities and divides them
-    by the sum of all species number densities in the mixture to get fractional 
-    abundances. It writes data (pressure, temperature, elemental abundances) 
+    by the hydrogen number densities fractional abundances. 
+    It writes data (pressure, temperature, elemental abundances) 
     into a pre-atmospheric file. The config file, pressure and temperature file, and 
     the abundances file are copied to the atm_inputs/ directory.
 
@@ -230,6 +228,8 @@ def makeatm():
         out_spec[i] = out_spec[i].partition('_')[0]
         if len(out_spec[i]) == 1:
             out_elem.append(out_spec[i])
+        elif len(out_spec[i]) == 2 and out_spec[i][1].islower():
+            out_elem.append(out_spec[i])
 
     # Catch if input elements not included in output species
     for i in in_elem_split:
@@ -255,9 +255,11 @@ def makeatm():
     # Convert dex exponents to number density
     out_num  = 10**np.array(out_dex)
 
-    # Get fractions of element number density to the 
-    #     total sum of all elements number densities in the mixture
-    out_abn  = (out_num / np.sum(out_num)).tolist()
+    # Get hydrogen number density
+    H_num = 10**12
+
+    # Get fractions of element number density to the hydrogen number density
+    out_abn  = (out_num / H_num).tolist()
     
     # Convert fractions to strings in scientific notation
     for n in np.arange(np.size(out_abn)):

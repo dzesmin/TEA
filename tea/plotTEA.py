@@ -2,8 +2,7 @@
 
 # ******************************* START LICENSE *******************************
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
-# abundances in planetary atmospheres under thermochemical equilibrium
-# conditions.
+# abundances under thermochemical equilibrium conditions.
 #
 # This project was completed with the support of the NASA Earth and Space 
 # Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
@@ -54,7 +53,7 @@ def plotTEA():
     on the command line: the path to the multiTP TEA output, and the names
     of the species user wants to plot. See notes for the full description
     of arguments. To run the code do:
-    ../TEA/tea/plotTEA.py <RESULT_ATM_FILE> <SPECIES_NAMES>
+    ../TEA/tea/plotTEA.py <RESULT_ATM_FILE_PATH> <SPECIES_NAMES>
     See 'Notes' section for an example.
 
     Parameters
@@ -71,11 +70,11 @@ def plotTEA():
     To plot the results, go to the results/ directory and open final
     .tea file. Read the species names and column numbers you want to plot.
     Arguments given should be in the following format:
-    ../TEA/tea/plotTEA.py <RESULT_ATM_FILE> <SPECIES_NAMES>
+    ../TEA/tea/plotTEA.py <RESULT_ATM_FILE_PATH> <SPECIES_NAMES>
 
-    RESULT_ATM_FILE - string
+    <RESULT_ATM_FILE> - string
                Path to the atm_file.           
-    SPECIES_NAMES  - list of strings
+    <SPECIES_NAMES>  - list of strings
                List of species that user wants to plot. Species names should 
                be given with their symbols (without their states) and no
                breaks between species names (e.g., CH4,CO,H2O).
@@ -84,10 +83,8 @@ def plotTEA():
     The plot is opened once execution is completed and saved in the ./plots/
     subdirectory.
 
-    The lower range on the y axis (mixing fraction) should be set at most -14 
-    (the maximum precision of the TEA code). The lower range on the x axis
-    (temperature) is currently set to 200 K, although the best precision is
-    reached above 1000 K.
+    The lower range on the y axis (mixing fraction) when temperatures are below ~600 K 
+    should be set at most -14. 
     '''
     
     # Get plots directory, create if non-existent
@@ -138,13 +135,13 @@ def plotTEA():
     # Convert spec to tuple
     spec = tuple(spec)
 
-    # Concatenate spec with temperature for data and columns
-    data    = tuple(np.concatenate((['T'], spec)))
-    usecols = tuple(np.concatenate(([1], columns)))
+    # Concatenate spec with pressure for data and columns
+    data    = tuple(np.concatenate((['p'], spec)))
+    usecols = tuple(np.concatenate(([0], columns)))
 
-    # Load all data for all interested specs
+    # Load all data for all interested species
     data = np.loadtxt(filename, dtype=float, comments='#', delimiter=None,    \
-                    converters=None, skiprows=12, usecols=usecols, unpack=True)
+                    converters=None, skiprows=8, usecols=usecols, unpack=True)
 
     # Open a figure
     plt.figure(1)
@@ -156,21 +153,18 @@ def plotTEA():
 
     # Plot all specs with different colours and labels
     for i in np.arange(nspec):
-        plt.plot(data[0], np.log10(data[i+1]), '-', color=colors[color_index], \
-                                                       label=str(spec[i]))
+        plt.loglog(data[i+1], data[0], '-', color=colors[color_index], \
+                                        linewidth=2, label=str(spec[i]))
         color_index += 1
 
     # Label the plot
-    plt.title(filename.split("/")[-1][:-4], fontsize=14)
-    plt.xlabel('T [K]'                    , fontsize=14)
-    plt.ylabel('log10 Mixing Fraction'    , fontsize=14)
+    plt.xlabel('Mixing Fraction', fontsize=14)
+    plt.ylabel('Pressure [bar]' , fontsize=14)
     plt.legend(loc='best', prop={'size':10})
 
     # Temperature range (plt.xlim) and pressure range (plt.ylim)
-    #plt.ylim(-10, -2)     
-    plt.ylim(-10, -2) 
-    plt.xlim(200, 3000)
-    
+    plt.ylim(max(data[0]), min(data[0]))     
+  
     # Place plot into plots directory with appropriate name 
     plot_out = plots_dir + filename.split("/")[-1][:-4] + '.png'
     plt.savefig(plot_out)  
