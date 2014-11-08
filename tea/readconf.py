@@ -2,11 +2,12 @@
 # ******************************* START LICENSE *******************************
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
 # abundances under thermochemical equilibrium conditions.
-#
-# This project was completed with the support of the NASA Earth and Space 
-# Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
-# PI Joseph Harrington. Project developers included graduate student 
-# Jasmina Blecic and undergraduate M. Oliver Bowman. 
+# 
+# This project was completed with the support of the NASA Earth and
+# Space Science Fellowship Program, grant NNX12AL83H, held by Jasmina
+# Blecic, Principal Investigator Joseph Harrington. Project developers
+# included graduate student Jasmina Blecic and undergraduate M. Oliver
+# Bowman.
 # 
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
@@ -15,6 +16,19 @@
 # in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 # PURPOSE.
+# 
+# Our intent is to release this software under an open-source,
+# reproducible-research license, once the code is mature and the first
+# research paper describing the code has been accepted for publication
+# in a peer-reviewed journal.  We are committed to development in the
+# open, and have posted this code on github.com so that others can test
+# it and give us feedback.  However, until its first publication and
+# first stable release, we do not permit others to redistribute the code
+# in either original or modified form, nor to publish work based in
+# whole or in part on the output of this code.  By downloading, running,
+# or modifying this code, you agree to these conditions.  We do
+# encourage sharing any modifications with us and discussing them
+# openly.
 # 
 # We welcome your feedback, but do not guarantee support.  Please send
 # feedback or inquiries to both:
@@ -26,7 +40,7 @@
 # 
 # Jasmina Blecic and Joseph Harrington
 # UCF PSB 441
-# 4000 Central Florida Blvd
+# 4111 Libra Drive
 # Orlando, FL 32816-2385
 # USA
 # 
