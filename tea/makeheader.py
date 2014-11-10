@@ -53,6 +53,8 @@ import numpy as np
 import re
 import os
 
+from scipy.interpolate import interp1d
+
 # =============================================================================
 # This module contains functions to write headers for a single T-P and multiple
 # T-P runs. It consists of two main functions, make_singleheader() and 
@@ -143,25 +145,13 @@ def header_setup(temp, pressure, spec_list,                      \
         # Convert data to an array
         data = np.asarray(data)
 
-        # This part is necessary only for H2O JANAF tables
-        # Find index of lowest temperature
-        idx  = np.abs(data[:, 0] - temp).argmin()
-        
-        # Interpolate in-between temperature intervals if gap is > 100 K
-        if (data[idx, 0] == data[-1, 0] and np.abs(data[idx, 0] - temp) > 100):
-            n_t = np.shape(data)[0]
-            x   = data[n_t-5:n_t, 0]
-            y1  = data[n_t-5:n_t, 1]
-            y2  = data[n_t-5:n_t, 2]
-            A1  = np.array([x, np.ones(5)])
-            A2  = np.array([x, np.ones(5)])
-            a1, b1 = np.linalg.lstsq(A1.T, y1)[0]
-            a2, b2 = np.linalg.lstsq(A2.T, y2)[0]
-            gdata_term1 = a1 * temp + b1
-            gdata_term2 = a2 * temp + b2
-        else:
-            gdata_term1 = data[idx, 1]
-            gdata_term2 = data[idx, 2]
+        # Interpolate in-between temperature intervals for each term
+        gdata_term1_inter = interp1d(data[:,0], data[:,1])
+        gdata_term2_inter = interp1d(data[:,0], data[:,2])
+
+        # Get each term at current temp
+        gdata_term1 = gdata_term1_inter(temp)
+        gdata_term2 = gdata_term2_inter(temp)
         
         # Equation for g_RT term equation (11) in TEA Document
         #  G        G-H(298)      delta-f H(298)
