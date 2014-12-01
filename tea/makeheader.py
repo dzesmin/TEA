@@ -53,7 +53,7 @@ import numpy as np
 import re
 import os
 
-from scipy.interpolate import interp1d
+from scipy.interpolate import UnivariateSpline
 
 # =============================================================================
 # This module contains functions to write headers for a single T-P and multiple
@@ -145,21 +145,27 @@ def header_setup(temp, pressure, spec_list,                      \
         # Convert data to an array
         data = np.asarray(data)
 
-        # Interpolate in-between temperature intervals for each term
-        gdata_term1_inter = interp1d(data[:,0], data[:,1])
-        gdata_term2_inter = interp1d(data[:,0], data[:,2])
-
-        # Get each term at current temp
-        gdata_term1 = gdata_term1_inter(temp)
-        gdata_term2 = gdata_term2_inter(temp)
-        
         # Equation for g_RT term equation (11) in TEA Document
         #  G        G-H(298)      delta-f H(298)
         # ---  =    -------  +    -------------
         # R*T         R*T              R*T
 
-        # First term is divided by T in JANAF    
+        # First term is divided by T in JANAF   
         # Second term needs to be converted to Joules (JANAF gives kJ)
+        #  G     G-H(298)             1                                    1000
+        # ---  = ------- [J/K/mol] * ---         + delta-f H(298) [kJ/mol] ------ 
+        # R*T      T                  R [J/K/mol]                          R*T [J/K/mol][K] 
+
+        # Spline interpolation of JANAF term1 values
+        spline_term1 = UnivariateSpline(data[:, 0], data[:,1], s=1)
+        gdata_term1  = spline_term1(temp)
+       
+        # Take term2 from gdata/ tables
+        for j in np.arange(len(data[:,0])):
+            if data[:,0][j] == 298.15:
+                gdata_term2  = data[:,2][j]   
+
+        # Calculate the above equation   
         g_RT[i] = - (gdata_term1 / R) + (gdata_term2 * 1000 / (temp * R))
         
     # Get number of elements that occur in species of interest
@@ -364,8 +370,7 @@ def write_header(desc, pressure, temp, stoich_arr, n_spec, g_RT):
     '''
 
     # Comment at top of header file
-    header_comment = ("# This is a header file for one T-P.\n"
-    "# Contains following data: \n"
+    header_comment = ("# This is a header file for one T-P. It contains the following data:\n"
     "# pressure (bar), temperature (K), elemental abundances (b, unitless),\n"
     "# species names, stoichiometric values of each element in the species (a),\n"
     "# and chemical potentials.\n\n")

@@ -75,7 +75,7 @@ Thank you for testing TEA!
    Download TEA from www.github.com/dzesmin/TEA
           - git clone https://github.com/dzesmin/TEA
 
-   The following should be included:
+   The following is included:
  
    1. README
           - file with basic instructions
@@ -246,7 +246,7 @@ Thank you for testing TEA!
              This will run TEA for every T-P line of the pre-atm file. The current line
              number of the pre-atm file and current iteration number is printed on-screen
              as the code progresses. The execution time for the example given should be 
-             between 5-10 minutes.
+             between 5-10 minutes on a dual core machine.
     
              Results will be placed in <DIRECTORY_NAME>/results/
              note: <DIRECTORY_NAME> is the name of the directory that
@@ -258,8 +258,8 @@ Thank you for testing TEA!
 
 6.  ==== Output ====
 
-    After running makeatm.py, the following directory and files should be created
-    below working directory:
+    After running makeatm.py, the following directory and files are created
+    below the working directory:
 
              Output directory based on the user <RESULT_DIR_NAME>.
              Below this directory:
@@ -270,7 +270,7 @@ Thank you for testing TEA!
                               TEA config file - TEA.cfg
                               multi TP pre-atmosphere file - pre-atm.atm
     
-    After running TEA, the following directories and files should be created
+    After running TEA, the following directories and files are created
     below working directory:
 
              Output directory based on the user <RESULT_DIR_NAME>.
