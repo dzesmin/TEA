@@ -57,7 +57,7 @@ import format as form
 def lagrange(it_num, datadir, doprint, direct):
     '''
     This code applies Lagrange's method and calculates minimum based on the 
-    methodology elaborated in TEA Document in Section (1.2.1). Equations in
+    methodology elaborated in the TEA theory document in Section (3). Equations in
     this code contain both references and an explicitly written definitions.
     The program reads the last iteration's output and data from the last header
     file, creates variables for the Lagrange equations, sets up the Lagrange
@@ -146,14 +146,14 @@ def lagrange(it_num, datadir, doprint, direct):
         
     # ============== CREATE VARIABLES FOR LAGRANGE EQUATION ============== #
 
-    # Create 'c' value, equation (17) TEA Document
+    # Create 'c' value, equation (18) TEA theory document
     # ci = (g/RT)_i + ln(P)    
     c = g_RT + np.log(pressure)
     
     # Allocates array of fi(Y) over different values of i (species)
     fi_y = np.zeros(i)
     
-    # Fill in fi(Y) values equation (18) TEA Document
+    # Fill in fi(Y) values equation (19) TEA theory document
     # fi = x_i * [ci + ln(x_i/x_bar)]
     for n in np.arange(i):
         y_frac  = np.float(y[n] / y_bar)
@@ -163,7 +163,7 @@ def lagrange(it_num, datadir, doprint, direct):
     k = j 
     rjk = np.zeros((j,k))
 
-    # Fill out values of rjk, equation (25) TEA Document 
+    # Fill out values of rjk, equation (26) TEA theory document 
     # rjk = rkj = sum_i(a_ij * a_ik) * y_i
     for l in np.arange(k):
         for m in np.arange(j):
@@ -172,7 +172,7 @@ def lagrange(it_num, datadir, doprint, direct):
                 r_sum += a[n, m] * a[n, l] * y[n]      
             rjk[m, l] = r_sum
     
-    # Allocate value of u, equation (27) TEA Document
+    # Allocate value of u, equation (28) TEA theory document
     u = Symbol('u')
     
     # Allocate pi_j variables, where j is element index
@@ -182,7 +182,7 @@ def lagrange(it_num, datadir, doprint, direct):
         name = 'pi_' + np.str(m+1)
         pi = np.append(pi, Symbol(name))
     
-    # Allocate rjk * pi_j summations, equation (26) TEA Document
+    # Allocate rjk * pi_j summations, equation (27) TEA theory document
     # There will be j * k terms of rjk * pi_j
     sq_pi = [pi]
     for m in np.arange(j-1):
@@ -190,14 +190,14 @@ def lagrange(it_num, datadir, doprint, direct):
         sq_pi = np.append(sq_pi, [pi], axis = 0) 
 
     # Multiply rjk * sq_pi to get array of rjk * pi_j 
-    # equation (26) TEA DOcument
+    # equation (27) TEA theory document
     rpi = rjk * sq_pi 
     
 
     # ======================= SET FINAL EQUATIONS ======================= #
     # Total number of equations is j + 1
     
-    # Set up a_ij * fi(Y) summations equation (26) TEA Document
+    # Set up a_ij * fi(Y) summations equation (27) TEA theory document
     # sum_i[a_ij * fi(Y)]
     aij_fiy = np.zeros((j))
     for m in np.arange(j):
@@ -206,7 +206,7 @@ def lagrange(it_num, datadir, doprint, direct):
             rhs += a[n,m] * fi_y[n]
         aij_fiy[m] = rhs
     
-    # Create first j'th equations equation (26) TEA Document
+    # Create first j'th equations equation (27) TEA theory document
     # r_1m*pi_1 + r_2m*pi_2 + ... + r_mm*pi_m + b_m*u = sum_i[a_im * fi(Y)]
     for m in np.arange(j):
         if m == 0:
@@ -215,7 +215,7 @@ def lagrange(it_num, datadir, doprint, direct):
             lagrange_eq = np.array([np.sum(rpi[m]) + b[m]*u - aij_fiy[m]])
             equations   = np.append(equations, lagrange_eq)
 
-    # Last (j+1)th equation (26) TEA Document
+    # Last (j+1)th equation (27) TEA theory document
     # b_1*pi_1 + b_2*pi_2 + ... + b_m*pi_m + 0*u = sum_i[fi(Y)]
     bpi = b * pi
     lagrange_eq_last = np.array([np.sum(bpi) - np.sum(fi_y)])
@@ -236,7 +236,7 @@ def lagrange(it_num, datadir, doprint, direct):
     for m in np.arange(j):
         pi_f = np.append(pi_f, [fsol[pi[m]]])
 
-    # Calculate x_bar from solution to get 'u', equation (27) TEA Document
+    # Calculate x_bar from solution to get 'u', equation (28) TEA theory document
     # u = -1. + (x_bar/y_bar)
     u_f = fsol[u]
     x_bar = (u_f + 1.) * y_bar
@@ -245,7 +245,7 @@ def lagrange(it_num, datadir, doprint, direct):
     x = np.zeros(i)
     
     # Apply Lagrange solution for final set of x_i values for this iteration
-    # equation (22) TEA Document
+    # equation (23) TEA theory document
     # x_i = -fi(Y) + (y_i/y_bar) * x_bar + [sum_j(pi_j * a_ij)] * y_i
     for n in np.arange(i):
         sum_pi_aij = 0.0

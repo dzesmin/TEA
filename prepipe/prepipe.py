@@ -311,7 +311,7 @@ def setup(abun_file, raw_dir = 'janaf', thermo_dir = 'lib/gdata', \
           stoich_dir = 'stoichcoeff/', stoich_out = 'lib/stoich.txt'):
     '''
     This routine reads the raw JANAF tables placed in the appropriate directory 
-    (default: rawtables/) and extracts partial thermodynamic and stoichiometric
+    (default: janaf/) and extracts partial thermodynamic and stoichiometric
     data. It serves as a setup for the readJANAF.py and makestoich.py routines.
     The program is given the name of the raw JANAF tables directory,
     thermodynamic output directory, and stoichiometric output directory, as
@@ -323,7 +323,7 @@ def setup(abun_file, raw_dir = 'janaf', thermo_dir = 'lib/gdata', \
 
     Parameters
     ----------
-    raw_dir = 'rawtables': string
+    raw_dir = 'janaf': string
            Directory name of raw JANAF tables.
     thermo_dir = 'gdata':  string
            Direcoty name of thermodynamic data output.

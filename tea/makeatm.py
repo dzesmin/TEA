@@ -62,7 +62,7 @@ import sys
 # The pre-atmospheric file will be placed in the atm_inputs/ directory. 
 # The module consists of 2 functions:
 # readPT()   reads pressure-temperature (PT) profile from the PT file provided
-# makeeatm() writes a pre-atm file
+# makeatm()  writes a pre-atm file
 #
 # The TEA.cfg file need to be edit with the following information: PT file,
 # pre-atmospheric file name, input elemental species, and output species.
@@ -162,16 +162,17 @@ def readPT(PT_file):
 
 def makeatm():
     '''
-    This function produces a pre-atmospheric file in the format that TEA can read 
-    it. The file will be placed in atm_inputs/ directory. It calls readPT() function
-    to take pressure and temperature array and reads the elemental abundance data
-    file (default: abundances.txt, Asplund et al. 2009). The code trims the abundance
-    data to the elements of interest, converts species dex abundances (logarithmic
-    abundances, dex stands for decimal exponent) into number densities and divides them
-    by the hydrogen number densities fractional abundances. 
-    It writes data (pressure, temperature, elemental abundances) 
-    into a pre-atmospheric file. The config file, pressure and temperature file, and 
-    the abundances file are copied to the atm_inputs/ directory.
+    This function produces a pre-atmospheric file in the format that TEA can 
+    read it. The file will be placed in atm_inputs/ directory. It calls 
+    readPT() function to take pressure and temperature array and reads the 
+    elemental abundance data file (default: abundances.txt, 
+    Asplund et al. 2009). The code trims the abundance data to the elements
+    of interest, converts species dex abundances (logarithmic abundances, 
+    dex stands for decimal exponent) into number densities and divides them
+    by the hydrogen number densities fractional abundances. It writes data
+    (pressure, temperature, elemental abundances) into a pre-atmospheric 
+    file. The config file, pressure and temperature file, and the abundances
+    file are copied to the atm_inputs/ directory.
 
     Parameters
     ----------
@@ -266,7 +267,7 @@ def makeatm():
     # Convert strings to floats
     out_dex  = map(float, abun_trim[:,2])
 
-    # Convert dex exponents to number density
+    # Convert logarithmic (dex) exponents to number density
     out_num  = 10**np.array(out_dex)
 
     # Get hydrogen number density

@@ -53,16 +53,16 @@ import format as form
 
 def lambdacorr(it_num, datadir, doprint, direct):
     '''
-    This module applies lambda correction method (see Section 1.3 in TEA 
-    Document). When input mole numbers are negative, the code corrects them to
+    This module applies lambda correction method (see Section 4 in the TEA theory 
+    document). When input mole numbers are negative, the code corrects them to
     positive values and pass them to the next iteration cycle. The code reads
     the values from the last lagrange output, the information from the header
     file, performs checks, and starts setting basic equations. It defines a 
     'smart' range so it can efficiently explore the lambda values from [0,1]. 
     Half of the range is sampled exponentially, and the other half linearly, 
     totalling 150 points. The code retrieves the last lambda value before first 
-    derivative becomes positive (equation (33) in TEA Document), and corrects
-    negative mole numbers to positive.
+    derivative becomes positive (equation (34) in TEA theory document), and
+    corrects negative mole numbers to positive.
 
     Parameters
     ----------
@@ -159,11 +159,11 @@ def lambdacorr(it_num, datadir, doprint, direct):
         print("\n\nMAJOR ERROR! Read in file uses different species \
                 order/list!\n\n")
     
-    # Create 'c' value, equation (16) TEA Document
+    # Create 'c' value, equation (17) TEA theory document
     # c_i = (g/RT)i + ln(P)    
     c = g_RT + np.log(pressure)
     
-    # Set equation (33) TEA Document
+    # Set equation (34) TEA theory document
     # dF(lam)/dlam = sum_i delta_i[(g(T)/RT)_i + lnP + 
     #                ln (yi+lam*delta_i)/(y_bar+lam*delta_bar)]
     def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
@@ -210,8 +210,8 @@ def lambdacorr(it_num, datadir, doprint, direct):
         lam = h
         lam_not_found = False
 
-    # If lambda is not found (break), function F (equation (35) in TEA
-    #    Document) set the final x mole numbers to the values calculated
+    # If lambda is not found (break), function F (equation (33) in the TEA
+    #    theory document) set the final x mole numbers to the values calculated
     #    in the last iteration output 
     if lam_not_found:
         x_corr = y

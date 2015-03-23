@@ -59,36 +59,34 @@ from sympy.solvers import solve
 import format as form
 
 # =============================================================================
-# This code produces an initial guess for the first iteration of TEA by 
-# fulfilling the mass balance condition, sum_i(ai_j * y_i) = bj (equation (16) 
-# in TEA Document), where i is species index, j is element index, a's
+# This code produces an initial guess for the first TEA iteration by 
+# fulfilling the mass balance condition, sum_i(ai_j * y_i) = bj (equation (17) 
+# in the TEA theory paper), where i is species index, j is element index, a's
 # are stoichiometric coefficients, and b's are elemental fractions by number, 
 # i.e., ratio of number densities of element 'j' to the total number densities 
-# of all elements in the system (see end of the Section 1.1 of the TEA
-# document). The code writes the result into machine- and human-readable files. 
+# of all elements in the system (see the end of the Section 2 in the TEA theory
+# paper). The code writes the result into machine- and human-readable files. 
 #
-# It begins by making a directory for the output results, reading the header
-# file and importing all relevant data. To satisfy the mass balance equation
-# some yi variables must remain as free parameters. The number of free 
-# parameters is set to the number of total elements in the system, thus 
-# ensuring that the mass balance equation can be solved for any number of input
-# elements and output species the user chooses. The code locates a chunk 
-# of species (y_i) containing a sum of ai_j values that forbids ignoring any
-# element in the system (sum of the ai_j values in a column must not be zero). 
-# This condition is necessary as the mass balance equation can not be solved
-# for all elements otherwise. This chunk is used as a set of free variables
-# in the system. The initial scale for other y_i variables are set to a known,
-# arbitrary number. Initially, a the starting values for the known species
-# are set to 0.1 moles, and the mass balance equation is calculated. If that 
-# does not produce all positive mole numbers, the code automatically sets known
-# parameters to 10 times smaller and tries again. Actual mole numbers for the
-# initial guesses of y_i are arbitrary, as TEA only requires a balanced 
-# starting point to initialize minimization. After all iterations are run, the
-# solution will converge regardless of the input used. The goal of this code is
-# to find a positive set of non-zero mole numbers to satisfy this requirement. 
-# Finally, the code calculates y_bar, initializes the iteration number, delta,
-# and delta_bar to zero and writes results into machine- and human-readable
-# output files. 
+# The code begins by making a directory for the output results. Then, it reads 
+# the header file and imports all relevant chemical data from it. 
+# To satisfy the mass balance equation, some yi variables remain as free
+# parameters. The number of free parameters is set to the number of total
+# elements in the system, thus ensuring that the mass balance equation can 
+# be solved for any number of input elements and output species the user 
+# chooses. The code locates a chunk of species (y_i) containing a sum of 
+# ai_j values that forbids ignoring any element in the system (sum of the 
+# ai_j values in a column must not be zero). This chunk is used as a set 
+# of free variables in the system. The initial scale for other y_i variables
+# are set to a known, arbitrary number. Initially, starting values for the 
+# known species are set to 0.1 moles, and the mass balance equation is 
+# calculated. If this value does not produce all positive mole numbers, 
+# the code automatically sets known parameters to 10 times smaller and 
+# tries again. Actual mole numbers for the initial guesses of y_i are 
+# arbitrary, as TEA only requires a balanced starting point to initialize
+# minimization. The goal of this code is to find a positive set of non-zero
+# mole numbers to satisfy this requirement. Finally, the code calculates y_bar,
+# initializes the iteration number, delta, and delta_bar to zero and writes
+# results into machine- and human-readable output files. 
 #
 # This code is called by runatm.py and runsingle.py and can be executed alone
 # with in-shell input: balance.py <HEADER_FILE> <DIRECTORY_NAME>
@@ -163,7 +161,7 @@ while nofit:
     y_init = np.append(pre_free,      free)
     y_init = np.append(  y_init, post_free)
 
-    # Make 'j' equations satisfying mass balance equation (16) in TEA Document:
+    # Make 'j' equations satisfying mass balance equation (17) in TEA theory doc:
     # sum_i(ai_j * y_i) = b_j
     eq = [[]]
     for m in np.arange(j):

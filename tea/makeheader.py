@@ -56,12 +56,13 @@ import os
 from scipy.interpolate import UnivariateSpline
 
 # =============================================================================
-# This module contains functions to write headers for a single T-P and multiple
+# This module contains functions to write headers containing all necessary 
+# chemical information for a single T-P and multiple
 # T-P runs. It consists of two main functions, make_singleheader() and 
 # make_atmheader() called by the runsingle.py and runatm.py modules
 # respectively. The header_setup(), atm_headarr(), single_headarr(), and
 # write_header() are the supporting functions for the main functions. 
-# Imported by runatm.py and runsingle.py to create header files.
+# Imported by runatm.py and runsingle.py to create the header files.
 # =============================================================================
 
 # Correct directory names
@@ -145,12 +146,12 @@ def header_setup(temp, pressure, spec_list,                      \
         # Convert data to an array
         data = np.asarray(data)
 
-        # Equation for g_RT term equation (11) in TEA Document
+        # Equation for g_RT term equation (10) in TEA theory document
         #  G        G-H(298)      delta-f H(298)
         # ---  =    -------  +    -------------
         # R*T         R*T              R*T
 
-        # First term is divided by T in JANAF   
+        # First term is divided by T in JANAF, equation (11) in TEA theory document   
         # Second term needs to be converted to Joules (JANAF gives kJ)
         #  G     G-H(298)             1                                    1000
         # ---  = ------- [J/K/mol] * ---         + delta-f H(298) [kJ/mol] ------ 
@@ -262,7 +263,7 @@ def single_headarr(spec_list, stoich_data, spec_stoich, is_used):
         stoich_arr[i+2, 0] = spec_list[i]
         stoich_arr[i+2, 1:] = map(int,spec_stoich[i+1, np.where(is_used)[0]])
     
-    # Convert dex abundances into number densities
+    # Convert logarithmic (dex) abundances into number densities
     finalstoich_conv = np.empty((n_spec + 2, np.sum(is_used) + 1), \
                                                  dtype=np.object)
     finalstoich_conv[0,0] = 'b'
@@ -377,7 +378,6 @@ def write_header(desc, pressure, temp, stoich_arr, n_spec, g_RT):
 
     # Make header directory if it does not exist to store header files
     if not os.path.exists(location_out + desc + '/headers/'): os.makedirs(location_out + desc + '/headers/')
-    #if not os.path.exists(location_out + 'headers/' + desc + '/'): os.makedirs(location_out + '/headers/' + desc + '/')
 
     # Create header file to be used by the main pipeline
     outfile = location_out + desc + '/headers/' + 'header_' + desc + ".txt"
