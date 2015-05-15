@@ -7,10 +7,10 @@ Blecic, Principal Investigator Joseph Harrington. Project developers
 included graduate student Jasmina Blecic and undergraduate M. Oliver
 Bowman.
 
-The Install Guide with basic instructions on how to install and run TEA
-is: doc/install_guide.txt
+The Start Guide with basic instructions on how to install and run TEA
+is: doc/start_guide.txt
 
-For more detailed instructions read the TEA User Guide: doc/TEA-UserGuide.pdf.
+For more detailed instructions read the TEA User Manual: doc/TEA-UserManual.pdf.
 For code description read: doc/TEA-CodeDescription.pdf
 
 The TEA Theory paper is submitted to ApJS and will be available in a future revision.

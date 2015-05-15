@@ -1,0 +1,54 @@
+
+
+This file contains instructions how to properly make a TEA compendium.
+
+When downloading TEA, you agreed that you will provide all references
+(software, data, and publication) for reproducing the research done
+using TEA.
+
+To make a compendium, you can use github or similar websites, like
+Victoria Stodden's http://researchcompendia.org/, that serve the same
+purposes.
+
+The information once uploaded should never be taken down!
+
+1. If original TEA version is not changed do the following:
+   - give link to your publication that uses TEA
+   - fork, upload or link the TEA version used to produce your results
+   - make ReadMe file and explain for what purposes TEA has been used
+   - make directory for each figure and table from your publication and
+     provide any additional material to reproduce the results
+   - make ReadMe file for each figure and table and explain how to 
+     reproduce the results
+
+2. If original TEA version has been changed do the following:
+   - give link to your publication that uses TEA
+   - fork/upload or link the TEA version you used
+   - commit the changes you did on the code
+   - make ReadMe file and explain:
+               - all changes that has been done to the code
+               - what steps need to be taken to reproduce the results
+   - upload additional material used to produce your results
+
+Our recommendation is to produce the compendium as you go!
+
+The purpose of making a compendium is to:
+- archive your research (data, codes, documentation, parameters, publication)
+- track computational changes
+- get appropriate credit for your code in addition to publications
+- allow others to reproduce, verify, and validate scientific results
+- allow others to build on your work
+- provide ability to use the latest scientific methods
+
+The github repo https://github.com/dzesmin/RRC-BlecicEtal-2015a-ApJS-TEA, 
+contains an example how to properly make a compendium. This directory 
+collects the source files, data, codes, and instructions how to 
+reproduce all the figures and tables from the Blecic et al. (2015a), 
+"TEA: A code for calculating thermochemical equilibrium abundances", paper.
+
+
+
+
+
+
+
