@@ -1,0 +1,810 @@
+
+
+\input{top-TEA-Manual}
+\usepackage{epsfig}
+\textwidth=6.5in
+\textheight=9.5in
+\topmargin=-0.75in
+\oddsidemargin=0.0in
+\evensidemargin=0.0in
+
+\pagestyle{myheadings}
+
+
+
+\markright{{\bf TEA Code Description, Blecic \& Bowman}}
+\pagenumbering{arabic}
+  
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+
+% Title
+\textsc{\huge \bfseries TEA}\\[0.5cm]
+\textsc{\LARGE Thermochemical Equilibrium Abundances}\\[0.5cm]
+\rule{250pt}{0.4pt} \\[0.4cm]
+{ \huge \bfseries Code Description\\[0.4cm] }
+
+\rule{250pt}{0.4pt} \\[1cm]
+
+% Author and supervisor
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Authors:}\\
+ \textsc{Jasmina Blecic \\M.~Oliver Bowman}
+\end{flushleft}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Programmers: } \\
+\textsc{M.~Oliver Bowman Jasmina Blecic }
+\end{flushright}
+\end{minipage}\\[1.5cm]
+
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Lead Scientist:}\\
+ \textsc{Jasmina Blecic}
+\end{flushleft}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Principal Investigator:} \\
+\textsc{Joseph Harrington}
+\end{flushright}
+\end{minipage}\\[.5cm]
+
+\vfill
+
+% Bottom of the page
+{\large \today}
+
+\end{center}
+\end{titlepage}
+
+
+% Copyright page
+\newpage
+
+\clearpage
+\vspace*{\fill}
+\begin{center}
+\begin{minipage}{.8\textwidth}
+
+
+\centerline{Copyright (C) 2014-2015 University of Central Florida.}
+\centerline{ALL RIGHTS RESERVED.}
+
+\vspace{20pt} This document goes along with the TEA code, the TEA theory
+paper \citep{BlecicEtal2015-TEAtheory}, and the user manual.  The
+documents are not peer-reviewed and the code is a test version
+only. They may not be redistributed to any third party.  Please refer
+such requests to us.  If you find this package useful for your
+research, please cite \citet{BlecicEtal2015-TEAtheory}.  The document
+and the program are distributed in the hope that they will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. \\ \\ Our intent
+is to release this software under an open-source,
+reproducible-research license, once the code is mature and the first
+research paper describing the code has been accepted for publication
+in a peer-reviewed journal.  We are committed to development in the
+open, and have posted this code on github.com so that others can test
+it and give us feedback.  However, until its first publication and
+first stable release, we do not permit others to redistribute the code
+in either original or modified form, nor to publish work based in
+whole or in part on the output of this code.  By downloading, running,
+or modifying this code, you agree to these conditions.  We do
+encourage sharing any modifications with us and discussing them
+openly.\\ \\ We welcome your feedback, but do not guarantee
+support. Please send feedback or inquiries to both:
+\\ Jasmina Blecic: jasmina@physics.ucf.edu \\ Joseph Harrington:
+jh@physics.ucf.edu \\ \\ or alternatively, \\ \\ Jasmina Blecic and
+Joseph Harrington \\ UCF PSB 441 \\ 4111 Libra Drive
+\\ Orlando, FL 32816-2385 \\ USA \\ \\ \centerline{Thank you for
+  testing TEA!}
+\end{minipage}
+\end{center}
+\vfill % equivalent to \vspace{\fill}
+\clearpage
+
+
+% Table of contents
+\newpage
+\tableofcontents
+\newpage
+\section{Code Overview}
+
+The Thermochemical Equilibrium Abundances (TEA) package
+(Figure \ref{fig:TEAflow}) is composed of five different types of
+programs: {\bf Library Programs} that read thermodynamic libraries and
+collect stoichiometric information, {\bf TEA Drivers} that execute TEA
+for a single $T, P$ point or a list of multiple $T, P$ points, {\bf
+Main Science Programs} that perform the iterative Lagrange
+minimization technique and Lambda correction algorithm, {\bf File
+Control Programs} that manage input-output files and operations, and
+{\bf Auxiliary Programs} that help the user to make proper input and
+plot the TEA output.
+
+
+
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=12.25cm, trim=22 100 27 110,
+    clip=true]{figs/TEAFlow.ps}
+    \includegraphics[width=11cm, trim=22 340 27 320,
+    clip=true]{figs/LegFlow.ps}
+\caption{Layout of the pre-pipeline and pipeline packages.}
+\label{fig:TEAflow}
+\end{figure}
+
+
+
+
+  The code is built in a modular fashion where each that program
+  performs calculations can be easily controlled by a driver program
+  or be otherwise replaced as long as the appropriate inputs and
+  outputs are conserved.  This modular work-flow facilitates strict
+  control over what calculations are performed and where, and allows
+  future users easy access to code manipulations or additions.  As the
+  TEA code is an open-source package, such modifications are
+  encouraged if the user wishes to fine-tune any mechanics or apply
+  new techniques in order to reach equilibrium abundances.
+  
+This is a third part of a three-part document describing the TEA
+code. The first part, the TEA theory
+document \citep{BlecicEtal2015-TEAtheory}, presents the theoretical
+basis for the method applied, the second part is a user manual, and
+this document contains programs description to allow the user future
+modifications. If you find this package useful for your research,
+please cite \citet{BlecicEtal2015-TEAtheory}.
+
+
+  This project was completed with the support of the NASA Earth and
+  Space Science Fellowship Program, grant NNX12AL83H, held by Jasmina
+  Blecic, PI Joseph Harrington. Project development included graduate
+  student Jasmina Blecic and undergraduate M. Oliver Bowman.
+
+
+
+\section{Code Description}
+
+This text is divided into five sections, each describing the
+aforementioned types of programs with detailed descriptions of each
+routine.
+
+\subsection{Library Programs}
+\label{PrepipeSec}
+
+The TEA {\bf Library Programs} read the thermodynamic tables and the
+elemental abundances file to store the necessary thermochemical data
+and stoichiometric information in TEA readable files. These files are
+further used by the TEA {\bf Driver programs} and {\bf Main Scientific
+Programs}. These library programs consist of three
+modules: \texttt{prepipe.py}, \texttt{readJANAF.py}
+and \newline \texttt{makestoich.py}. Currently, these modules process
+the JANAF tables and the elemental abundances file made based on
+Asplund et al. (2009), both provided with the code. The user can feed
+the code with their own library granted the format that TEA can
+process is obeyed.
+
+These programs are executed prior to the release, and the
+thermochemical data and stoichiometric information needed for TEA to
+run are provided with the code. However, if updated JANAF tables are
+obtained, a pre-pipeline execution will populate the files with new
+information.
+
+
+\subsubsection{prepipe.py}
+
+This program sets and/or executes the pre-pipeline TEA
+routines \texttt{readJANAF.py} and \newline \texttt{makestoich.py}. It
+consists of two functions: \texttt{comp()} and \texttt{setup()}. The
+\texttt{comp()} function counts the number of each element in a
+ chemical species, while the \texttt{setup()} function reads the JANAF
+tables and allows sharing of common routines for \texttt{readJANAF.py}
+and \texttt{makestoich.py}. If executed as \texttt{prepipe.py}, it
+will run both routines. The user can also run each routine separately,
+if desired.
+
+The \texttt{comp()} function is the species-counting function. It
+counts the number of each element in a chemical species by taking in a
+string of a chemical species (i.e., "H2O") and returning an array
+containing every element with corresponding counts found in that
+species. It is called by \texttt{makestoich.py} and
+the \texttt{setup()} function. The user can also return a
+stoichiometric array containing only the elements found in the input
+species. Otherwise, it returns the full array of all 113 available
+elemental stoichiometric data.
+
+The \texttt{setup()}routine reads raw JANAF tables placed in the
+appropriate directory (default: \texttt{janaf/}) and extracts
+thermodynamic and stoichiometric data of interest. It serves as a
+setup for the \texttt{readJANAF.py} and \texttt{makestoich.py}
+routines. The program takes the names of the raw JANAF tables
+directory, thermodynamic output directory, stoichiometric output
+directory, output stoichiometric file, and the pre-written file
+containing abundance data \newline
+(default: \texttt{abundances.txt}). It takes number of elements
+from \texttt{comp()} and loops over all JANAF data and abundance data,
+performing various thermodynamic calculations and stoichiometric
+functions on the appropriate species of interest.
+
+
+\subsubsection{makestoich.py}
+
+This code makes the \texttt{stoich\_out} file
+(default: \texttt{stoich.txt}) that carries stoichiometric values of
+all species that appear in the JANAF tables. It reads the chemical
+formula from each JANAF file to obtain the number of atomic weights of
+each element in each species. Also reads in bulk elemental abundances
+from \texttt{abundances.txt} that currently uses Asplund et al. (2009)
+solar photosphere abundances. The code creates a temporary directory
+where JANAF tables are converted into stoichiometric tables. The
+tables carry a unique name and state, given by the top line in each
+JANAF table: (i.e., original JANAF table \texttt{Al-001.txt} is
+converted to \texttt{Al\_ref.txt}).  If desired, user can preserve
+this directory (in \texttt{TEA.cfg}, doprint = \texttt{True}).
+
+The names of the files in the temporary directory have the following
+format: {
+\begin{enumerate}
+\setlength\itemsep{0ex}
+\setlength\topsep{0ex}
+\setlength\partopsep{0ex}
+\setlength\parsep{0ex}
+
+   \item If a species appears just once in JANAF tables, it gets the
+   unique name of the compound and its state and is defined
+   as \texttt{originals} in the code
+   (example: \texttt{CH4\_$\sb{g}$}).  \item If a species appears
+   several times, it is defined as \texttt{redundant} in the code and
+   an additional string is added to differentiate among them
+   (example: \texttt{Al2O3\_{cr}\_{Alpha}, \newline
+   Al2O3\_{cr}\_{Beta}, Al2O3\_{cr}\_{Kappa}}). This is defined by the
+   isomer name in the JANAF tables.
+\end{enumerate}
+
+
+The setup of this code is done in \texttt{prepipe.py}
+inside \texttt{setup()}. The code retrieves the setup information,
+creates a temporary directory to store the converted files, allocates
+space for these files with the unique naming scheme described above,
+then loops over all JANAF tables to write stoichiometric files.
+
+To write the \texttt{stoich\_{out}} file
+(default: \texttt{stoich.txt}), it again loops over all elements
+(listed in \texttt{comp()} inside \texttt{prepipe.py}) and matches
+them with the abundance data from the abundance file (default:
+\texttt{abundances.txt}). If a match is not found, the abundance is set to
+zero. This information is written at the top of
+the \texttt{stoich\_{out}} file.
+
+For each element in \texttt{comp()} and species in the JANAF tables,
+the species name and stoichiometric values are written into
+the \texttt{stoich\_{out}} file. The code ignores redundant compounds
+as they carry the same stoichiometric values.
+
+The \texttt{prepipe.py} code can execute this code together with
+the \texttt{readJANAF.py}. \newline
+\texttt{makestoich.py} can also be executed on its own with the simple
+ command: \texttt{makestoich.py}. 
+
+}
+
+\subsubsection{readJANAF.py}
+
+This code makes the \texttt{thermo\_dir}
+(default: \texttt{/lib/gdata}) directory that carries converted JANAF
+tables with only the data needed for TEA to run, namely the
+temperature, $T$ in (K), free energy
+function \math{(-[G\sp{o}-H\sp{o}(T\sb{r})]/T)} in (J/K/mol), and the
+heat of formation \math{(\Delta\sb{f}H\sp{o}}), in (kJ/mol). This
+program will remove intermittent commentary in the JANAF files and
+will produce separate files for stoichiometrically identical species
+with unique descriptors. Output data files are produced in the
+format \texttt{/lib/gdata/SPECIES\_STATE.txt}.  The code also
+makes \texttt{conversion\_record.txt} that gives the names of the
+original, raw JANAF files and the new names given by
+\newline \texttt{readJANAF.py}. To sort the file list in
+alphabetical order, execute in terminal: \newline \texttt{sort
+conversion\_record.txt $>$ conversion\_record\_sorted.txt}
+
+The names of the files have the following format:
+{
+\begin{enumerate}
+\setlength\itemsep{0ex}
+\setlength\topsep{0ex}
+\setlength\partopsep{0ex}
+\setlength\parsep{0ex}
+
+   \item Each converted file carries a unique name and state given by
+   the top line in each JANAF file.  \item If a species appears just
+   once in JANAF tables, it gets a unique name of the compound and its
+   state and is defined as \texttt{originals} in the code
+   (example: \texttt{CH4\_$\sb{g}$}).  \item If a species appears
+   several times, it is defined as \texttt{redundant} in the code and
+   an additional string is added to differentiate among them \newline
+   (example: \texttt{Al2O3\_cr\_Alpha, Al2O3\_cr\_Beta,
+   Al2O3\_cr\_Kappa}).  \item If a species is an ion, additional
+   string is added (example: \texttt{Al-007.txt and Al-008.txt became
+   Al\_ion\_n\_g, Al\_ion\_p\_g})
+\end{enumerate}
+}
+
+The setup of this code is done in \texttt{prepipe.py} inside
+the \texttt{setup()} function.The code retrieves pre-pipeline setup
+information, creates a directory for converted thermodynamic files,
+checks whether a species is redundant in JANAF tables, and
+creates \texttt{conversion\_record.txt}. If a species is redundant, an
+additional string is added to the file name. The module loops over all
+JANAF tables and writes data into the correct columns with the correct
+labels.
+
+The \texttt{prepipe.py} code can execute this code together with
+the \texttt{readJANAF.py}. \newline
+\texttt{readJANAF.py} can also be executed on its own with the simple command: 
+\texttt{readJANAF.py}. 
+
+
+%%%%%%%%%%%%%%%%%%% PIPELINE DRIVERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{TEA Drivers}
+
+TEA is executed by one of two drivers, depending on if a
+single \math{T, P} point or a list of \math{T, P} points are
+provided. Both drivers follow the same general flow of execution.
+
+\subsubsection{runsingle.py}
+\label{runsingleSec}
+
+This program runs TEA over an input file that contains only one ${T,
+P}$ point. The code retrieves the input file and the current directory
+name given by the user and sets the locations of all necessary modules
+and directories that will be used. It then executes the modules in the
+following order: \texttt{makeheader.py}, \texttt{balance,py},
+and \texttt{iterate.py}. The final results along with the input and
+the configuration files are saved in the {em results/} directory.
+
+This module prints the code progress on screen: the current ${T, P}$
+line from the pre-atmosphere file, the current iteration number, and
+when the minimization is complete.  \newline Example: \texttt{100
+Maximum iteration reached, ending minimization}.
+
+The program is executed with in-shell inputs:\newline
+\texttt{runsingle.py <input file> <name of the result directory>}\newline
+Example: \texttt{runsingle.py inputs/Examples/inp\_Example.txt
+Single\_Example}
+
+
+\subsubsection{runatm.py}
+\label{runatmSec}
+
+This program runs TEA over a pre-atmosphere file that contains
+multiple ${T,P}$ points.  The code first retrieves the pre-atmosphere
+file and the current directory name given by the user. It then sets
+the locations of all necessary modules and directories of files that
+will be used. It allocates an array to store the final abundances for
+each species of each $T, P$ run. The program loops over all lines
+(${T, P}$'s) in the pre-atmosphere file and executes the modules in
+the following order: \texttt{readatm.py, makeheader.py, balance,py,
+iterate.py}, and \texttt{readoutput.py}. \texttt{Iterate.py}
+executes \texttt{lagrange.py}
+and \texttt{lambdacorr.py}. \texttt{readoutput.py} reads results from
+the TEA iteration loop executed in \texttt{iterate.py}. The abundances
+are calculated and stored in an abundance array. The code then opens
+the final atmosphere file to write the results. It takes first common
+lines from the pre-atmosphere file and writes the data from the stored
+radii, temperature, pressure and abundances array. The code has a
+condition to save or delete all intermediate files, time stamps for
+checking the speed of execution, and is verbose for debugging
+purposes. If these files are saved, the function will create a unique
+directory for each ${T, P}$ point. This functionality is controlled in
+the TEA config file. The final results, along with the input and the
+configuration files are saved in the \texttt{results/} directory.
+
+This module prints on screen the current ${T, P}$ line from the
+pre-atmosphere file, the current iteration number, and informs the
+user that minimization is done.  Example: \texttt{5 100 Maximum
+iteration reached, ending minimization}.
+
+The program is executed with in-shell inputs:\newline
+\texttt{runatm.py <pre-atmosphere file> <name of the result directory>}\newline
+Example: \texttt{runatm.py inputs/Examples/atm\_Example.atm
+Atm\_Example}
+
+
+%%%%%%%%%%%%%%%%%%% MAIN PIPELINE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Main Scientific Programs}
+
+These programs perform scientific calculations explained in Sections
+2, 3, and 4 of \citet{BlecicEtal2015-TEAtheory}. The mass balance
+equation, Lagrange optimization system of equations, Lambda correction
+procedure, and iterative minimization approach are separated into four
+modules,
+respectively: \texttt{balance.py}, \texttt{lagrange.py}, \texttt{lambdacorr.py},
+and \texttt{iterate.py}. Inclusion of condensates or solids can be
+easily implemented inside these modules by modifying the equations
+listed in the code comments.
+
+\subsubsection{balance.py}
+
+This code produces an initial guess for the first TEA iteration by
+fulfilling the mass balance condition, $\sum\sb{i=1}^n a\sb{ij}\,
+x\sb{i} = b\sb{j}$ (equation (17)
+in \citealp{BlecicEtal2015-TEAtheory}), where $i$ is species index,
+$j$ is element index, $a$'s are stoichiometric coefficients, and $b$'s
+are elemental fractions by number, i.e., ratio of number densities of
+element '$j$' to the total number densities of all elements in the
+system (see the end of Section 2
+of \citealp{BlecicEtal2015-TEAtheory}).  The code writes the result
+into machine- and human-readable files.
+
+The code begins by making a directory for the output results. It, then
+reads the header file and imports all relevant chemical data from it.
+To satisfy the mass balance equation, some $y\_i$ variables remain as
+free parameters. The number of free parameters is set to the number of
+total elements in the system, thus ensuring that the mass balance
+equation can be solved for any number of input elements and output
+species the user chooses. The code locates a chunk of species ($y\_i$)
+containing a sum of $ai\_j$ values that forbids ignoring any element
+in the system (sum of the $ai\_j$ values in a column must not be
+zero). This chunk is used as a set of free variables in the
+system. The initial scale for other $y\_i$ variables is set to a
+known, arbitrary number. Starting values for the known species are set
+to 0.1 moles, and the mass balance equation is calculated. If this
+value does not produce all positive mole numbers, the code
+automatically sets known parameters to 10 times smaller and tries
+again. Actual mole numbers for the initial guesses of $y\_i$ are
+arbitrary, as TEA only requires a balanced starting point to
+initialize minimization. The goal of this code is to find a positive
+and a non-zero set of mole numbers to satisfy this
+requirement. Finally, the code calculates $\bar{y}$, initializes the
+iteration number, $\Delta$, and $\bar{\Delta}$ to zero and writes
+results into machine- and human-readable output files.
+
+This code is called by \texttt {runatm.py} and \texttt {runsingle.py}
+and can be executed alone with in-shell input: \texttt
+{balance.py} \texttt{<HEADER\_FILE> <DIRECTORY\_NAME>}
+
+
+
+\subsubsection{lagrange.py}
+
+This code applies Lagrange's method and calculates minima based on the
+methodology elaborated in Section 3
+of \citet{BlecicEtal2015-TEAtheory}. Equations in this code contain
+both references and an explicitly written definitions.  The program
+reads the last iteration's output and data from the last header file,
+creates variables for the Lagrange equations, sets up the Lagrange
+equations, and calculates final $x_i$ mole numbers for the current
+iteration cycle. Note that the mole numbers that result from this
+function are allowed to be negative. If negatives are returned, lambda
+correction by
+\texttt{lambdacorr.py} is necessary. The final $x_i$ values, as well as 
+$\bar{x}$, $\bar{y}$, $\Delta$, and $\bar\Delta$ are written into
+machine- and human-readable output files. This function is
+executed \texttt{iterate.py} and can be run independently.
+
+
+\subsubsection{lambdacorr.py}
+
+This module applies lambda correction method described in Section 4
+of \citealp{BlecicEtal2015-TEAtheory}). When input mole numbers are
+negative, the code corrects them to positive values and pass them to
+the next iteration cycle. The code reads the values from the last
+\texttt{lagrange.py} output and header file, performs
+checks, then starts setting basic equations. It sets a smart range so
+it can efficiently explore the lambda values from [0,1]. Half of the
+range is sampled exponentially, and the other half linearly, totalling
+150 points. The code retrieves the last lambda value before first
+derivative becomes positive (equation (34) in TEA theory document),
+and corrects negative mole numbers to positive.
+
+The code works without adjustments and with high precision for the
+fractional abundances (mixing fractions) up to 10$\sp{-14}$ and the
+temperature range of 1000 - 4000 K. For temperatures below 1000 K and
+mixing fractions below 10$\sp{-14}$, the code produces results with
+low precision. To improve the precision, adjust the lambda exploration
+variables \texttt{lower} and \texttt{steps} to larger magnitudes
+(i.e., \texttt{lower} = -100, \texttt{steps} = 1000). This will
+lengthen the time of execution.
+
+This function is executed \texttt{iterate.py} and can be run
+independently.
+
+\subsubsection{iterate.py}
+
+This program executes the iteration loop for TEA. It repeats
+Lagrangian minimization \newline (\texttt{lagrange.py}) and lambda
+correction (\texttt{lambdacorr.py}) until the maximum iteration is
+reached. The code has time stamps for checking the speed of execution
+and is verbose for debugging purposes; both are defined
+in \texttt{TEA.cfg} file.
+
+The flow of the code goes as follows: the current header, output, and
+result directory are read; physical properties are retrieved from the
+header, then the \texttt{balance.py} output is read as the initial
+iteration input and passed to \texttt{lagrange.py}. Lagrange $x\_i$
+values are then checked for negative values; the next iteration starts
+either with lambda correction output (if negative $x\_i$'s are found)
+or with the output produced by \texttt{lagrange.py} (if all $x\_i$'s
+are positive). This procedure is repeated until the maximum iteration
+is reached, which stops the loop. Intermediate results from each
+iteration step are written in the machine- and human-readable output
+files on the user's request in \texttt{TEA.cfg}.
+
+This program is executed by \texttt{runatm.py} and can be executed
+alone with in-shell input: \\
+\texttt{iterate.py $<$header file$>$ $<$name of the result directory$>$}
+
+
+%%%%%%%%%%%%%%%%%%% ANCILLARY PROGRAMS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{File Control Programs} 
+
+These programs generate inputs for the {\bf Main Scientific
+Programs}, manage reading and processing the input information, and
+produce machine- and human-readable output files.
+
+\subsubsection{format.py}
+
+This module allows each program to read the output of the previous
+step so the data can be used in the next step. It also manages the
+format for each output file and produces both machine- and
+human-readable files.
+
+It contains the following functions: 
+{
+\begin{enumerate}
+\setlength\itemsep{0ex}
+\setlength\topsep{0ex}
+\setlength\partopsep{0ex}
+\setlength\parsep{0ex}
+   \item {\bf readheader()}: This function reads the current header
+   file (one $T, P$) and returns data common to each step of TEA. It
+   searches only for the required chemical data from the header file
+   and fills out the output arrays appropriately. The function is used
+   by \texttt{balance.py, lagrange.py, lambdacorr.py},
+   and \texttt{iterate.py}.  \item {\bf readoutput()}: This function
+   reads output files made by \texttt{balance.py, \newline
+   lagrange.py} and \texttt{lambdacorr.py}. It reads any iteration's
+   output and returns the data in an array.  \item {\bf output()}:
+   This function produces machine-readable output files. The files are
+   saved only if \texttt{saveout = True} in \texttt{TEA.cfg} file. The
+   function is used by the \texttt{balance.py, lagrange.py},
+   and \texttt{lambdacorr.py}. The function writes the name of the
+   header, current iteration number, species list, starting mole
+   numbers of species for current iteration, final mole numbers of
+   molecular species after the iteration is done, difference between
+   starting and final mole numbers, total sum of initial mole numbers,
+   total sum of final mole numbers and the change in total mole
+   numbers of all species.  \item {\bf fancyout()}: This function
+   produces human-readable output files. The files are saved only
+   if \texttt{saveout = True} in \texttt{TEA.cfg} file. The function
+   is used by \texttt{balance.py},\newline \texttt{lagrange.py},
+   and \texttt{lambdacorr.py}. The function writes the name of the
+   header, current iteration number, species list, starting mole
+   numbers of species for current iteration, final mole numbers of
+   molecular species after the iteration is done, difference between
+   starting and final mole numbers, total sum of initial mole numbers,
+   total sum of final mole numbers, and the change in total mole
+   numbers of all species.  If \texttt{doprint = True}, all data
+   written to the file is presented on-screen in the same
+   human-readable format.  \item {\bf fancyout\_results()}: This
+   function produces the final result output for each $T, P$ in the
+   human-readable format. The final mole number for each species is
+   divided by the total mole numbers of all species in the
+   mixture. This gives the mole fraction abundance for each species,
+   which are TEA final results. This function is called by
+   the \texttt{iterate.py} module.  \item {\bf printout()}: Prints
+   iteration progress number or other information in one line of
+   terminal.
+\end{enumerate}
+}
+
+
+\subsubsection{makeheader.py}
+\label{makeheaderSec}
+
+This module contains functions to write headers containing all
+necessary chemical data for a single TEA execution using a single $T,
+P$ and multiple $T, P$ points. It consists of two main
+functions, \newline \texttt{make\_singleheader()}
+and \texttt{make\_atmheader()}, both of which are called by the
+\newline \texttt{runsingle.py} and \texttt{runatm.py} modules,
+respectively. \texttt{header\_setup()}, \newline \texttt{atm\_headarr()}, \texttt{single\_headarr()},and \texttt{write\_header()}
+are supporting functions for these main functions. This module is
+imported by \texttt{runatm.py} and \texttt{runsingle.py} to create the
+header files.
+
+{\bf header\_setup()} - This function is a common setup for both
+single $T, P$ and multiple $T, P$ runs of TEA. Given the
+thermochemical data and stoichiometric table, this function returns
+stoichiometric values and an array of chemical potentials for the
+species of interest at the current temperature and pressure.  Using
+the data provided in the JANAF tables and the equations (10) and (11)
+from \citet{BlecicEtal2015-TEAtheory}, it calculates the free energies
+(chemical potentials) of each species at a certain temperature. It
+also returns an array of booleans that marks which information should
+be read from \texttt{stoich\_file} for the current species. It is
+executed by the \texttt{make\_atmheader()}
+and \texttt{make\_singleheader()} functions.
+
+{\bf single\_headarr()} - This function gathers data needed for TEA to
+run in a single $T, P$ case. These are: elemental abundances, species
+names, and their stoichiometric values. For the list of elements and
+species used, it takes the abundances and stoichiometric values and
+puts them in the final array. It converts logarithmic (dex) elemental
+abundances into number densities. This function is run
+by \texttt{make\_singleheader()} and is dependent on results
+from \texttt{header\_setup()}.
+
+{\bf atm\_headarr()} - This function gathers data needed for TEA to
+run in a multiple $T, P$ case. These are: elemental abundances,
+species names, and their stoichiometric values. For the list of
+elements and species used, it takes the abundances and stoichiometric
+values and puts them in the final array. This function is run
+by \texttt{make\_atmheader()} and is dependent on results
+from \texttt{header\_setup()}.
+
+{\bf write\_header()} - This function writes a header file that
+contains all necessary data for TEA to run. It is called
+by \texttt{make\_atmheader()} and \texttt{make\_singleheader()}.
+
+{\bf make\_singleheader()} - This is the main function that creates a
+header for a single $T, P$ run of TEA. It reads the input $T, P$ file
+and retrieves necessary data. It then calls
+the \texttt{header\_setup()}, \newline \texttt{single\_headarr()},
+and \texttt{write\_header()} functions to create a header for the
+single $T, P$ point. This function is called by
+the \texttt{runsingle.py} module.
+
+{\bf make\_atmheader()} - This is the main function that creates a TEA
+header for one $T, P$ of a pre-atmosphere file. It retrieves number of
+elements and species used for only the $q$-th $T, P$ point in the
+pre-atmosphere file. It then calls
+the \texttt{header\_setup()}, \texttt{atm\_headarr()},
+and \texttt{write\_header()} functions to create a header for this
+point. This function is called by the \texttt{runatm.py} module.
+    
+
+
+
+\subsubsection{readatm.py}
+
+This function reads a pre-atmosphere file and returns the data that
+TEA will use.  It opens a pre-atmosphere file to find markers for
+species and TEA data, retrieves the species list, reads data below the
+markers, and fills out data into corresponding arrays. It also returns
+number of runs TEA must execute for each $T, P$. The function is used
+by \texttt{runatm.py}.
+
+
+\subsubsection{readconf.py}
+
+This code reads the TEA config file, \texttt{TEA.cfg}. There are two
+sections in \texttt{TEA.cfg}: the 'TEA' section and the 'PRE-ATM'
+section. The 'TEA' section carries parameters and booleans to run and
+debug TEA, whereas 'PRE-ATM' section carries parameters to make a
+pre-atmospheric file (see Section \ref{makeatm}).
+
+
+
+
+%%%%%%%%%%%%%%%%%%% AUXILIARY PROGRAMS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Auxiliary Programs}
+
+These programs are provided for the user's convenience. They allow for
+the easy generation of the multiple ${T, P}$ pre-atmosphere files
+(input for the \texttt{runatm.py} module), and for plotting the
+desired abundances profile from the final multiple ${T, P}$ atmosphere
+files (output of the \texttt{runatm.py} module).
+
+
+\subsubsection{makeatm.py}
+\label{makeatm}
+
+This module produces a pre-atmosphere file in the format that TEA can
+read. Before running \texttt {makeatm.py}, the \texttt {TEA.cfg} file
+needs to be edited with the following information: location of the
+$PT$ file, the desired name of the pre-atmosphere file, desired input
+elemental species, and desired output molecular species.
+
+To run the code type in the terminal: \texttt {makeatm.py
+$<$DIRECTORY\_NAME$>$}. \newline The \texttt{$<$DIRECTORY\_NAME$>$} is
+the name of the directory where the user wants the current run to be
+placed. The pre-atmopshere file will be placed in \texttt
+atm\_inputs\} under the \newline \texttt{$<$DIRECTORY\_NAME$>$}
+directory.
+
+This module consists of 2 functions:
+{
+\begin{enumerate}
+\setlength\itemsep{0ex}
+\setlength\topsep{0ex}
+\setlength\partopsep{0ex}
+\setlength\parsep{0ex}
+
+   \item {\bf readPT()} - reads the pressure-temperature profile from
+   the PT file provided. If custom made, it must be in the format
+   provided in the \texttt {doc/examples/} directory.  \item {\bf
+   makeatm()} - produces a pre-atmosphere file in the format that TEA
+   can read. The file will be placed in the \texttt {atm\_inputs/}
+   directory. It calls \texttt {readPT()} to get the pressure and
+   temperature array and reads the elemental abundance data file
+   (default: \texttt
+   {abundances.txt}, \citet{AsplundEtal2009-SunAbundances}). The code
+   trims the abundance data to the elements of interest, converts
+   species dex abundances into number densities and divides them by
+   the hydrogen number densities fractional abundances. It writes data
+   (pressure, temperature, elemental abundances) into a
+   pre-atmospheric file. The configuration, pressure and temperature,
+   and abundances files are copied to the \texttt {atm\_inputs/}
+   directory.
+\end{enumerate}
+}
+
+
+
+
+\subsubsection{plotTEA.py}
+This code plots a figure of temperature vs. abundances for the final
+atmosphere file produced by TEA. It needs 2 arguments on the command
+line: the path to the atmosphere file name and the names of the
+species user wants to plot.
+
+Arguments given should be in the following format: {
+\begin{enumerate}
+\setlength\itemsep{0ex}
+\setlength\topsep{0ex}
+\setlength\partopsep{0ex}
+\setlength\parsep{0ex}
+
+   \item {\bf filename} - string. Full path to the atmospheric
+   file.  \item {\bf species} - list of strings. List of species that
+   user wants to plot. Species names should be given with their
+   symbols (without their states) and no breaks between species names
+   (e.g., \texttt{CH4,CO,H2O}).
+\end{enumerate}
+}
+
+To run the code execute: \texttt{plotTEA.py $<$RESULT\_ATM\_FILE$>$
+$<$SPECIES\_NAMES$>$} \\ Example: \texttt{plotTEA.py
+results/atm\_Example/atm\_Example.atm
+CO,CH$\sb{4}$,H$\sb{2}$O,NH$\sb{3}$} The plot is opened once execution
+is completed and saved in the \texttt{plots/} directory.
+
+
+{\footnotesize
+\bibliography{TEA-Manual}
+}
+
+
+\actcharon
+\mathshifton
+
+\pagebreak
+\end{document}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
