@@ -3,7 +3,8 @@
                                 Version 1.0
 
 This is an installation and a quick-start guide for the Thermochemical
-Equilibrium Abundances (TEA) code. The code calculates equilibrium abundances of gaseous molecular species. It works with high numerical precision, 
+Equilibrium Abundances (TEA) code. The code calculates equilibrium abundances
+of gaseous molecular species. It works with high numerical precision, 
 without adjustments, for temperatures above ~600 K. For temperatures below 
 600 K and mixing fractions below 1e-14, the code produces results with low
 precision. The output can be improved with fine adjustments to the lambda 
