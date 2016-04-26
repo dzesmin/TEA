@@ -1,5 +1,61 @@
 import numpy as np
 
+############################# BEGIN FRONTMATTER ################################ 
+#                                                                              # 
+#   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
+#                                                                              #
+#   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
+#   Blecic, who developed it with coding assistance from                       #
+#   undergraduate M. Oliver Bowman and under the advice of                     #
+#   Prof. Joseph Harrington at the University of Central Florida,              #
+#   Orlando, Florida, USA.                                                     #
+#                                                                              #
+#   Copyright (C) 2014-2016 University of Central Florida                      #
+#                                                                              #
+#   This program is reproducible-research software: you can                    #
+#   redistribute it and/or modify it under the terms of the                    #
+#   Reproducible Research Software License as published by                     #
+#   Prof. Joseph Harrington at the University of Central Florida,              #
+#   either version 0.3 of the License, or (at your option) any later           #
+#   version.                                                                   #
+#                                                                              #
+#   This program is distributed in the hope that it will be useful,            #
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of             #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+#   Reproducible Research Software License for more details.                   #
+#                                                                              #
+#   You should have received a copy of the Reproducible Research               #
+#   Software License along with this program.  If not, see                     #
+#   <http://planets.ucf.edu/resources/reproducible/>.  The license's           #
+#   preamble explains the situation, concepts, and reasons surrounding         #
+#   reproducible research, and answers some common questions.                  #
+#                                                                              #
+#   This project was started with the support of the NASA Earth and            #
+#   Space Science Fellowship Program, grant NNX12AL83H, held by                #
+#   Jasmina Blecic, Principal Investigator Joseph Harrington, and the          #
+#   NASA Science Mission Directorate Planetary Atmospheres Program,            #
+#   grant NNX12AI69G.                                                          #
+#                                                                              #
+#   See the file ACKNOWLEDGING in the top-level TEA directory for              #
+#   instructions on how to acknowledge TEA in publications.                    #
+#                                                                              #
+#   We welcome your feedback, but do not guarantee support.                    #
+#   Many questions are answered in the TEA forums:                             #
+#                                                                              #
+#   https://physics.ucf.edu/mailman/listinfo/tea-user                          #
+#   https://physics.ucf.edu/mailman/listinfo/tea-devel                         #
+#                                                                              #
+#   Visit our Github site:                                                     #
+#                                                                              #
+#   https://github.com/dzesmin/TEA/                                            #
+#                                                                              #
+#   Reach us directly at:                                                      #
+#                                                                              #
+#   Jasmina Blecic <jasmina@physics.ucf.edu>                                   #
+#   Joseph Harrington <jh@physics.ucf.edu>                                     #
+#                                                                              #
+############################## END FRONTMATTER #################################
+
 
 def makeAbun(solar_abun, abun_file, COratio, solar_times=1):
     """

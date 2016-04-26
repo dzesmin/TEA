@@ -1,0 +1,148 @@
+	 HOW TO MAKE A REPRODUCUBLE-RESEARCH COMPENDIUM (RRC)
+
+			  Joseph  Harrington
+			  jh@physics.ucf.edu
+			    11 April 2016
+
+The Reproducible Research Software License requires that each paper
+published in the reviewed literature be accompanied by a
+Reproducuble-Research Compendium (RRC).  An RRC is a permanent,
+unchanging, public collection of all the information needed to
+reproduce the work done with a software package covered by the
+license.  The main benefits of an RRC is that others can reproduce
+your work and build upon it.  It will also make it easier to get
+credit for your computational work as well as your results.
+
+Well-designed research software will do most of the work of making the
+RRC for you.  Usually, all you need to do is organize the output
+(e.g., according to the table and figure numbers) and write some
+README files explaining what's what and how to run the code.  If you
+got the code from a public repository like Github.com and you did not
+change the code, you do not need to include the code in your RRC, just
+include a URL that downloads the version you used.  Otherwise, add the
+full software package to the repo.  Don't worry about size, the
+hosting sites are happy if the RRCs are smaller than a few GB.
+
+Making the RRC as you work is MUCH EASIER than making it afterward.
+However, if you cannot make one after you finish your work, this is a
+great demonstration that your work is not even reproducible by you!
+Here's what to do (Note: This is a guideline for making a good RRC.
+The terms of the license state exactly what must be in the RRC.):
+
+1. Do research.  Be methodical.  Make notes about each program run.
+(But you knew that!)  For each run, the code should make a directory
+containing the inputs you used (including any GUI settings), the
+outputs it produced, and possibly the command line you used to run it
+(if your operating system uses command lines).  Don't delete these!
+Instead, collect the ones that appear in the paper, document and add
+any changed code versions, and that's your RRC.
+
+2. Organize the directories according to what they produced in the
+paper.  If you describe a run in the text that is not in a figure or
+table, refer to the section that it's in.  For example, you could name
+them Fig3, Fig4, Table3, Video1, Sec4.2, etc.
+
+3. Write a README in each directory explaining where any external data
+came from and relating the files in the directory to the paper.  For
+example, "The green trace in Figure 4 is column 2 in the file
+output.txt.  The red trace is column 3."  Also, state how to run the
+program to reproduce the data exactly (e.g., give the command line).
+If random methods are used, note that, including how many iterations
+you ran.
+
+4. Include anything else used to post-process the results, such as
+one-off statistical or plotting routines, and explain them in your
+README.
+
+5. Write an overall README and put it in your top-level directory.
+This should state:
+a. Full reference to the publication the RRC is for.  This should
+   include the title, all authors, journal, volume, page or article
+   number, and publication date.  It should also include a DOI and/or
+   link to the article.  Putting the abstract here is good, as well,
+   if the publisher permits it.  Obviously, if the publication is not
+   an article, modify the list above to include what is appropriate.
+b. That this is the RRC for that paper
+c. How the compendium is organized
+d. Where you got the code and what version you used.  Giving a URL
+   that downloads the exact version you used is ideal.
+e. Whether you changed the code.  If so, you must include the entire
+   code, as changed.  If you made multiple versions, include all
+   versions that produced results in the paper and be clear which
+   version produced which results.  In cases where you also used code
+   you are not allowed to redistribute, see the license terms for this
+   package and follow them carefully.
+f. Sources for any external data that apply to most or all runs in the
+   paper.  External data used for a single run could be here, too, or
+   could be in the directory for that run.  Document individual-run
+   data sources in their respective READMEs.
+
+6. Post the RRC online.  It must go somewhere permanent.  It should go
+somewhere with good "discoverability".  That is, the site should give
+you a Digital Object Identifier and should index it for search
+engines.  There are now many free sites that do this, including:
+
+http://Zenodo.org/  (note: NOT the same as zenodo.com!)
+
+http://researchcompendia.org/
+
+We do not recommend versioning sites, such as github.com, as these are
+oriented to changing content.  RRCs must never change!  Also,
+archiving sites have tagged information (title, authors, abstract)
+that makes a paper much more easily discovered in online searches.
+
+We were surprised to learn that the American Astronomical Society now
+no longer recommends using its own journals' electronic supplements
+for RRCs.  The e-supplements are there just to store additional
+figures and such.  This is because sites like Zenodo provide better
+discoverability.
+
+7. Never change it!  "But, what if I made a mistake and there's a
+wrong result in there?"  To correct a mistake, publish another paper
+that does so.  Your RRC is part of your paper, which also cannot be
+changed, as they are now part of history.  Science learns from
+correcting its mistakes.  If you "fix" something after someone else
+points out a problem, people will no longer be able to see what they
+were talking about.  They may even be angry with you for covering
+something up rather than honestly talking about it.
+
+Frequently Asked Questions
+
+Q1. My paper has several versions (submitted, revised, accepted) and I
+might post it on arXiv.com before submission.  How should I handle
+that?
+
+A1. The License only requires you to post an RRC for the reviewed
+version of a paper.  However, it is best to make one for each version
+that circulates, and certainly for each permanently posted version.
+When you post a paper on arXiv before publication, it is possible that
+referees or competition will force you to change it substantially.  As
+the source text for the paper evolves, so might the source version of
+the RRC on your own computer.  However, just as you cannot change a
+posted paper version on arXiv, neither should you ever change the RRC
+that you posted with each version.  Instead, copy the source RRC on
+your computer to the hosting site separately for each posted version
+of the paper.  Be sure to update the documentation, and to identify
+which paper version it is for.
+
+Q2. I just changed a few lines of code.  Do I really have to post the
+whole package??
+
+A2. Yes, for two reasons (at least).  First, if someone wants to try
+to reproduce your work, they then have to get code from another source
+and put it together as you did.  This may or may not be
+straightforward.  It is much better to give them the code as you used
+it, which might be different from how they would interpret your
+description of how to put it together.  As a practical matter, people
+often do not write the clearest instructions!  Second, it is very hard
+to legislate in license language how much change is too small to worry
+about.  The quantum of space on an archive site is typically orders of
+magnitude larger than the vast majority of source codes.
+
+For an example RRC, see:
+http://dx.doi.org/10.5281/zenodo.50378
+
+This RRC contains the code data, and instructions for reproducing the
+work of Blecic et al. (2016), "TEA: A code for calculating
+Thermochemical Equilibrium Abundances", published in The Astrophysical
+Journal Supplement Series.

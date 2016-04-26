@@ -1,0 +1,63 @@
+HOW TO ACKNOWLEDGE TEA
+
+Thank you for using the Thermochemical Equilibrium Abundances (TEA)
+code.  In consideration of your access to this code, the license (see
+the file RR-LICENSE-0.3.txt) requires that you acknowledge the
+original authors and cite the paper describing it in a form
+appropriate to the medium of publication.  This file gives
+instructions for acknowledging TEA in research publications.
+
+** In peer-reviewed research papers, other article-style academic work
+   with references sections (including classwork and textbooks), and
+   conference posters:
+
+Cite the TEA paper as appropriate in the main text and include the TEA
+paper in the References, Bibliography, or similar section of the
+work.  Here is a BibTeX entry for it:
+
+@ARTICLE{BlecicHarringtonBowman2016apjsTEA,
+ author = {{Blecic}, Jasmina and
+           {Harrington}, Joseph and
+           {Bowman}, Matthew Oliver},
+ title = "{TEA: A} Code For Calculating {Thermochemical Equilibrium Abundances}",
+ year = {2016},
+ journal = {The Astrophysical Journal Supplement Series},
+ volume = ,
+ pages = 
+}
+
+The volume and pages should be filled in; as of this writing they have
+not been assigned.
+
+Include the following text in the Acknowledgements section, or
+equivalent section that usually appears at the end of the main text,
+before the references, depending on journal/article style:
+
+  We thank the developers of the Thermochemical Equilibrium Abundances
+  (TEA) code <citation to TEA paper>, initially developed at the
+  University of Central Florida, Orlando, Florida, USA.
+
+The citation should appear in the appropriate format for the journal,
+for example:
+
+  We thank the developers of the Thermochemical Equilibrium Abundances
+  (TEA) code (Blecic et al. 2016), initially developed at the
+  University of Central Florida, Orlando, Florida, USA.
+
+For example, in LaTeX using the natbib.sty references package and
+BibTeX, this would be:
+
+  We thank the developers of the Thermochemical Equilibrium Abundances
+  (TEA) code \citep{BlecicHarringtonBowman2016apjsTEA}, initially
+  developed at the University of Central Florida, Orlando, Florida, USA.
+
+** In conference abstracts or the visuals of talks:
+
+Include an in-line citation to the paper, as in:
+
+   We used the Thermochemical Equilibrium Abundances (TEA) code of
+   Blecic et al. (2016, ApJS xx, yy).
+
+...where xx is the volume and yy is the pages, which should be filled
+in once they are known (they have not been assigned as of this
+writing).

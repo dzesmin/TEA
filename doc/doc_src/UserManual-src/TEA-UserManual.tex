@@ -74,7 +74,6 @@
 
 
 % Copyright page
-\newpage
 
 \clearpage
 \vspace*{\fill}
@@ -82,36 +81,58 @@
 \begin{minipage}{.8\textwidth}
 
 
-\centerline{Copyright (C) 2014-2015 University of Central Florida.}
-\centerline{ALL RIGHTS RESERVED.}
-
 \vspace{20pt} This document goes along with the TEA code, the TEA theory
-paper \citep{BlecicEtal2015-TEAtheory}, and the code description
-document.  The documents are not peer-reviewed and the code is a test
-version only. They may not be redistributed to any third party.
-Please refer such requests to us.  If you find this package useful for
-your research, please cite \citet{BlecicEtal2015-TEAtheory}.  The
-document and the program are distributed in the hope that they will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. \\ \\ Our intent
-is to release this software under an open-source,
-reproducible-research license once the code is mature and the first
-research paper describing the code has been accepted for publication
-in a peer-reviewed journal.  We are committed to development in the
-open, and have posted this code on github.com so that others can test
-it and give us feedback.  However, until its first publication , we do
-not permit others to redistribute the code in either original or
-modified form, nor to publish work based in whole or in part on the
-output of this code.  By downloading, running, or modifying this code,
-you agree to these conditions.  We do encourage sharing any
-modifications with us and discussing them openly.\\ \\ We welcome your
-feedback, but do not guarantee support. Please send feedback or
-inquiries to both:
-\\ Jasmina Blecic: jasmina@physics.ucf.edu \\ Joseph Harrington:
-jh@physics.ucf.edu \\ \\ or alternatively, \\ \\ Jasmina Blecic and
-Joseph Harrington \\ UCF PSB 441 \\ 4111 Libra Drive
-\\ Orlando, FL 32816-2385 \\ USA \\ \\ \centerline{Thank you for
-  testing TEA!}
+paper \citep{BlecicEtal2016-TEAtheory}, and the code description
+document.  \\
+
+ TEA is part of the PhD dissertation work of Dr. Jasmina                   
+Blecic, who developed it with coding assistance from                       
+undergraduate M. Oliver Bowman and under the advice of                     
+Prof. Joseph Harrington at the University of Central Florida,              
+Orlando, Florida, USA.   \\      
+
+\hspace{60pt} Copyright  \textcopyright \hspace{1pt} 2014-2016 University of Central Florida. \\   
+
+This program is reproducible-research software: you can                    
+redistribute it and/or modify it under the terms of the                    
+Reproducible Research Software License as published by                     
+Prof. Joseph Harrington at the University of Central Florida,              
+either version 0.3 of the License, or (at your option) any later           
+version.  \\   
+                                                             
+This program is distributed in the hope that it will be useful,            
+but WITHOUT ANY WARRANTY; without even the implied warranty of             
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              
+Reproducible Research Software License for more details.  \\                 
+
+You should have received a copy of the Reproducible Research               
+Software License along with this program.  If not, see                     
+{\tt http://planets.ucf.edu/resources/reproducible/}.  The license's           
+preamble explains the situation, concepts, and reasons surrounding         
+reproducible research, and answers some common questions.  \\                
+
+This project was started with the support of the NASA Earth and            
+Space Science Fellowship Program, grant NNX12AL83H, held by                
+Jasmina Blecic, Principal Investigator Joseph Harrington, and the          
+NASA Science Mission Directorate’s Planetary Atmospheres Program,          
+grant NNX12AI69G.     \\                                                     
+                                                                           
+See the file ACKNOWLEDGING in the top-level TEA directory for              
+instructions on how to acknowledge TEA in publications.  \\                  
+                                                                           
+We welcome your feedback, but do not guarantee support.                    
+Many questions are answered in the TEA forums:   \\                          
+                                                                          
+{\tt https://physics.ucf.edu/mailman/listinfo/tea-user}                          
+{\tt https://physics.ucf.edu/mailman/listinfo/tea-devel}   \\                      
+                                                                           
+Visit our Github site:                               
+{\tt https://github.com/dzesmin/TEA/}   \\                                         
+                                                                           
+Reach us directly at:                                                      
+\\ Jasmina Blecic: jasmina@physics.ucf.edu 
+\\ Joseph Harrington: jh@physics.ucf.edu \\                                     
+
 \end{minipage}
 \end{center}
 \vfill % equivalent to \vspace{\fill}
@@ -142,7 +163,7 @@ Joseph Harrington \\ UCF PSB 441 \\ 4111 Libra Drive
   Gibbs-free-energy minimization calculation originally developed
   by \citet{WhiteJohnsonDantzig1958JGibbs}
   and \citet{Eriksson1971}. The code is written entirely in Python and
-  is available to the scientific community under an open-source
+  is available to the scientific community under the reproducible-research
   license.
 
 
@@ -154,10 +175,10 @@ Joseph Harrington \\ UCF PSB 441 \\ 4111 Libra Drive
   intended use of the TEA code is to solve equilibrium abundances for
   hot-Jupiter exoplanetary atmospheres, though it is not strictly
   limited to such a system. TEA uses the Lagrangian steepest-descent
-  method \citep[Section 1.2] {BlecicEtal2015-TEAtheory} in order to
+  method \citep[Section 1.2] {BlecicEtal2016-TEAtheory} in order to
   minimize the free-energy of a system.  This minimization followed by
   a short correction for validity called "Lambda
-  correction" \citep[Section 4]{BlecicEtal2015-TEAtheory} results in
+  correction" \citep[Section 4]{BlecicEtal2016-TEAtheory} results in
   the equilibrium abundances one would expect to find at a certain
   temperature and pressure. TEA outputs are abundances given as
   fractional abundances (mole mixing fractions), i.e., the ratio of
@@ -178,10 +199,10 @@ Joseph Harrington \\ UCF PSB 441 \\ 4111 Libra Drive
 
 This is a second part of a three-part document describing the TEA
 code. The first part, the TEA Theory document
-\citep{BlecicEtal2015-TEAtheory} presents the theoretical basis for
+\citep{BlecicEtal2016-TEAtheory} presents the theoretical basis for
 the method applied, this document is the user manual, and the third is
 the TEA Code Description document by Blecic \& Bowman. If you find
-this package useful, please cite \citet{BlecicEtal2015-TEAtheory}.
+this package useful, please cite \citet{BlecicEtal2016-TEAtheory}.
 
 
   This project was completed with the support of the NASA Earth and
@@ -202,9 +223,7 @@ this package useful, please cite \citet{BlecicEtal2015-TEAtheory}.
   solving a system of equations, and the general Python overhead.  Any
   other packages used by TEA are included by default in the Python
   overhead installation and do not need to be explicitly installed.
-  
-  All of these dependencies have been tested across the popular
-  operating systems (Linux, Mac OS X, and Microsoft Windows).
+  These dependencies have been tested on the Linux operating system.
   
 % #########################
 \subsection{Python}
@@ -249,7 +268,7 @@ this package useful, please cite \citet{BlecicEtal2015-TEAtheory}.
   more fluent and intuitive means of solving individual or sets of
   equations.  TEA uses SymPy to solve sets of equations during the
   Lagrange optimization process \citep[Section 3 Equation
-  27]{BlecicEtal2015-TEAtheory}. SymPy documentation and its
+  27]{BlecicEtal2016-TEAtheory}. SymPy documentation and its
   installation procedure can be found at \href{http://sympy.org/}
   {\tttm http://sympy.org/}.
   
@@ -357,7 +376,7 @@ this package useful, please cite \citet{BlecicEtal2015-TEAtheory}.
   initial set of mass-balanced abundances and proceeds to iteratively
   apply Lagrange minimization and lambda correction before settling on
   a final set of equilibrium
-  abundances \citep{BlecicEtal2015-TEAtheory}. Should the user need to
+  abundances \citep{BlecicEtal2016-TEAtheory}. Should the user need to
   solve system of more than one \math{T, P} point, the pipeline driver
   will additionally repeat this process over each \math{T, P}
   point. The final abundances are given as fractional abundances, mole
@@ -404,7 +423,7 @@ The following directories and files are included in the download:
 \item \texttt{PT} - directory containing several examples of the
   pressure and temperature profile
 \end{enumerate}
-\item \texttt{TEA Theory document, \citet{BlecicEtal2015-TEAtheory}} - 
+\item \texttt{TEA Theory document, \citet{BlecicEtal2016-TEAtheory}} - 
 document containing \newline theory part of the code
 \item \texttt{TEA User manual} - document containing the user manual
 \item \texttt{TEA Code Description} - document containing program
@@ -895,7 +914,7 @@ abundances, while the other columns should remain unmodified.
   pre-pipeline.  The primary function of the pre-pipeline outputs are
   to establish the stoichiometric and thermodynamic rules TEA must
   obey in order to maintain a system at
-  equilibrium \citep{BlecicEtal2015-TEAtheory}.
+  equilibrium \citep{BlecicEtal2016-TEAtheory}.
   
   The pre-pipeline is divided into two components, each of which are
   responsible for one of the outputs that are

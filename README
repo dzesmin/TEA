@@ -1,4 +1,3 @@
-
 ############################# BEGIN FRONTMATTER ################################ 
 #                                                                              # 
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
@@ -56,70 +55,25 @@
 ############################## END FRONTMATTER #################################
 
 
-# ============================================================================= 
-# Configuration file containing two sections: 
-# 1. TEA section with parameters and booleans to run and debug TEA.
-# 2. PRE-ATM section with parameters to make pre-atmospheric file. 
-# ============================================================================= 
+The Start Guide with basic instructions on how to install and run TEA
+is: doc/start_guide.txt
 
+For more detailed instructions read the TEA User Manual: doc/TEA-UserManual.pdf
+For code description read: doc/TEA-CodeDescription.pdf
 
-# =============================== TEA SECTION =============================== #
-# Change the parameters below to control how TEA runs. The default number of 
-# iterations is the optimal value for common molecular species in hot Jupiters.
-[TEA]
+The TEA Theory paper is published in The Astrophysical Journal Supplement Series
+and also available here: doc/TEA-TheoryPaper.pdf 
 
-# === Sets maximum number of iteration ===
-# (Def: 100)   Number of iterations the pipeline will run for each T-P point 
-maxiter      = 100
+The compendium for this paper can be find on zenodo.org, entitled 
+RRC-BlecicEtal-2016-ApJS-TEA, http://dx.doi.org/10.5281/zenodo.50378.
+ 
+The compendium for the arXiv version 1 of this paper, 
+http://arxiv.org/abs/1505.06392, can be find
+here: https://github.com/dzesmin/RRC-BlecicEtal-2015a-ApJS-TEA
 
-                        
-# === Controls output files ===
-# (Def: False) Preserve headers
-save_headers = True
-                   
-# (Def: False) Preserve intermediate outputs     
-save_outputs = True   
-                        
+Completely executed TEA examples can be find in a separate repository: 
+https://github.com/dzesmin/TEA-Examples
 
-# === Controls debugging and tracking ===
-# (Def: False) Enable various debug printouts 
-doprint      = True
-# (Def: False) Enable time printing for speed tests         
-times        = True
+The reproducible-reserach license and how to acknowledge TEA files are placed 
+in the root directory: RR-LICENSE-0.3.txt, ACKNOWLEDGING-TEA
 
-
-# === Location of TEA source files ===
-location_TEA = /home/jasmina/Work/TEA/TEA-Sep2014/cleaned-TEA
-
-# === Location of abundances file ===
-abun_file = /home/jasmina/Work/TEA/TEA-Sep2014/cleaned-TEA/lib/abundances.txt
-
-# === Location of working directory ===
-location_out = .
-
-# ============================= PRE-ATM SECTION ============================= #
-# Execution of this section is optional. The user can produce a TEA
-# pre-atmospheric file by running makeatm.py, or make a custom-made file in 
-# the format that TEA can read it and place it in the inputs/ folder. 
-# See the correct format in the examples/multi_TP/ folder.
-#
-# Change the parameters below to control how pre-atmospheric file is made.
-# Before executing the makeatm.py module make a pressure-temperature file. 
-# Run makeatm.py as: makeatm.py <RESULTS_DIR_NAME>
-[PRE-ATM]
-
-# Pressure and temperature file
-PT_file = /home/jasmina/Work/TEA/TEA-Sep2014/PT/PT-1bar.dat
-
-# === Pre-atmospheric filename ===
-# Use extension .atm. File will be placed in inputs/.
-pre_atm_name    = PT-1bar.atm
-
-# === Input elements names ===
-input_elem      = H C N O
-
-# === Output species names ===
-# MUST have names as they appear in gdata/ folder. 
-# MUST include all elemental species.    
-output_species  = H_g C_g N_g O_g H2_ref CO_g CH4_g H2O_g N2_ref NH3_g
-                                                              
