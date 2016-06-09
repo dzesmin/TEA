@@ -193,8 +193,16 @@ for i in np.arange(n_JANAF):
     if pressure == 1: 
         outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) +   \
                                                                    '.txt'
+        # Renaming case-insensitive species names for MAC users
+        MACspecies = species[i, 0] + '_' + np.str(species[i,2])
+        if MACspecies=='CoCl2_g' or MACspecies=='CoCl_g' or \
+           MACspecies=='CoF2_g'  or MACspecies=='Co_g'   or \
+           MACspecies=='Cs2_g'   or MACspecies=='Cs_g'   or \
+           MACspecies=='Hf_g':
+           outfile = outfile[:-5] + 'gas.txt'
+
         # Check if species is redundant and add additional string if so
-        if redundant.has_key(outfile):
+        elif redundant.has_key(outfile):
             outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) \
                                         + '_' + np.str(species[i,3]) + '.txt'
         elif os.path.isfile(outfile):

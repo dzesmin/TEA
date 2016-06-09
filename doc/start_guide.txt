@@ -69,7 +69,7 @@ exploration variables in lambdacorr.py module (see documentation).
 
 1. ==== Packages ====
 
-   TEA works in Linux/Ubuntu enviroment.
+   TEA works in Linux/Ubuntu and MAC enviroment.
    Ensure following python packages are installed:
           Python: 2.7.3+
           NumPy:  1.6.1+
