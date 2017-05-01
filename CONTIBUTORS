@@ -11,4 +11,6 @@ Joseph Harrington  <jh@physics.ucf.edu>
 CONTRIBUTORS:
 Patricio Cubillos <pcubillos@fulbrightmail.org>  
          May 2016 - pointed out to case-insensitive species names for MAC users
+         May 2017 - pointed out to the line in balance.py sensitive to
+                    different Python versions
 

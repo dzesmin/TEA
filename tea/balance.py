@@ -144,7 +144,7 @@ for n in np.arange(i - j + 1):
         for m in np.arange(j):
             if doprint == True:
                 print('Using y_' + np.str(n + m + 1) + ' as a free variable')
-            free_id = np.append(free_id, n + m)
+            free_id.append(n + m)
         break
 
 # Set initial guess of non-free y_i 
