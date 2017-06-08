@@ -191,45 +191,49 @@ for i in np.arange(n_JANAF):
     # Create file for each JANAF species, adding additional string if redundant
     # For consistency, only use 1 bar tables (only H2O has other pressures)
     if pressure == 1: 
-        outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) +   \
+        # Catch weird species
+        if '.' in species[i, 1]:
+            pass
+        else:
+            outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) +   \
                                                                    '.txt'
-        # Renaming case-insensitive species names for MAC users
-        MACspecies = species[i, 0] + '_' + np.str(species[i,2])
-        if MACspecies=='CoCl2_g' or MACspecies=='CoCl_g' or \
-           MACspecies=='CoF2_g'  or MACspecies=='Co_g'   or \
-           MACspecies=='Cs2_g'   or MACspecies=='Cs_g'   or \
-           MACspecies=='Hf_g':
-           outfile = outfile[:-5] + 'gas.txt'
+            # Renaming case-insensitive species names for MAC users
+            MACspecies = species[i, 0] + '_' + np.str(species[i,2])
+            if MACspecies=='CoCl2_g' or MACspecies=='CoCl_g' or \
+                MACspecies=='CoF2_g'  or MACspecies=='Co_g'   or \
+                MACspecies=='Cs2_g'   or MACspecies=='Cs_g'   or \
+                MACspecies=='Hf_g':
+                outfile = outfile[:-5] + 'gas.txt'
 
-        # Check if species is redundant and add additional string if so
-        elif redundant.has_key(outfile):
-            outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) \
+            # Check if species is redundant and add additional string if so
+            elif redundant.has_key(outfile):
+                outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) \
                                         + '_' + np.str(species[i,3]) + '.txt'
-        elif os.path.isfile(outfile):
-            outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) \
+            elif os.path.isfile(outfile):
+                outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) \
                                         + '_' + np.str(species[i,3]) + '.txt'
         
-        # Write conversion data to file
-        file_list.write(outfile+' made from ' + infile + '\n')
+            # Write conversion data to file
+            file_list.write(outfile+' made from ' + infile + '\n')
 
-        # Write converted JANAF tables
-        f = open(outfile, 'w+')
-        n_files += 1
+            # Write converted JANAF tables
+            f = open(outfile, 'w+')
+            n_files += 1
 
-        # Write column labels
-        f.write(header[0].ljust(8))
-        f.write(header[1].ljust(24))
-        f.write(header[2].ljust(22))
-        f.write('\n')
-
-        # Write data in corresponding columns
-        for h in np.arange(n_temps):
-            f.write(gdata[h, 0].ljust(8))
-            f.write(gdata[h, 1].ljust(24))
-            f.write(gdata[h, 2].ljust(22))
+            # Write column labels
+            f.write(header[0].ljust(8))
+            f.write(header[1].ljust(24))
+            f.write(header[2].ljust(22))
             f.write('\n')
+
+            # Write data in corresponding columns
+            for h in np.arange(n_temps):
+                f.write(gdata[h, 0].ljust(8))
+                f.write(gdata[h, 1].ljust(24))
+                f.write(gdata[h, 2].ljust(22))
+                f.write('\n')
         
-        f.close()
+            f.close()
 
     # Exclude files with pressure != 1 bar
     else:

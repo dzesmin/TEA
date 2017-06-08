@@ -132,29 +132,34 @@ originals    = {}
 # Loop over all JANAF files to write new stoichiometric files
 n_files      = 0
 for i in np.arange(n_JANAF):
+
     # Read list of elements from comp()
     elements = comp(species[i, 1])
     
-    # Create stoichiometric file name for species with its state
-    outfile = stoich_dir + species[i, 0] + '_' + species[i,2] + '.txt'
+    # Catch weird species
+    if '.' in species[i, 1]:
+        pass
+    else:
+        # Create stoichiometric file name for species with its state
+        outfile = stoich_dir + species[i, 0] + '_' + species[i,2] + '.txt'
 
-    # Check if isomer exists for specie, and if so add additional string
-    if originals.has_key(outfile):
-        outfile = stoich_dir + species[i, 0] + '_' + np.str(species[i,2]) + \
+        # Check if isomer exists for specie, and if so add additional string
+        if originals.has_key(outfile):
+            outfile = stoich_dir + species[i, 0] + '_' + np.str(species[i,2]) + \
                                       '_' + np.str(species[i,3]) + '.txt'
-    elif os.path.isfile(outfile):
-        outfile = stoich_dir + species[i, 0] + '_' + np.str(species[i,2]) + \
+        elif os.path.isfile(outfile):
+            outfile = stoich_dir + species[i, 0] + '_' + np.str(species[i,2]) + \
                                       '_' + np.str(species[i,3]) + '.txt'
-            
-    # Open each file to write
-    f = open(outfile, 'w+')
-    numcols = np.shape(elements)[1]
-    numele = np.shape(elements)[0]
-    for j in np.arange(numele):
-        for h in np.arange(numcols):
-            f.write(np.str(elements[j, h]).ljust(4))
-        f.write('\n')
-    f.close()
+  
+        # Open each file to write
+        f = open(outfile, 'w+')
+        numcols = np.shape(elements)[1]
+        numele = np.shape(elements)[0]
+        for j in np.arange(numele):
+            for h in np.arange(numcols):
+                f.write(np.str(elements[j, h]).ljust(4))
+            f.write('\n')
+        f.close()
 
 
 # ============= Create all-in-one stoichiometry file =================== #
@@ -222,12 +227,16 @@ for j in np.arange(n_JANAF):
     else:
         # Species chemical formula is not redundant; place counts into file
         originals[specie] = False
-        f.write(specie.ljust(12))
+        # Catch weird species
+        if '.' in specie:
+            pass
+        else:
+            f.write(specie.ljust(12))
         
-        # Write count for each element into file
-        for i in np.arange(n_ele):
-            f.write(np.str(elements[i, 2]).rjust(6))        
-        f.write('\n')
+            # Write count for each element into file
+            for i in np.arange(n_ele):
+                f.write(np.str(elements[i, 2]).rjust(6))        
+            f.write('\n')
 f.close()
 
 # Delete temporary stoichiometry directory as all information is now 

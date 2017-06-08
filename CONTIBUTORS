@@ -14,3 +14,6 @@ Patricio Cubillos <pcubillos@fulbrightmail.org>
          May 2017 - pointed out to the line in balance.py sensitive to
                     different Python versions
 
+Peter Woitke
+         June 2017 - pointed out to a bug when writing double-digits 
+                     stoich values in stoich.txt

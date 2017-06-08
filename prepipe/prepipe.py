@@ -250,10 +250,6 @@ def comp(specie):
     elements[:, 1] = symbols
     elements[:, 2] = 0
     
-    # Scenario for returning empty array
-    if specie == 'NOUSE':
-        return elements
-    
     # Allocate string length and array of booleans to indicate if characters
     #          are capitals or digits
     chars   = len(specie)
@@ -269,13 +265,12 @@ def comp(specie):
     # Indicator for ending each count and blank results array
     endele = True
     result = [[]]
-    
-    # Loop over all characters in species string
-    for i in np.arange(len(specie)):  
+
+    for i in np.arange(len(specie)):
         # Start tracking new element
         if endele == True:
             ele = ''
-            weight = 0
+            weight = ''
             endele = False
         
         # Check if character is a letter, if so add to element name
@@ -284,8 +279,8 @@ def comp(specie):
         
         # Check if character is a digit, if so, make this the element's weight
         if isdigit[i] == True:
-            weight = np.int(specie[i])
-        
+            weight += specie[i]
+
         # Check if element name ends (next capital is reached) 
         #       and if no weight (count) is found, set it to 1
         if (isdigit[i] == False and                \
@@ -302,8 +297,7 @@ def comp(specie):
         if endele == True:
             # Locate element in element array and add the weight found
             index = np.where(elements[:, 1] == ele)[0]
-            elements[index, 2] += weight
-
+            elements[index, 2] += np.int(weight)
             # Create array containing only the elements used in this run 
             # This is not explicitly returned but can easy be if desired
             if result == [[]]:
