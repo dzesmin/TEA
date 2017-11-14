@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -75,14 +75,14 @@ import format     as form
 from   format import printout
 
 # =============================================================================
-# This program executes the iteration loop for TEA. It repeats Lagrangian 
+# This program executes the iteration loop for TEA. It repeats Lagrangian
 # minimization (lagrange.py) and lambda correction (lambdacorr.py) until the
 # maximum iteration is reached. The code has time stamps for checking the speed
 # of execution and is verbose for debugging purposes. Both are controlled in
 # TEA.cfg file.
 #
 # The flow of the code goes as follows: the current header, output, and result
-# directory are read; physical properties are retrieved from the header, and 
+# directory are read; physical properties are retrieved from the header, and
 # the balance.py output is read as the initial iteration input and passed to
 # lagrange.py. Lagrange x_i values are then checked for negative values: the
 # next iteration starts either with lambda correction output (if negative x_i's
@@ -90,7 +90,7 @@ from   format import printout
 # positive). This procedure is repeated until the maximum iteration is reached,
 # which stops the loop. Intermediate results from each iteration step are
 # written in the machine- and human-readable output files on the user's request
-# in TEA.cfg. 
+# in TEA.cfg.
 #
 # The program is executed by runatm.py and can be executed alone with in-shell
 # input: iterate.py <HEADER_FILE> <DIRECTORY_NAME>
@@ -112,7 +112,7 @@ desc   = argv[1:][1]              # Directory name
 
 # Create and name outputs and results directories if they do not exist
 datadir   = location_out + desc + '/outputs/' + 'transient/'
-datadirr  = location_out + desc + '/results'                
+datadirr  = location_out + desc + '/results'
 
 if not os.path.exists(datadir): os.makedirs(datadir)
 if not os.path.exists(datadirr): os.makedirs(datadirr)
@@ -131,11 +131,11 @@ speclist  = input[2]
 x         = input[3]
 x_bar     = input[6]
 
-# Set up first iteration 
+# Set up first iteration
 it_num  = 1
 repeat  = True
 
-# Prepare data object for iterative process 
+# Prepare data object for iterative process
 #         (see description of the 'direct' object in lagrange.py)
 lambdacorr_data = [header, 0, speclist, x, x, 0, x_bar, x_bar, 0]
 
@@ -156,44 +156,44 @@ while repeat:
     # Time / speed testing for lagrange.py
     if times:
         ini = time.time()
-    
+
     # Execute Lagrange minimization
     lagrange_data = lg.lagrange(it_num, datadir, doprint, lambdacorr_data)
-    
+
     # Time / speed testing for lagrange.py
     if times:
         fin = time.time()
         elapsed = fin - ini
-        print("lagrange" + str(it_num).rjust(4) + " :      " + str(elapsed))    
-      
+        print("lagrange" + str(it_num).rjust(4) + " :      " + str(elapsed))
+
     # Print for debugging purposes
     if doprint:
         printout('Iteration %d Lagrange complete. Starting lambda correction...', it_num)
-    
-    # Take final x_i mole numbers from last Lagrange calculation 
+
+    # Take final x_i mole numbers from last Lagrange calculation
     lagrange_x = lagrange_data[4]
-    
+
     # Check if x_i have negative mole numbers, and if yes perform lambda correction
     if where((lagrange_x < 0) == True)[0].size != 0:
-        # Print for debugging purposes 
+        # Print for debugging purposes
         if doprint:
             printout('Correction required. Initializing...')
-            
+
         # Time / speed testing for lambdacorr.py
         if times:
             ini = time.time()
-        
+
         # Execute lambda correction
         lambdacorr_data = lc.lambdacorr(it_num, datadir, doprint, \
                                                    lagrange_data)
-        
+
         # Print for debugging purposes
         if times:
             fin = time.time()
             elapsed = fin - ini
             print("lambcorr" + str(it_num).rjust(4) + " :      " + \
                                                       str(elapsed))
-        
+
         # Print for debugging purposes
         if doprint:
             printout('Iteration %d lambda correction complete. Checking precision...', it_num)
@@ -206,26 +206,26 @@ while repeat:
         # Print for debugging purposes
         if doprint:
             printout('Iteration %d did not need lambda correction.', it_num)
-    
+
     # Retrieve most recent iteration values
     input_new = lambdacorr_data
 
-    # Take most recent x_i and x_bar values    
+    # Take most recent x_i and x_bar values
     x_new     = input_new[4]
     x_bar_new = input_new[7]
-    
+
     # If max iteration not met, continue with next iteration cycle
-    if it_num < maxiter: 
+    if it_num < maxiter:
         # Add 1 to iteration number
         it_num += 1
 
         # Print for debugging purposes
         if doprint:
             printout('Max interation not met. Starting next iteration...\n')
-    
+
     # ============== Stop the loop, max iteration reached ============== #
 
-    # Stop if max iteration is reached 
+    # Stop if max iteration is reached
     else:
         # Print to screen
         printout('Maximum iteration reached, ending minimization.\n')
@@ -238,12 +238,12 @@ while repeat:
 
         # Calculate delta_bar values
         delta_bar = x_bar_new - x_bar
-        
+
         # Name output files with corresponding iteration number name
         file_results       = datadirr + '/results-machine-read.txt'
         file_fancyResults  = datadirr + '/results-visual.txt'
 
-        # Export all values into machine and human readable output files  
+        # Export all values into machine and human readable output files
         form.output(datadirr, header, it_num, speclist, x, x_new, delta,    \
                     x_bar, x_bar_new, delta_bar, file_results, doprint)
         form.fancyout_results(datadirr, header, it_num, speclist, x, x_new, \
