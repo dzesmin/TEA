@@ -103,7 +103,7 @@ import format as form
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
-         location_TEA, abun_file, location_out = TEApars
+         location_TEA, abun_file, location_out, xtol = TEApars
 
 # Correct location_TEA name
 if location_out[-1] != '/':

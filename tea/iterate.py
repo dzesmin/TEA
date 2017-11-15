@@ -91,7 +91,8 @@ from   format import printout
 # =============================================================================
 
 
-def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
+def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
+            xtol=3e-6):
   """
   Run iterative Lagrangian minimization and lambda correction.
 
@@ -107,6 +108,11 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
   times: Bool
      If True, track excecution times.
   location_out:
+  xtol: Float
+     Error between iterations that is acceptable for convergence.
+     The routine has converged when the sum of the relative improvement
+     per species becomes less than xtol, i.e.:
+       sum(abs((y-x)/y)) / len(x) <= xtol.
 
   Returns
   -------
@@ -155,8 +161,8 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
   it_num  = 1
 
   # Prepare data object for iterative process
-  #         (see description of the 'direct' object in lagrange.py)
-  lambdacorr_data = x, x, 0, x_bar, x_bar, 0
+  #         (see description of the 'input' object in lagrange.py)
+  lc_data = x, x, 0, x_bar, x_bar, 0
   info = pressure, i, j, a, b, g_RT, header, speclist
 
   # Time / speed testing
@@ -178,7 +184,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
           ini = time.time()
 
       # Execute Lagrange minimization
-      lagrange_data = lg.lagrange(it_num, datadir, doprint, lambdacorr_data, info)
+      lc_data = lg.lagrange(it_num, datadir, doprint, lc_data, info)
 
       # Time / speed testing for lagrange.py
       if times:
@@ -191,7 +197,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
           printout('Iteration %d Lagrange complete. Starting lambda correction...', it_num)
 
       # Check if x_i have negative mole numbers, if so, do lambda correction
-      if np.any(lagrange_data[1] < 0):
+      if np.any(lc_data[1] < 0):
           # Print for debugging purposes
           if doprint:
               printout('Correction required. Initializing...')
@@ -201,7 +207,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
               ini = time.time()
 
           # Execute lambda correction
-          lambdacorr_data = lc.lambdacorr(it_num, datadir, doprint, lagrange_data, info)
+          lc_data = lc.lambdacorr(it_num, datadir, doprint, lc_data, info)
 
           # Print for debugging purposes
           if times:
@@ -215,12 +221,15 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
 
       # Lambda correction is not needed
       else:
-          # Pass previous Lagrange results as inputs to next iteration
-          lambdacorr_data = lagrange_data
-
           # Print for debugging purposes
           if doprint:
               printout('Iteration %d did not need lambda correction.', it_num)
+
+      xdiff = (lc_data[1]/lc_data[4])/(lc_data[0]/lc_data[3]) - 1
+      if np.sum(np.abs(xdiff))/len(xdiff) <= xtol:
+          printout("The solution has converged to the given improvement "
+                   "tolerance error.\n")
+          break
 
       it_num += 1
       # If max iteration not met, continue with next iteration cycle
@@ -230,11 +239,11 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out):
 
   # ============== Stop the loop, max iteration reached ============== #
   # Stop if max iteration is reached
-  printout('Maximum iteration reached, ending minimization.\n')
-  # Stop the loop
+  if it_num == maxiter-1:
+      printout('Maximum iteration reached.\n')
 
   # Retrieve most recent iteration values
-  input_new = lambdacorr_data
+  input_new = lc_data
 
   # Take most recent x_i and x_bar values
   x_new     = input_new[1]

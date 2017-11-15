@@ -125,7 +125,7 @@ Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
-         location_TEA, abun_file, location_out = TEApars
+         location_TEA, abun_file, location_out, xtol = TEApars
 
 # Correct directory names
 if location_TEA[-1] != '/':
@@ -260,15 +260,14 @@ for q in np.arange(n_runs)[1:]:
     if doprint:
         print("\nReading atm file, TP line " + str(q))
     else:
-        print('\n'+ str(q))
+        print('\nLayer {:d}'.format(q))
 
     # Radius, pressure, and temp for the current line
     pres = pres_arr[q]
     temp = temp_arr[q]
 
     # Produce header for the current line
-    mh.make_atmheader(q, spec_list, \
-                              pres, temp, atom_arr, desc, thermo_dir)
+    mh.make_atmheader(q, spec_list, pres, temp, atom_arr, desc, thermo_dir)
 
     # Time / speed testing for balance.py
     if times:
@@ -286,7 +285,7 @@ for q in np.arange(n_runs)[1:]:
     # Execute main TEA loop for the current line, run iterate.py
     header = form.readheader(loc_headerfile)
     y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
-                      loc_headerfile, maxiter, doprint, times, location_out)
+              loc_headerfile, maxiter, doprint, times, location_out, xtol)
 
     # Insert results from the current line (T-P) to atm file
     fout.write(pres.rjust(10) + ' ')

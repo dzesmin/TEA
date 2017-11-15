@@ -81,6 +81,7 @@ def read():
        location_TEA: String
        abun_file: String
        location_out: String
+       xtol: Float
   PREATlist: 1D list
      The pre-atmospheric configuration parameters:
        PT_file: String
@@ -113,6 +114,10 @@ def read():
   location_TEA = config.get       ('TEA', 'location_TEA')
   abun_file    = config.get       ('TEA', 'abun_file')
   location_out = config.get       ('TEA', 'location_out')
+  if config.has_option("TEA", "xtol"):
+    xtol       = config.getfloat  ('TEA', 'xtol')
+  else:
+    xtol       = 1e-6
 
   # read PRE-ATM section
   PT_file        = config.get('PRE-ATM', 'PT_file')
@@ -121,5 +126,5 @@ def read():
   output_species = config.get('PRE-ATM', 'output_species')
 
   return [maxiter, save_headers, save_outputs, doprint, times,
-         location_TEA, abun_file, location_out], \
+         location_TEA, abun_file, location_out, xtol], \
          [PT_file, pre_atm_name, input_elem, output_species]

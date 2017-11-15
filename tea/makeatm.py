@@ -113,7 +113,7 @@ Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
-         location_TEA, abun_file, location_out = TEApars
+         location_TEA, abun_file, location_out, xtol = TEApars
 PT_file, pre_atm_name, input_elem, output_species = PREATpars
 
 # Correct directory names
