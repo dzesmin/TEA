@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -64,33 +64,33 @@ import format as form
 
 def lagrange(it_num, datadir, doprint, input, info):
     '''
-    This code applies Lagrange's method and calculates minimum based on the 
+    This code applies Lagrange's method and calculates minimum based on the
     methodology elaborated in the TEA theory document in Section (3). Equations in
     this code contain both references and an explicitly written definitions.
     The program reads the last iteration's output and data from the last header
     file, creates variables for the Lagrange equations, sets up the Lagrange
-    equations, and calculates final x_i mole numbers for the current iteration 
-    cycle. Note that the mole numbers that result from this function are 
-    allowed to be negative. If negatives are returned, lambda correction 
-    (lambdacorr.py) is necessary. The final x_i values, as well as x_bar, 
+    equations, and calculates final x_i mole numbers for the current iteration
+    cycle. Note that the mole numbers that result from this function are
+    allowed to be negative. If negatives are returned, lambda correction
+    (lambdacorr.py) is necessary. The final x_i values, as well as x_bar,
     y_bar, delta, and delta_bar are written into machine- and human-readable
     output files. This function is executed by iterate.py.
 
     Parameters
     ----------
-    it_num:  integer 
+    it_num:  integer
              Iteration number.
     datadir: string
              Current directory where TEA is run.
     doprint: string
-             Parameter in configuration file that allows printing for 
+             Parameter in configuration file that allows printing for
              debugging purposes.
     input:   List
              The input values/data from the previous
              calculation in lagrange.py or lambdacorr.py. It is a list
-             containing current header directory, current iteration 
-             number, array of species names, array of initial guess, 
-             array of non-corrected Lagrange values, and array of 
+             containing current header directory, current iteration
+             number, array of species names, array of initial guess,
+             array of non-corrected Lagrange values, and array of
              lambdacorr corrected values.
     info:    List
              FINDME
@@ -105,11 +105,11 @@ def lagrange(it_num, datadir, doprint, input, info):
             Array containing change in initial and final mole numbers of
             molecular species for current iteration.
     y_bar: float
-            Array containing total sum of initial guesses of all molecular 
+            Array containing total sum of initial guesses of all molecular
             species for current iteration.
     x_bar: float
             Total sum of the final mole numbers of all molecular species.
-    delta_bar: float 
+    delta_bar: float
             Change in total of initial and final mole numbers of molecular
             species.
     '''
@@ -130,26 +130,26 @@ def lagrange(it_num, datadir, doprint, input, info):
     # ============== CREATE VARIABLES FOR LAGRANGE EQUATION ============== #
 
     # Create 'c' value, equation (18) TEA theory document
-    # ci = (g/RT)_i + ln(P)    
+    # ci = (g/RT)_i + ln(P)
     c = g_RT + np.log(pressure)
-    
+
     # Fill in fi(Y) values equation (19) TEA theory document
     # fi = x_i * [ci + ln(x_i/x_bar)]
     fi_y = y * (c + np.log(y / y_bar))
 
     # Allocate values of rjk. Both j and k goes from 1 to m.
-    k = j 
+    k = j
     rjk = np.zeros((j,k))
 
-    # Fill out values of rjk, equation (26) TEA theory document 
+    # Fill out values of rjk, equation (26) TEA theory document
     # rjk = rkj = sum_i(a_ij * a_ik) * y_i
     for l in np.arange(k):
         for m in np.arange(j):
             rjk[m, l] = np.sum(a[:,m] * a[:,l] * y)
-    
+
     # Allocate value of u, equation (28) TEA theory document
     u = Symbol('u')
-    
+
     # Allocate pi_j variables, where j is element index
     # Example: pi_2 is Lagrange multiplier of N (j = 2)
     pi = np.empty(j, dtype=object)
@@ -161,17 +161,17 @@ def lagrange(it_num, datadir, doprint, input, info):
     # Make square array of pi values with shape j * k
     sq_pi = np.tile(pi, (j,1))
 
-    # Multiply rjk * sq_pi to get array of rjk * pi_j 
+    # Multiply rjk * sq_pi to get array of rjk * pi_j
     # equation (27) TEA theory document
-    rpi = rjk * sq_pi 
+    rpi = rjk * sq_pi
 
     # ======================= SET FINAL EQUATIONS ======================= #
     # Total number of equations is j + 1
-    
+
     # Set up a_ij * fi(Y) summations equation (27) TEA theory document
     # sum_i[a_ij * fi(Y)]
     aij_fiy = np.sum(a.T*fi_y, axis=1)
-    
+
     # Create first j'th equations equation (27) TEA theory document
     # r_1m*pi_1 + r_2m*pi_2 + ... + r_mm*pi_m + b_m*u = sum_i[a_im * fi(Y)]
     for m in np.arange(j):
@@ -186,15 +186,15 @@ def lagrange(it_num, datadir, doprint, input, info):
     bpi = b * pi
     lagrange_eq_last = np.array([np.sum(bpi) - np.sum(fi_y)])
     equations = np.append(equations, lagrange_eq_last)
-            
+
     # List all unknowns in the above set of equations
     unknowns = list(pi)
     unknowns.append(u)
 
     # Solve final system of j+1 equations
     fsol = solve(list(equations), unknowns, rational=False)
-    
-    
+
+
     # ============ CALCULATE xi VALUES FOR CURRENT ITERATION ============ #
     # Make array of pi values
     pi_f = np.zeros(j, np.double)
@@ -203,7 +203,7 @@ def lagrange(it_num, datadir, doprint, input, info):
     # Calculate x_bar from solution to get 'u', equation (28) TEA theory document
     # u = -1. + (x_bar/y_bar)
     x_bar = (fsol[u] + 1.0) * y_bar
-    
+
     # Apply Lagrange solution for final set of x_i values for this iteration
     # equation (23) TEA theory document
     # x_i = -fi(Y) + (y_i/y_bar) * x_bar + [sum_j(pi_j * a_ij)] * y_i
@@ -227,5 +227,5 @@ def lagrange(it_num, datadir, doprint, input, info):
                        delta, y_bar, x_bar, delta_bar, file, doprint)
       form.fancyout(datadir, it_num, speclist, y, x, delta,\
                          y_bar, x_bar, delta_bar, file_fancy, doprint)
-       
+
     return y, x, delta, y_bar, x_bar, delta_bar

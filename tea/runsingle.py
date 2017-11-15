@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -74,8 +74,8 @@ import makeheader as mh
 
 # =============================================================================
 # This program runs TEA over an input file that contains only one T-P.
-# The code retrieves the input file and the current directory name given by the 
-# user. It sets locations of all necessary modules and directories that 
+# The code retrieves the input file and the current directory name given by the
+# user. It sets locations of all necessary modules and directories that
 # will be used. Then, it executes the modules in the following order:
 # makeheader.py, balance,py, and iterate.py. The final results with the input
 # and the configuration files are saved in the results/ directory. The config
@@ -93,7 +93,7 @@ import makeheader as mh
 # runsingle.py <SINGLETP_INPUT_FILE_PATH> <DIRECTORY_NAME>
 # Example: ../TEA/tea/runsingle.py ../TEA/doc/examples/singleTP/inputs/singleTP_Example.txt Single_Example
 # =============================================================================
-    
+
 # Time / speed testing
 if times:
     end = time.time()
@@ -133,7 +133,7 @@ try:
 except:
     raise IOError ("\n\nSingle T-P input file does not exist.\n")
 
-# Retrieve current output directory name given by user 
+# Retrieve current output directory name given by user
 desc    = sys.argv[1:][1]
 
 # Check if output directory exists and inform user

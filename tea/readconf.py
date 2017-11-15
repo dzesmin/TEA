@@ -1,6 +1,6 @@
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -59,10 +59,10 @@ import ConfigParser
 import os
 
 # =============================================================================
-# This code reads the TEA config file, TEA.cfg. There are two sections in 
-# TEA.cfg file: the TEA section and the PRE-ATM section. The TEA section 
+# This code reads the TEA config file, TEA.cfg. There are two sections in
+# TEA.cfg file: the TEA section and the PRE-ATM section. The TEA section
 # carries parameters and booleans to run and debug TEA. The PRE-ATM section
-# carries paramaters to make pre-atmospheric file. 
+# carries paramaters to make pre-atmospheric file.
 # =============================================================================
 
 # Get current working directory

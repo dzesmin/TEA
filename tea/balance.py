@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -67,34 +67,34 @@ from sympy.solvers import solve
 import format as form
 
 # =============================================================================
-# This code produces an initial guess for the first TEA iteration by 
-# fulfilling the mass balance condition, sum_i(ai_j * y_i) = bj (equation (17) 
+# This code produces an initial guess for the first TEA iteration by
+# fulfilling the mass balance condition, sum_i(ai_j * y_i) = bj (equation (17)
 # in the TEA theory paper), where i is species index, j is element index, a's
-# are stoichiometric coefficients, and b's are elemental fractions by number, 
-# i.e., ratio of number densities of element 'j' to the total number densities 
+# are stoichiometric coefficients, and b's are elemental fractions by number,
+# i.e., ratio of number densities of element 'j' to the total number densities
 # of all elements in the system (see the end of the Section 2 in the TEA theory
-# paper). The code writes the result into machine- and human-readable files. 
+# paper). The code writes the result into machine- and human-readable files.
 #
-# The code begins by making a directory for the output results. Then, it reads 
-# the header file and imports all relevant chemical data from it. 
+# The code begins by making a directory for the output results. Then, it reads
+# the header file and imports all relevant chemical data from it.
 # To satisfy the mass balance equation, some yi variables remain as free
 # parameters. The number of free parameters is set to the number of total
-# elements in the system, thus ensuring that the mass balance equation can 
-# be solved for any number of input elements and output species the user 
-# chooses. The code locates a chunk of species (y_i) containing a sum of 
-# ai_j values that forbids ignoring any element in the system (sum of the 
-# ai_j values in a column must not be zero). This chunk is used as a set 
+# elements in the system, thus ensuring that the mass balance equation can
+# be solved for any number of input elements and output species the user
+# chooses. The code locates a chunk of species (y_i) containing a sum of
+# ai_j values that forbids ignoring any element in the system (sum of the
+# ai_j values in a column must not be zero). This chunk is used as a set
 # of free variables in the system. The initial scale for other y_i variables
-# are set to a known, arbitrary number. Initially, starting values for the 
-# known species are set to 0.1 moles, and the mass balance equation is 
-# calculated. If this value does not produce all positive mole numbers, 
-# the code automatically sets known parameters to 10 times smaller and 
-# tries again. Actual mole numbers for the initial guesses of y_i are 
+# are set to a known, arbitrary number. Initially, starting values for the
+# known species are set to 0.1 moles, and the mass balance equation is
+# calculated. If this value does not produce all positive mole numbers,
+# the code automatically sets known parameters to 10 times smaller and
+# tries again. Actual mole numbers for the initial guesses of y_i are
 # arbitrary, as TEA only requires a balanced starting point to initialize
 # minimization. The goal of this code is to find a positive set of non-zero
 # mole numbers to satisfy this requirement. Finally, the code calculates y_bar,
 # initializes the iteration number, delta, and delta_bar to zero and writes
-# results into machine- and human-readable output files. 
+# results into machine- and human-readable output files.
 #
 # This code is called by runatm.py and runsingle.py and can be executed alone
 # with in-shell input: balance.py <HEADER_FILE> <DIRECTORY_NAME>
@@ -109,7 +109,7 @@ header = argv[1:][0]              # Name of header file
 desc   = argv[1:][1]              # Directory name
 
 # Create and name outputs and results directories if they do not exist
-datadir   = location_out + desc + '/outputs/' + 'transient/'  
+datadir   = location_out + desc + '/outputs/' + 'transient/'
 
 # If output directory does not exist already, make it
 if not os.path.exists(datadir): os.makedirs(datadir)
@@ -127,17 +127,17 @@ for n in np.arange(i - j + 1):
     # Get lower and upper indices for chunk of ai_j array to check
     lower = n
     upper = n + j
-    
+
     # Retrieve chunk of ai_j that would contain free variables
     a_chunk = a[lower:upper]
-    
+
     # Sum columns to get total of ai_j in chunk for each species 'j'
     check = map(sum,zip(*a_chunk))
-    
-    # Look for zeros in check. If a zero is found, this chunk of data can't 
+
+    # Look for zeros in check. If a zero is found, this chunk of data can't
     # be used for free variables, as this signifies an element is ignored
     has_zero = 0 in check
-    
+
     # If zero not found, create list of free variables' indices
     if has_zero == False:
         free_id = []
@@ -147,7 +147,7 @@ for n in np.arange(i - j + 1):
             free_id.append(n + m)
         break
 
-# Set initial guess of non-free y_i 
+# Set initial guess of non-free y_i
 scale = 0.1
 
 # Assume that all or some y_i are negative or zeros
@@ -158,7 +158,7 @@ while nofit:
     # Set up list of 'known' initial mole numbers before and after free chunk
     pre_free = np.zeros(free_id[0]) + scale
     post_free = np.zeros(i - free_id[-1] - 1) + scale
-    
+
     # Set up list of free variables
     free = []
     for m in np.arange(j):
@@ -178,11 +178,11 @@ while nofit:
             rhs += a[n, m] * y_init[n]
         rhs -= b[m]
         eq = np.append(eq, rhs)
-        
+
     # Solve system of linear equations to get free y_i variables
     result = solve(list(eq), list(free), rational=False)
-    
-    # Correct for no-solution-found results. 
+
+    # Correct for no-solution-found results.
     # If no solution found, decrease scale size.
     if result == []:
         scale /= 10
@@ -193,9 +193,9 @@ while nofit:
     # Correct for negative-mass results.  If found, decrease scale size.
     else:
         # Assume no negatives and check
-        hasneg = False    
+        hasneg = False
         for m in np.arange(j):
-            if result[free[m]] < 0: 
+            if result[free[m]] < 0:
                 hasneg = True
         # If negatives found, decrease scale size
         if hasneg:
@@ -209,7 +209,7 @@ while nofit:
             nofit = False
             if doprint:
                 print(str(scale) + " provided a viable initial guess.")
-    
+
 # Gather the results
 fit = []
 for m in np.arange(j):
@@ -218,9 +218,9 @@ for m in np.arange(j):
 # Put the result into the final y_init array
 y_init[free_id[0]:free_id[j-1]+1] = fit
 
-# This part of the code is only for debugging purposes 
+# This part of the code is only for debugging purposes
 # It rounds the values and checks whether the balance equation is satisfied
-# No values are changed and this serves solely as a check 
+# No values are changed and this serves solely as a check
 if doprint == True:
     print('\nCHECKS:')
 for m in np.arange(j):
@@ -242,8 +242,8 @@ y         = y_init
 y_bar     = np.sum(y)
 
 # Initialize delta variables to 0. (this signifies the first iteration)
-delta     = np.zeros(i)   
-delta_bar = np.sum(delta) 
+delta     = np.zeros(i)
+delta_bar = np.sum(delta)
 
 # Name output files with corresponding iteration number name
 file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \

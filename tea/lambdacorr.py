@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -74,32 +74,32 @@ def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
 
 def lambdacorr(it_num, datadir, doprint, input, info):
     '''
-    This module applies lambda correction method (see Section 4 in the TEA theory 
+    This module applies lambda correction method (see Section 4 in the TEA theory
     document). When input mole numbers are negative, the code corrects them to
     positive values and pass them to the next iteration cycle. The code reads
     the values from the last lagrange output, the information from the header
-    file, performs checks, and starts setting basic equations. It defines a 
-    'smart' range so it can efficiently explore the lambda values from [0,1]. 
-    Half of the range is sampled exponentially, and the other half linearly, 
-    totalling 150 points. The code retrieves the last lambda value before first 
+    file, performs checks, and starts setting basic equations. It defines a
+    'smart' range so it can efficiently explore the lambda values from [0,1].
+    Half of the range is sampled exponentially, and the other half linearly,
+    totalling 150 points. The code retrieves the last lambda value before first
     derivative becomes positive (equation (34) in TEA theory document), and
     corrects negative mole numbers to positive.
 
     Parameters
     ----------
-    it_num:  integer 
+    it_num:  integer
              Iteration number.
     datadir: string
              Current directory where TEA is run.
     doprint: string
-             Parameter in configuration file that allows printing for 
+             Parameter in configuration file that allows printing for
              debugging purposes.
     input:   object
              Object containing all of the results/data from the previous
              calculation in lagrange.py or lambdacorr.py. It is a list
-             containing current header directory, current iteration 
-             number, array of species names, array of initial guess, 
-             array of non-corrected Lagrange values, and array of 
+             containing current header directory, current iteration
+             number, array of species names, array of initial guess,
+             array of non-corrected Lagrange values, and array of
              lambdacorr corrected values.
 
     Returns
@@ -109,24 +109,24 @@ def lambdacorr(it_num, datadir, doprint, input, info):
     x_corr:  array of floats
              Final mole numbers of molecular species.
     delta_corr: array of floats
-             Array containing change of initial and final mole numbers of 
+             Array containing change of initial and final mole numbers of
              molecular species for current iteration.
     y_bar: float
              Total initial guess of all molecular species for
              current iteration.
     x_corr_bar: float
              Total sum of the final mole numbers of all molecular species.
-    detla_corr_bar: float 
+    detla_corr_bar: float
              Change in total number of all species.
     doprint: string
-             Parameter in configuration file that allows printing for 
+             Parameter in configuration file that allows printing for
              debugging purposes.
 
     Notes
     -----
     The code works without adjustments and with high precision for the
-    temperatures above ~600 K. For temperatures below 600 K and 
-    mixing fractions below 10e-14, the code produces results with low 
+    temperatures above ~600 K. For temperatures below 600 K and
+    mixing fractions below 10e-14, the code produces results with low
     precision. To improve the precision, adjust the lambda exploration
     variables 'lower' and 'steps' to larger magnitudes (i.e., lower = -100,
     steps = 1000). This will lengthen the time of execution.
@@ -150,12 +150,12 @@ def lambdacorr(it_num, datadir, doprint, input, info):
     delta_bar = input[5]
 
     # Create 'c' value, equation (17) TEA theory document
-    # c_i = (g/RT)i + ln(P)    
+    # c_i = (g/RT)i + ln(P)
     c = g_RT + np.log(pressure)
-    
+
     # Create the range of lambda values to explore. To speed up finding
     #        the correct lambda value to use, the range is split into two
-    #        parts at range_split: the lower exponential range and the 
+    #        parts at range_split: the lower exponential range and the
     #        higher linear range. This helps the system to converge faster.
     range_split = 0.5
 
@@ -192,7 +192,7 @@ def lambdacorr(it_num, datadir, doprint, input, info):
 
     # If lambda is not found (break), function F (equation (33) in the TEA
     #    theory document) set the final x mole numbers to the values calculated
-    #    in the last iteration output 
+    #    in the last iteration output
     if lam_not_found:
         x_corr = y
     else:
@@ -202,7 +202,7 @@ def lambdacorr(it_num, datadir, doprint, input, info):
     x_corr_bar = np.sum(x_corr)
     delta_corr = y - x_corr
     delta_corr_bar = x_corr_bar - y_bar
-    
+
     if doprint:
       # Name output files with corresponding iteration number name
       file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \
@@ -214,5 +214,5 @@ def lambdacorr(it_num, datadir, doprint, input, info):
                     y_bar, x_corr_bar, delta_corr_bar, file, doprint)
       form.fancyout(datadir, it_num, speclist, y, x_corr, delta_corr, y_bar, \
                      x_corr_bar, delta_corr_bar, file_fancy, doprint)
-        
+
     return y, x_corr, delta_corr, y_bar, x_corr_bar, delta_corr_bar

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -68,7 +68,7 @@ import sys
 
 # =============================================================================
 # This module produces a pre-atmospheric file in the format that TEA can read it.
-# The pre-atmospheric file will be placed in the atm_inputs/ directory. 
+# The pre-atmospheric file will be placed in the atm_inputs/ directory.
 # The module consists of 2 functions:
 # readPT()   reads pressure-temperature (PT) profile from the PT file provided
 # makeatm()  writes a pre-atm file
@@ -81,15 +81,15 @@ import sys
 # Possible user errors in configuring pre-atm section in the TEA.cfg that
 # conflicts with TEA:
 #  - in input_elem use elements' names as they appear in the periodic table
-#  - all input_elem must be included in the list of output_species with their 
-#    states. 
+#  - all input_elem must be included in the list of output_species with their
+#    states.
 #  - use species names as readJANAF.py produces them. See lib/gdata folder or
 #    lib/conversion_record_sorted.txt for the correct names of the species
 #  - H, and He elements as input_elem must be included for hot-Jupiters
 #  - H_g, He_ref and H2_ref species in output_species must be included for
 #    hot-Jupiters
-#  - If the code stalls at the first iteration of the first temperature, check 
-#    if all elements that appear in the output species list are included 
+#  - If the code stalls at the first iteration of the first temperature, check
+#    if all elements that appear in the output species list are included
 #    with their correct names
 # =============================================================================
 
@@ -136,7 +136,7 @@ def readPT(PT_file):
     Parameters
     ----------
     PT_file: string
-             Name of pressure and temperature file. 
+             Name of pressure and temperature file.
 
     Returns
     -------
@@ -177,15 +177,15 @@ def readPT(PT_file):
 
 def makeatm():
     '''
-    This function produces a pre-atmospheric file in the format that TEA can 
-    read it. The file will be placed in atm_inputs/ directory. It calls 
-    readPT() function to take pressure and temperature array and reads the 
-    elemental abundance data file (default: abundances.txt, 
+    This function produces a pre-atmospheric file in the format that TEA can
+    read it. The file will be placed in atm_inputs/ directory. It calls
+    readPT() function to take pressure and temperature array and reads the
+    elemental abundance data file (default: abundances.txt,
     Asplund et al. 2009). The code trims the abundance data to the elements
-    of interest, converts species dex abundances (logarithmic abundances, 
+    of interest, converts species dex abundances (logarithmic abundances,
     dex stands for decimal exponent) into number densities and divides them
     by the hydrogen number densities fractional abundances. It writes data
-    (pressure, temperature, elemental abundances) into a pre-atmospheric 
+    (pressure, temperature, elemental abundances) into a pre-atmospheric
     file. The config file, pressure and temperature file, and the abundances
     file are copied to the atm_inputs/ directory.
 
@@ -290,7 +290,7 @@ def makeatm():
 
     # Get fractions of element number density to the hydrogen number density
     out_abn  = (out_num / H_num).tolist()
-    
+
     # Convert fractions to strings in scientific notation
     for n in np.arange(np.size(out_abn)):
         out_abn[n] = str('%1.10e'%out_abn[n])
@@ -323,19 +323,19 @@ def makeatm():
     f.write('#SPECIES\n' + output_species + '\n\n')
     f.write('#TEADATA\n')
     for i in np.arange(n_layers + 1):
-    
+
         # Pressure list
         f.write(out[i][0].ljust(10) + ' ')
-    
+
         # Temp list
         f.write(out[i][1].ljust(7) + ' ')
-    
+
         # Elemental abundance list
         for j in np.arange(nelem):
             f.write(out[i][j+2].ljust(16)+' ')
         f.write('\n')
     f.close()
-   
+
     print("\nCreated pre-atmospheric file:\n" + str(inputs_dir + pre_atm_name) + "\n")
 
 

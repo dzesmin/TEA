@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -80,17 +80,17 @@ import readatm as ra
 # name given by the user. Then, it sets locations of all necessary modules
 # and directories of files that will be used. It allocates an array to store
 # the final abundances for each species of each T-P run. The program loops over
-# all lines (T-P points) in the pre-atm file and executes the modules in the 
-# following order: readatm.py, makeheader.py, balance,py, iterate.py, and 
-# readoutput.py. Iterate.py executes lagrange.py and lambdacorr.py. 
-# Readoutput.py reads results from the TEA iteration loop executed in 
-# iterate.py. The code then opens the final atm file to write the results. 
-# It takes first common lines from the pre-atm file and writes the data from 
-# the stored pressure, temperature, and abundances array. The code has a 
+# all lines (T-P points) in the pre-atm file and executes the modules in the
+# following order: readatm.py, makeheader.py, balance,py, iterate.py, and
+# readoutput.py. Iterate.py executes lagrange.py and lambdacorr.py.
+# Readoutput.py reads results from the TEA iteration loop executed in
+# iterate.py. The code then opens the final atm file to write the results.
+# It takes first common lines from the pre-atm file and writes the data from
+# the stored pressure, temperature, and abundances array. The code has a
 # condition to save or delete all intermediate files, time stamps for checking
 # the speed of execution, and is verbose for debugging purposes. If these files
-# are saved, the function will create a unique directory for each T-P point. 
-# This functionality is controlled in the TEA.cfg file. The final results with 
+# are saved, the function will create a unique directory for each T-P point.
+# This functionality is controlled in the TEA.cfg file. The final results with
 # the input and the configuration files are saved in the results/ directory.
 # The pre-atmospheric file, config file, and abundances file used for this run
 # are copied to inputs/ directory.
@@ -218,7 +218,7 @@ for i in np.arange(np.size(spec_list)):
 spec_list = np.copy(good_spec)
 
 # =================== Start writing final atm file ===================
-# Open final atm file for writing, keep open to add new lines 
+# Open final atm file for writing, keep open to add new lines
 fout_name = out_dir + desc + '.tea'
 fout = open(fout_name, 'w+')
 
@@ -234,7 +234,7 @@ for i in np.arange(np.size(spec_list)):
 fout.write("\n\n")
 fout.write("#TEADATA\n")
 
-# Write data header from the pre-atm file into each column of atm file 
+# Write data header from the pre-atm file into each column of atm file
 fout.write(pres_arr[0].ljust(10) + ' ')
 fout.write(temp_arr[0].ljust(7) + ' ')
 for i in np.arange(np.size(spec_list)):
@@ -264,28 +264,28 @@ for q in np.arange(n_runs)[1:]:
         print("\nReading atm file, TP line " + str(q))
     else:
         print('\n'+ str(q))
-    
-    # Radius, pressure, and temp for the current line    
+
+    # Radius, pressure, and temp for the current line
     pres = pres_arr[q]
     temp = temp_arr[q]
-    
+
     # Produce header for the current line
     mh.make_atmheader(q, spec_list, \
                               pres, temp, atom_arr, desc, thermo_dir)
-    
+
     # Time / speed testing for balance.py
     if times:
         ini = time.time()
-    
+
     # Get balanced initial guess for the current line, run balance.py
     subprocess.call([loc_balance, loc_headerfile, desc], shell = inshell)
-    
+
     # Retrieve balance runtime
     if times:
         fin = time.time()
         elapsed = fin - ini
         print("balance.py:         " + str(elapsed))
-    
+
     # Execute main TEA loop for the current line, run iterate.py
     subprocess.call([loc_iterate, loc_headerfile, desc], shell = inshell)
 
@@ -299,8 +299,8 @@ for q in np.arange(n_runs)[1:]:
     for i in np.arange(np.size(spec_list)):
         cur_abn = x[i] / x_bar
         fout.write('%1.4e'%cur_abn + ' ')
-    fout.write('\n')    
-   
+    fout.write('\n')
+
     # Save or delete intermediate headers
     if save_headers:
         # Save header files for each T-P
@@ -313,7 +313,7 @@ for q in np.arange(n_runs)[1:]:
     else:
         # Delete header files for each T-P
         shutil.rmtree(location_out + desc + "/headers/" )
-    
+
     # Save or delete lagrange.py, lambdacorr.py outputs and single T-P results
     if save_outputs:
         # Save directory for each T-P and its output files
@@ -334,7 +334,7 @@ for q in np.arange(n_runs)[1:]:
         for file in single_res:
             if os.path.isfile(single_dir + file):
                 os.remove(single_dir + file)
-            os.rename(out_dir + file, single_dir + file) 
+            os.rename(out_dir + file, single_dir + file)
     else:
         # Delete output directories and files
         shutil.rmtree(loc_outputs)
