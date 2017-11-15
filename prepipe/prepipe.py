@@ -65,7 +65,7 @@ import re
 prepipe  = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(prepipe[:-7] + "tea/")
 
-from readconf import *
+import readconf as rc
 
 # ============================================================================
 # This program sets and/or executes the pre-pipeline TEA routines readJANAF.py 
@@ -75,6 +75,10 @@ from readconf import *
 # routines for readJANAF.py and makestoich.py. If executed as "prepipe.py", it
 # will run both routines. If desired, user can run each routine separately.
 # ============================================================================
+
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
 
 # Correct directory names
 if location_TEA[-1] != '/':

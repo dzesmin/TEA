@@ -114,6 +114,7 @@ Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
          location_TEA, abun_file, location_out = TEApars
+PT_file, pre_atm_name, input_elem, output_species = PREATpars
 
 # Correct directory names
 if location_out[-1] != '/':
