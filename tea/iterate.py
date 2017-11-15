@@ -92,7 +92,7 @@ from   format import printout
 
 
 def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
-            xtol=3e-6):
+            guess=None, xtol=3e-6):
   """
   Run iterative Lagrangian minimization and lambda correction.
 
@@ -108,6 +108,10 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
   times: Bool
      If True, track excecution times.
   location_out:
+  guess: 1D list
+     If not None, a three-element list with input guess values for
+     x, x_bar, and speclist.  Otherwise, take values from balance.py's
+     output.
   xtol: Float
      Error between iterations that is acceptable for convergence.
      The routine has converged when the sum of the relative improvement
@@ -148,17 +152,19 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
   b        = header[6]
   g_RT     = header[7]
 
-  # Locate and read initial iteration output from balance.py
-  infile    = datadir + '/lagrange-iteration-0-machine-read.txt'
-  input     = form.readoutput(infile)
 
   # Retrieve and set initial values
-  speclist  = input[2]
-  x         = input[3]
-  x_bar     = float(input[6])
-
-  # Set up first iteration
-  it_num  = 1
+  if guess is not None:
+      x        = guess[0]
+      x_bar    = guess[1]
+      speclist = guess[2]
+  else:
+      # Locate and read initial iteration output from balance.py
+      infile    = datadir + '/lagrange-iteration-0-machine-read.txt'
+      input     = form.readoutput(infile)
+      speclist = input[2]
+      x        = input[3]
+      x_bar    = float(input[6])
 
   # Prepare data object for iterative process
   #         (see description of the 'input' object in lagrange.py)
@@ -172,7 +178,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
       print("pre-loop setup:     " + str(elapsed))
 
   # ====================== PERFORM MAIN TEA LOOP ====================== #
-
+  it_num  = 1
   while it_num <= maxiter:
       # Output iteration number
       if ((not doprint) & (not times)):
@@ -239,7 +245,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
 
   # ============== Stop the loop, max iteration reached ============== #
   # Stop if max iteration is reached
-  if it_num == maxiter-1:
+  if it_num == maxiter+1:
       printout('Maximum iteration reached.\n')
 
   # Retrieve most recent iteration values

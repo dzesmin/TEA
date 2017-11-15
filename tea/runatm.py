@@ -251,6 +251,8 @@ else:               inshell = False   # OSx / Linux
 # Allocate abundances matrix for all species and all T-Ps
 abun_matrix = np.zeros(np.size(spec_list))
 
+# Use x, x_bar values from a previous layer as initial guess:
+guess = None
 
 # ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
@@ -274,7 +276,7 @@ for q in np.arange(n_runs)[1:]:
         ini = time.time()
 
     # Get balanced initial guess for the current line, run balance.py
-    subprocess.call([loc_balance, loc_headerfile, desc], shell = inshell)
+    subprocess.call([loc_balance, loc_headerfile, desc], shell=inshell)
 
     # Retrieve balance runtime
     if times:
@@ -285,7 +287,8 @@ for q in np.arange(n_runs)[1:]:
     # Execute main TEA loop for the current line, run iterate.py
     header = form.readheader(loc_headerfile)
     y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
-              loc_headerfile, maxiter, doprint, times, location_out, xtol)
+          loc_headerfile, maxiter, doprint, times, location_out, guess, xtol)
+    guess = x, x_bar, spec_list
 
     # Insert results from the current line (T-P) to atm file
     fout.write(pres.rjust(10) + ' ')
