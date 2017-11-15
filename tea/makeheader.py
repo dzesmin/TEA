@@ -55,13 +55,13 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
-
 import numpy as np
 import re
 import os
 
 from scipy.interpolate import UnivariateSpline
+
+import readconf as rc
 
 # =============================================================================
 # This module contains functions to write headers containing all necessary
@@ -72,6 +72,10 @@ from scipy.interpolate import UnivariateSpline
 # write_header() are the supporting functions for the main functions.
 # Imported by runatm.py and runsingle.py to create the header files.
 # =============================================================================
+
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
 
 # Correct directory names
 if location_TEA[-1] != '/':

@@ -56,13 +56,19 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
 
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
 from PIL import Image
+
+import readconf as rc
+
+# Read configuration-file parameters:
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
 
 # Correct directory names
 if location_out[-1] != '/':

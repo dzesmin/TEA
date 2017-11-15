@@ -55,7 +55,6 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
 
 import numpy as np
 from sys import stdout

@@ -57,14 +57,14 @@
 ############################## END FRONTMATTER #################################
 
 
-from readconf import *
-
 import numpy as np
 import ntpath
 import os
 import shutil
 import matplotlib.pyplot as plt
 import sys
+
+import readconf as rc
 
 # =============================================================================
 # This module produces a pre-atmospheric file in the format that TEA can read it.
@@ -109,6 +109,11 @@ https://physics.ucf.edu/mailman/listinfo/tea-user\n\
 Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
+
+# Read configuration-file parameters:
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
 
 # Correct directory names
 if location_out[-1] != '/':

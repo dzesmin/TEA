@@ -56,12 +56,6 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
-
-# Setup for time/speed testing
-if times:
-    import time
-    start = time.time()
 
 import numpy as np
 import sys
@@ -69,10 +63,12 @@ import ntpath
 import os
 import shutil
 import subprocess
+import time
 
 import format as form
 import makeheader as mh
 import readatm as ra
+import readconf as rc
 
 # =============================================================================
 # This program runs TEA over a pre-atm file that contains multiple T-P points.
@@ -107,11 +103,6 @@ import readatm as ra
 # Example: ../TEA/tea/runatm.py ../TEA/tea/doc/examples/multiTP/atm_inputs/multiTP_Example.atm example_multiTP
 # =============================================================================
 
-# Time / speed testing
-if times:
-    end = time.time()
-    elapsed = end - start
-    print("runatm.py imports:  " + str(elapsed))
 
 # Print license
 print("\n\
@@ -129,6 +120,10 @@ https://physics.ucf.edu/mailman/listinfo/tea-user\n\
 Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
+
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
 
 # Correct directory names
 if location_TEA[-1] != '/':

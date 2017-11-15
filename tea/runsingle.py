@@ -56,12 +56,6 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
-
-# Setup for time/speed testing
-if times:
-    import time
-    start = time.time()
 
 import ntpath
 import os
@@ -69,8 +63,10 @@ import shutil
 import subprocess
 import numpy as np
 import sys
+import time
 
 import makeheader as mh
+import readconf as rc
 
 # =============================================================================
 # This program runs TEA over an input file that contains only one T-P.
@@ -94,12 +90,6 @@ import makeheader as mh
 # Example: ../TEA/tea/runsingle.py ../TEA/doc/examples/singleTP/inputs/singleTP_Example.txt Single_Example
 # =============================================================================
 
-# Time / speed testing
-if times:
-    end = time.time()
-    elapsed = end - start
-    print("runsingle.py imports:  " + str(elapsed))
-
 # Print license
 print("\n\
 ================= Thermal Equilibrium Abundances (TEA) =================\n\
@@ -116,6 +106,10 @@ https://physics.ucf.edu/mailman/listinfo/tea-user\n\
 Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
+
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
 
 # Correct location_TEA name
 if location_TEA[-1] != '/':

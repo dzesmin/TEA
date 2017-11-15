@@ -56,7 +56,7 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
+import readconf as rc
 
 import os
 import numpy as np
@@ -99,6 +99,11 @@ import format as form
 # This code is called by runatm.py and runsingle.py and can be executed alone
 # with in-shell input: balance.py <HEADER_FILE> <DIRECTORY_NAME>
 # =============================================================================
+
+# Read configuration-file parameters:
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
 
 # Correct location_TEA name
 if location_out[-1] != '/':

@@ -56,14 +56,9 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
-
-# Setup for time/speed testing
-if times:
-    import time
-    start = time.time()
 
 import os
+import time
 import numpy as np
 from sys import argv
 from sys import stdout
@@ -72,6 +67,7 @@ import lagrange   as lg
 import lambdacorr as lc
 import format     as form
 from   format import printout
+import readconf as rc
 
 # =============================================================================
 # This program executes the iteration loop for TEA. It repeats Lagrangian
@@ -95,15 +91,13 @@ from   format import printout
 # input: iterate.py <HEADER_FILE> <DIRECTORY_NAME>
 # =============================================================================
 
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, doprint, times, \
+         location_TEA, abun_file, location_out = TEApars
+
 # Correct location_TEA name
 if location_out[-1] != '/':
     location_out += '/'
-
-# Time / speed testing
-if times:
-    end = time.time()
-    elapsed = end - start
-    print("iterate.py imports: " + str(elapsed))
 
 # Read run-time arguments
 header = argv[1:][0]              # Name of header file

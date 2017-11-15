@@ -65,36 +65,61 @@ import os
 # carries paramaters to make pre-atmospheric file.
 # =============================================================================
 
-# Get current working directory
-cwd = os.getcwd() + '/'
+def read():
+  """
+  Read the TEA config file.
 
-# Name of the configuration file
-cfg_name = cwd + 'TEA.cfg'
+  Returns
+  -------
+  TEAlist: 1D list
+     The TEA configuration parameters:
+       maxiter: Integer
+       save_headers: Bool
+       save_outputs: Bool
+       doprint: Bool
+       times: Bool
+       location_TEA: String
+       abun_file: String
+       location_out: String
+  PREATlist: 1D list
+     The pre-atmospheric configuration parameters:
+       PT_file: String
+       pre_atm_name:String
+       input_elem: String
+       output_species: String
+  """
+  # Get current working directory
+  cwd = os.getcwd() + '/'
 
-# Check if config file exists
-try:
-    f = open(cfg_name)
-except IOError:
-    print("\nConfig file is missing. Place TEA.cfg in the working directory\n")
+  # Name of the configuration file
+  cfg_name = cwd + 'TEA.cfg'
 
-# open config file
-config = ConfigParser.RawConfigParser({})
-config.read(cfg_name)
+  # Check if config file exists
+  try:
+      f = open(cfg_name)
+  except IOError:
+      print("\nConfig file is missing. Place TEA.cfg in the working directory\n")
 
-# read TEA section
-maxiter      = config.getint    ('TEA', 'maxiter')
-save_headers = config.getboolean('TEA', 'save_headers')
-save_outputs = config.getboolean('TEA', 'save_outputs')
-doprint      = config.getboolean('TEA', 'doprint')
-times        = config.getboolean('TEA', 'times')
-location_TEA = config.get       ('TEA', 'location_TEA')
-abun_file    = config.get       ('TEA', 'abun_file')
-location_out = config.get       ('TEA', 'location_out')
+  # open config file
+  config = ConfigParser.RawConfigParser({})
+  config.read(cfg_name)
 
-# read PRE-ATM section
-PT_file        = config.get('PRE-ATM', 'PT_file')
-pre_atm_name   = config.get('PRE-ATM', 'pre_atm_name')
-input_elem     = config.get('PRE-ATM', 'input_elem')
-output_species = config.get('PRE-ATM', 'output_species')
+  # read TEA section
+  maxiter      = config.getint    ('TEA', 'maxiter')
+  save_headers = config.getboolean('TEA', 'save_headers')
+  save_outputs = config.getboolean('TEA', 'save_outputs')
+  doprint      = config.getboolean('TEA', 'doprint')
+  times        = config.getboolean('TEA', 'times')
+  location_TEA = config.get       ('TEA', 'location_TEA')
+  abun_file    = config.get       ('TEA', 'abun_file')
+  location_out = config.get       ('TEA', 'location_out')
 
+  # read PRE-ATM section
+  PT_file        = config.get('PRE-ATM', 'PT_file')
+  pre_atm_name   = config.get('PRE-ATM', 'pre_atm_name')
+  input_elem     = config.get('PRE-ATM', 'input_elem')
+  output_species = config.get('PRE-ATM', 'output_species')
 
+  return [maxiter, save_headers, save_outputs, doprint, times,
+         location_TEA, abun_file, location_out], \
+         [PT_file, pre_atm_name, input_elem, output_species]
