@@ -66,7 +66,8 @@ import sys
 import time
 
 import makeheader as mh
-import readconf as rc
+import readconf   as rc
+import iterate    as it
 
 # =============================================================================
 # This program runs TEA over an input file that contains only one T-P.
@@ -107,6 +108,7 @@ Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
 
+# Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
          location_TEA, abun_file, location_out = TEApars
@@ -187,7 +189,10 @@ else:               inshell = False   # OSx / Linux
 # Execute main TEA loop
 mh.make_singleheader(infile, desc, thermo_dir)
 subprocess.call([loc_balance, loc_headerfile, desc, str(doprint)], shell=inshell)
-subprocess.call([loc_iterate, loc_headerfile, desc, str(doprint)], shell=inshell)
+header = form.readheader(loc_headerfile)
+y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
+                     loc_headerfile, maxiter, doprint, times, location_out)
+
 
 # Save or delete headers file
 if save_headers == False:
@@ -215,4 +220,3 @@ if times:
     end = time.time()
     elapsed = end - start
     print("Overall run time:   " + str(elapsed) + " seconds")
-

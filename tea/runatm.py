@@ -65,10 +65,11 @@ import shutil
 import subprocess
 import time
 
-import format as form
-import makeheader as mh
-import readatm as ra
 import readconf as rc
+import iterate  as it
+import format   as form
+import makeheader as mh
+import readatm  as ra
 
 # =============================================================================
 # This program runs TEA over a pre-atm file that contains multiple T-P points.
@@ -121,6 +122,7 @@ Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
 
+# Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
          location_TEA, abun_file, location_out = TEApars
@@ -282,11 +284,9 @@ for q in np.arange(n_runs)[1:]:
         print("balance.py:         " + str(elapsed))
 
     # Execute main TEA loop for the current line, run iterate.py
-    subprocess.call([loc_iterate, loc_headerfile, desc], shell = inshell)
-
-    # Read output of TEA loop
-    header, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar \
-        = form.readoutput(location_out + desc + '/results/' + single_res[0])
+    header = form.readheader(loc_headerfile)
+    y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
+                      loc_headerfile, maxiter, doprint, times, location_out)
 
     # Insert results from the current line (T-P) to atm file
     fout.write(pres.rjust(10) + ' ')
@@ -305,9 +305,6 @@ for q in np.arange(n_runs)[1:]:
         if os.path.isfile(new_name):
             os.remove(new_name)
         os.rename(old_name, new_name)
-    else:
-        # Delete header files for each T-P
-        shutil.rmtree(location_out + desc + "/headers/" )
 
     # Save or delete lagrange.py, lambdacorr.py outputs and single T-P results
     if save_outputs:
@@ -330,12 +327,16 @@ for q in np.arange(n_runs)[1:]:
             if os.path.isfile(single_dir + file):
                 os.remove(single_dir + file)
             os.rename(out_dir + file, single_dir + file)
-    else:
-        # Delete output directories and files
-        shutil.rmtree(loc_outputs)
-        # Delete single T-P result directories and files
-        for file in single_res:
-            os.remove(out_dir + file)
+
+if not save_headers:
+    # Delete header files for each T-P
+    shutil.rmtree(location_out + desc + "/headers/" )
+if not save_outputs:
+    # Delete output directories and files
+    shutil.rmtree(loc_outputs)
+    # Delete single T-P result directories and files
+    for file in single_res:
+        os.remove(out_dir + file)
 
 # Close atm file
 fout.close()
