@@ -62,7 +62,7 @@ from sympy.solvers import solve
 
 import format as form
 
-def lagrange(it_num, datadir, doprint, direct):
+def lagrange(it_num, datadir, doprint, input, info):
     '''
     This code applies Lagrange's method and calculates minimum based on the 
     methodology elaborated in the TEA theory document in Section (3). Equations in
@@ -85,28 +85,22 @@ def lagrange(it_num, datadir, doprint, direct):
     doprint: string
              Parameter in configuration file that allows printing for 
              debugging purposes.
-    direct:  object
-             Object containing all of the results/data from the previous
+    input:   List
+             The input values/data from the previous
              calculation in lagrange.py or lambdacorr.py. It is a list
              containing current header directory, current iteration 
              number, array of species names, array of initial guess, 
              array of non-corrected Lagrange values, and array of 
              lambdacorr corrected values.
+    info:    List
+             FINDME
 
     Returns
     -------
-    header: string
-            Name of the header file used.
-    it_num: integer 
-            Iteration number.
-    speclist: string array
-            Array containing names of molecular species. 
     y: float array
-            Array containing initial guess of molecular species for
-            current iteration.
+            Input guess of molecular species.
     x: float array
-            Array containing final mole numbers of molecular species for
-            current iteration.
+            Final mole numbers of molecular species.
     delta: float array
             Array containing change in initial and final mole numbers of
             molecular species for current iteration.
@@ -119,54 +113,30 @@ def lagrange(it_num, datadir, doprint, direct):
             Change in total of initial and final mole numbers of molecular
             species.
     '''
-
-    # Read values from last iteration   
-    input  = direct 
-
-    # Take the current header file  
-    header = input[0]
-
     # Read values from the header file
-    pressure, temp, i, j, speclist, a, b, g_RT = form.readheader(header)
-    
-    # Use final values from last iteration (x values) as new initial
-    y     = input[4] 
-    y_bar = input[7] 
+    pressure = info[0]
+    i        = info[1]
+    j        = info[2]
+    a        = info[3]
+    b        = info[4]
+    g_RT     = info[5]
+    header   = info[6]
+    speclist = info[7]
 
-    # Perform checks to be safe
-    it_num_check   = input[1]
-    speclist_check = input[2]
-    
-    # Make array of checks
-    check = np.array([it_num_check != it_num - 1,
-            False in (speclist_check == speclist) ])
-    # If iteration number given by iterate.py is not one larger as in 'direct',
-    #      give error
-    if check[0]:
-        print("\n\nMAJOR ERROR! Read in file's it_num is not the most \
-                recent iteration!\n\n")
-    # If species names in the header are not the same as in 'direct', 
-    #      give error 
-    if check[1]:
-        print("\n\nMAJOR ERROR! Read in file uses different species   \
-                order/list!\n\n")      
-    
-        
+    # Use final values from last iteration (x values) as new initial
+    y     = input[1]
+    y_bar = input[4]
+
     # ============== CREATE VARIABLES FOR LAGRANGE EQUATION ============== #
 
     # Create 'c' value, equation (18) TEA theory document
     # ci = (g/RT)_i + ln(P)    
     c = g_RT + np.log(pressure)
     
-    # Allocates array of fi(Y) over different values of i (species)
-    fi_y = np.zeros(i)
-    
     # Fill in fi(Y) values equation (19) TEA theory document
     # fi = x_i * [ci + ln(x_i/x_bar)]
-    for n in np.arange(i):
-        y_frac  = np.float(y[n] / y_bar)
-        fi_y[n] = y[n] * ( c[n] + np.log(y_frac) )
-    
+    fi_y = y * (c + np.log(y / y_bar))
+
     # Allocate values of rjk. Both j and k goes from 1 to m.
     k = j 
     rjk = np.zeros((j,k))
@@ -175,44 +145,32 @@ def lagrange(it_num, datadir, doprint, direct):
     # rjk = rkj = sum_i(a_ij * a_ik) * y_i
     for l in np.arange(k):
         for m in np.arange(j):
-            r_sum = 0.0
-            for n in np.arange(i): 
-                r_sum += a[n, m] * a[n, l] * y[n]      
-            rjk[m, l] = r_sum
+            rjk[m, l] = np.sum(a[:,m] * a[:,l] * y)
     
     # Allocate value of u, equation (28) TEA theory document
     u = Symbol('u')
     
     # Allocate pi_j variables, where j is element index
     # Example: pi_2 is Lagrange multiplier of N (j = 2)
-    pi = []
+    pi = np.empty(j, dtype=object)
     for m in np.arange(j):
-        name = 'pi_' + np.str(m+1)
-        pi = np.append(pi, Symbol(name))
-    
+        pi[m] = Symbol('pi_' + str(m+1))
+
     # Allocate rjk * pi_j summations, equation (27) TEA theory document
     # There will be j * k terms of rjk * pi_j
-    sq_pi = [pi]
-    for m in np.arange(j-1):
-        # Make square array of pi values with shape j * k
-        sq_pi = np.append(sq_pi, [pi], axis = 0) 
+    # Make square array of pi values with shape j * k
+    sq_pi = np.tile(pi, (j,1))
 
     # Multiply rjk * sq_pi to get array of rjk * pi_j 
     # equation (27) TEA theory document
     rpi = rjk * sq_pi 
-    
 
     # ======================= SET FINAL EQUATIONS ======================= #
     # Total number of equations is j + 1
     
     # Set up a_ij * fi(Y) summations equation (27) TEA theory document
     # sum_i[a_ij * fi(Y)]
-    aij_fiy = np.zeros((j))
-    for m in np.arange(j):
-        rhs = 0.0
-        for n in np.arange(i):
-            rhs += a[n,m] * fi_y[n]
-        aij_fiy[m] = rhs
+    aij_fiy = np.sum(a.T*fi_y, axis=1)
     
     # Create first j'th equations equation (27) TEA theory document
     # r_1m*pi_1 + r_2m*pi_2 + ... + r_mm*pi_m + b_m*u = sum_i[a_im * fi(Y)]
@@ -238,46 +196,36 @@ def lagrange(it_num, datadir, doprint, direct):
     
     
     # ============ CALCULATE xi VALUES FOR CURRENT ITERATION ============ #
-    
     # Make array of pi values
-    pi_f = []
+    pi_f = np.zeros(j, np.double)
     for m in np.arange(j):
-        pi_f = np.append(pi_f, [fsol[pi[m]]])
-
+        pi_f[m] = fsol[pi[m]]
     # Calculate x_bar from solution to get 'u', equation (28) TEA theory document
     # u = -1. + (x_bar/y_bar)
-    u_f = fsol[u]
-    x_bar = (u_f + 1.) * y_bar
-    
-    # Initiate array for x values of size i
-    x = np.zeros(i)
+    x_bar = (fsol[u] + 1.0) * y_bar
     
     # Apply Lagrange solution for final set of x_i values for this iteration
     # equation (23) TEA theory document
     # x_i = -fi(Y) + (y_i/y_bar) * x_bar + [sum_j(pi_j * a_ij)] * y_i
-    for n in np.arange(i):
-        sum_pi_aij = 0.0
-        for m in np.arange(j):
-            sum_pi_aij += pi_f[m] * a[n, m]
-        x[n] = - fi_y[n] + (y[n]/y_bar) * x_bar + sum_pi_aij * y[n]
-    
+    sum_pi_aij = np.sum(pi_f*a, axis=1)
+    x = np.array(-fi_y + (y/y_bar)*x_bar + sum_pi_aij*y, np.double)
+
     # Calculate other variables of interest
     x_bar = np.sum(x)             # sum of all x_i
     delta = x - y                 # difference between initial and final values
     delta_bar = x_bar - y_bar     # difference between sum of initial and
                                   # final values
-    
-    # Name output files with corresponding iteration number name
-    file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \
-                                         'machine-read-nocorr.txt'
-    file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
-                                              '-visual-nocorr.txt'
 
-    # Export all values into machine and human readable output files
-    form.output(datadir, header, it_num, speclist, y, x, \
+    # Name output files with corresponding iteration number name
+    if doprint:
+      file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \
+                                         'machine-read-nocorr.txt'
+      file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
+                                              '-visual-nocorr.txt'
+      # Export all values into machine and human readable output files
+      form.output(datadir, header, it_num, speclist, y, x, \
                        delta, y_bar, x_bar, delta_bar, file, doprint)
-    form.fancyout(datadir, it_num, speclist, y, x, delta,\
+      form.fancyout(datadir, it_num, speclist, y, x, delta,\
                          y_bar, x_bar, delta_bar, file_fancy, doprint)
        
-    return [header, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar]
-        
+    return y, x, delta, y_bar, x_bar, delta_bar

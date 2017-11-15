@@ -59,7 +59,20 @@
 import numpy as np
 import format as form
 
-def lambdacorr(it_num, datadir, doprint, direct):
+def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
+    """
+    # Set equation (34) TEA theory document
+    # dF(lam)/dlam = sum_i delta_i[(g(T)/RT)_i + lnP +
+    #                ln (yi+lam*delta_i)/(y_bar+lam*delta_bar)]
+    """
+    dF_dlam = 0
+    for n in np.arange(i):
+        dF_dlam += delta[n] * (c[n] + np.log(y[n] + s*delta[n]) -
+                               np.log(y_bar + s*delta_bar))
+    return dF_dlam
+
+
+def lambdacorr(it_num, datadir, doprint, input, info):
     '''
     This module applies lambda correction method (see Section 4 in the TEA theory 
     document). When input mole numbers are negative, the code corrects them to
@@ -81,7 +94,7 @@ def lambdacorr(it_num, datadir, doprint, direct):
     doprint: string
              Parameter in configuration file that allows printing for 
              debugging purposes.
-    direct:  object
+    input:   object
              Object containing all of the results/data from the previous
              calculation in lagrange.py or lambdacorr.py. It is a list
              containing current header directory, current iteration 
@@ -91,23 +104,15 @@ def lambdacorr(it_num, datadir, doprint, direct):
 
     Returns
     -------
-    header:  string
-             Name of the header file used.
-    it_num:  integer 
-             Iteration number.
-    speclist: array of strings
-             Array containing names of molecular species. 
     y: array of floats
-             Array containing initial guess of molecular species for
-             current iteration.
+             The initial guess of molecular species.
     x_corr:  array of floats
-             Array containing final mole numbers of molecular species for
-             current iteration.
+             Final mole numbers of molecular species.
     delta_corr: array of floats
              Array containing change of initial and final mole numbers of 
              molecular species for current iteration.
     y_bar: float
-             Array containing total initial guess of all molecular species for
+             Total initial guess of all molecular species for
              current iteration.
     x_corr_bar: float
              Total sum of the final mole numbers of all molecular species.
@@ -126,60 +131,27 @@ def lambdacorr(it_num, datadir, doprint, direct):
     variables 'lower' and 'steps' to larger magnitudes (i.e., lower = -100,
     steps = 1000). This will lengthen the time of execution.
     '''
-
     # Suppress nan warnings, as they are used for finding valid minima
     np.seterr(invalid='ignore')
     np.seterr(divide='ignore')
-    
-     # Read values from last lagrange output
-    input  = direct
 
-    # Take the current header file
-    header = input[0]
+    pressure = info[0]
+    i        = info[1]
+    g_RT     = info[5]
+    header   = info[6]
+    speclist = info[7]
 
-    # Read values from the header file
-    pressure, temp, i, j, speclist, a, b, g_RT = form.readheader(header)
-   
     # Take final values from last iteration, lagrange.py
-    y         = input[3]
-    x         = input[4]
-    delta     = input[5]
-    y_bar     = input[6]
-    x_bar     = input[7]
-    delta_bar = input[8]
+    y         = input[0]
+    x         = input[1]
+    delta     = input[2]
+    y_bar     = input[3]
+    x_bar     = input[4]
+    delta_bar = input[5]
 
-    # Perform checks to be safe
-    it_num_check   = input[1]
-    speclist_check = input[2]
-    
-    # Make array of checks
-    check = np.array([it_num_check != it_num,
-                      False in (speclist_check == speclist) ])
-
-    # If iteration number given by iterate.py is not one larger as in 'direct',
-    #      give error
-    if check[0]:
-        print("\n\nMAJOR ERROR! Read in file's it_num is not the    \
-                current iteration!\n\n")
-    # If species names in the header are not the same as in 'direct', 
-    #      give error 
-    if check[1]:
-        print("\n\nMAJOR ERROR! Read in file uses different species \
-                order/list!\n\n")
-    
     # Create 'c' value, equation (17) TEA theory document
     # c_i = (g/RT)i + ln(P)    
     c = g_RT + np.log(pressure)
-    
-    # Set equation (34) TEA theory document
-    # dF(lam)/dlam = sum_i delta_i[(g(T)/RT)_i + lnP + 
-    #                ln (yi+lam*delta_i)/(y_bar+lam*delta_bar)]
-    def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
-        dF_dlam = 0
-        for n in np.arange(i):
-            dF_dlam += delta[n] * (c[n] + np.log(y[n] + s*delta[n]) - \
-                       np.log(y_bar + s*delta_bar))
-        return dF_dlam
     
     # Create the range of lambda values to explore. To speed up finding
     #        the correct lambda value to use, the range is split into two
@@ -211,7 +183,7 @@ def lambdacorr(it_num, datadir, doprint, direct):
     # Retrieve last lambda value explored before the minimum energy is passed
     for h in smart_range:
         val = dF_dlam(h, i, x, y, delta, c, x_bar, y_bar, delta_bar)
-        if val > 0 or np.isnan(val) == True:
+        if val > 0 or np.isnan(val):
             break
 
         # If lambda found, take lambda and set lambda not found to false
@@ -231,18 +203,16 @@ def lambdacorr(it_num, datadir, doprint, direct):
     delta_corr = y - x_corr
     delta_corr_bar = x_corr_bar - y_bar
     
-    # Name output files with corresponding iteration number name
-    file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \
+    if doprint:
+      # Name output files with corresponding iteration number name
+      file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \
                                            '-machine-read.txt'
-    file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
+      file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
                                                  '-visual.txt'
-
-    # Export all values into machine and human readable output files
-    form.output(datadir, header, it_num, speclist, y, x_corr, delta_corr,  \
+      # Export all values into machine and human readable output files
+      form.output(datadir, header, it_num, speclist, y, x_corr, delta_corr,  \
                     y_bar, x_corr_bar, delta_corr_bar, file, doprint)
-    form.fancyout(datadir, it_num, speclist, y, x_corr, delta_corr, y_bar, \
+      form.fancyout(datadir, it_num, speclist, y, x_corr, delta_corr, y_bar, \
                      x_corr_bar, delta_corr_bar, file_fancy, doprint)
         
-    return [header, it_num, speclist, y, x_corr, delta_corr, y_bar,       \
-                                x_corr_bar, delta_corr_bar, doprint]
-
+    return y, x_corr, delta_corr, y_bar, x_corr_bar, delta_corr_bar

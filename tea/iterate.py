@@ -64,8 +64,7 @@ if times:
     start = time.time()
 
 import os
-from numpy import size
-from numpy import where
+import numpy as np
 from sys import argv
 from sys import stdout
 
@@ -118,9 +117,14 @@ if not os.path.exists(datadir): os.makedirs(datadir)
 if not os.path.exists(datadirr): os.makedirs(datadirr)
 
 # Retrieve header info
-inhead    = form.readheader(header)
-pressure  = inhead[0]
-temp      = inhead[1]
+inhead   = form.readheader(header)
+pressure = inhead[0]
+temp     = inhead[1]
+i        = inhead[2]
+j        = inhead[3]
+a        = inhead[5]
+b        = inhead[6]
+g_RT     = inhead[7]
 
 # Locate and read initial iteration output from balance.py
 infile    = datadir + '/lagrange-iteration-0-machine-read.txt'
@@ -129,7 +133,7 @@ input     = form.readoutput(infile)
 # Retrieve and set initial values
 speclist  = input[2]
 x         = input[3]
-x_bar     = input[6]
+x_bar     = float(input[6])
 
 # Set up first iteration
 it_num  = 1
@@ -137,7 +141,8 @@ repeat  = True
 
 # Prepare data object for iterative process
 #         (see description of the 'direct' object in lagrange.py)
-lambdacorr_data = [header, 0, speclist, x, x, 0, x_bar, x_bar, 0]
+lambdacorr_data = x, x, 0, x_bar, x_bar, 0
+info = pressure, i, j, a, b, g_RT, header, speclist
 
 # Time / speed testing
 if times:
@@ -150,7 +155,7 @@ if times:
 while repeat:
     # Output iteration number
     if ((not doprint) & (not times)):
-        stdout.write(' ' + str(it_num) + '\r')
+        stdout.write(' {:d}\r'.format(it_num))
         stdout.flush()
 
     # Time / speed testing for lagrange.py
@@ -158,7 +163,7 @@ while repeat:
         ini = time.time()
 
     # Execute Lagrange minimization
-    lagrange_data = lg.lagrange(it_num, datadir, doprint, lambdacorr_data)
+    lagrange_data = lg.lagrange(it_num, datadir, doprint, lambdacorr_data, info)
 
     # Time / speed testing for lagrange.py
     if times:
@@ -170,11 +175,8 @@ while repeat:
     if doprint:
         printout('Iteration %d Lagrange complete. Starting lambda correction...', it_num)
 
-    # Take final x_i mole numbers from last Lagrange calculation
-    lagrange_x = lagrange_data[4]
-
-    # Check if x_i have negative mole numbers, and if yes perform lambda correction
-    if where((lagrange_x < 0) == True)[0].size != 0:
+    # Check if x_i have negative mole numbers, if so, do lambda correction
+    if np.any(lagrange_data[1] < 0):
         # Print for debugging purposes
         if doprint:
             printout('Correction required. Initializing...')
@@ -184,15 +186,13 @@ while repeat:
             ini = time.time()
 
         # Execute lambda correction
-        lambdacorr_data = lc.lambdacorr(it_num, datadir, doprint, \
-                                                   lagrange_data)
+        lambdacorr_data = lc.lambdacorr(it_num, datadir, doprint, lagrange_data, info)
 
         # Print for debugging purposes
         if times:
             fin = time.time()
             elapsed = fin - ini
-            print("lambcorr" + str(it_num).rjust(4) + " :      " + \
-                                                      str(elapsed))
+            print("lambcorr" + str(it_num).rjust(4) + " :      " + str(elapsed))
 
         # Print for debugging purposes
         if doprint:
@@ -207,19 +207,9 @@ while repeat:
         if doprint:
             printout('Iteration %d did not need lambda correction.', it_num)
 
-    # Retrieve most recent iteration values
-    input_new = lambdacorr_data
-
-    # Take most recent x_i and x_bar values
-    x_new     = input_new[4]
-    x_bar_new = input_new[7]
-
     # If max iteration not met, continue with next iteration cycle
     if it_num < maxiter:
-        # Add 1 to iteration number
         it_num += 1
-
-        # Print for debugging purposes
         if doprint:
             printout('Max interation not met. Starting next iteration...\n')
 
@@ -227,11 +217,16 @@ while repeat:
 
     # Stop if max iteration is reached
     else:
-        # Print to screen
         printout('Maximum iteration reached, ending minimization.\n')
-
-        # Set repeat to False to stop the loop
+        # Stop the loop
         repeat = False
+
+        # Retrieve most recent iteration values
+        input_new = lambdacorr_data
+
+        # Take most recent x_i and x_bar values
+        x_new     = input_new[1]
+        x_bar_new = input_new[4]
 
         # Calculate delta values
         delta = x_new - x
