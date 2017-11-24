@@ -91,7 +91,9 @@ def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     temp_arr:  float array
                Array containing temperature data.
     atom_arr:  string array
-               Array containing elemental symbols and abundances.
+               Array containing elemental abundances.
+    atom_name: string array
+               Array containing elemental symbols.
     marker[0]: integer
                Marks line number in pre-atm file where data start.
     '''
@@ -149,13 +151,12 @@ def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     iatom = 2
 
     # Place data into corresponding arrays
-    pres_arr = data[:,ipres]
-    temp_arr = data[:,itemp]
-    atom_arr = data[:,iatom:]
+    pres_arr  = data[1:,ipres]
+    temp_arr  = data[1:,itemp]
+    atom_name = data[0,iatom:]
+    atom_arr  = data[1:,iatom:]
 
     # Number of times TEA will have to be executed for each T-P
-    n_runs = data.shape[0]
+    n_runs = data.shape[0]-1
 
-    return n_runs, spec_list, pres_arr, temp_arr, atom_arr, marker[0]
-
-
+    return n_runs, spec_list, pres_arr, temp_arr, atom_arr, atom_name, marker[0]

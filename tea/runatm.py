@@ -150,7 +150,6 @@ desc    = sys.argv[1:][1]
 inputs_dir       = location_out + desc + "/inputs/"
 thermo_dir       = location_TEA + "lib/gdata"
 loc_balance      = location_TEA + "tea/balance.py"
-loc_iterate      = location_TEA + "tea/iterate.py"
 loc_headerfile   = location_out + desc + "/headers/" + "header_" + desc + ".txt"
 loc_outputs      = location_out + desc + "/outputs/"
 loc_transient    = location_out + desc + "/outputs/" + "transient/"
@@ -197,13 +196,16 @@ else:
     shutil.copy2(infile, inputs_dir + preatm_filename)
 
 # Read pre-atm file
-n_runs, spec_list, pres_arr, temp_arr, atom_arr, end_head = \
+n_runs, spec_list, pres_arr, temp_arr, atom_arr, atom_name, end_head = \
                                                  ra.readatm(infile)
+
+# Number of output species:
+n_spec = np.size(spec_list)
 
 # Correct species list for only species found in thermo_dir
 gdata_files = os.listdir(thermo_dir)
 good_spec   = []
-for i in np.arange(np.size(spec_list)):
+for i in np.arange(n_spec):
     spec_file = spec_list[i] + '.txt'
     if spec_file in gdata_files:
         good_spec = np.append(good_spec, spec_list[i])
@@ -226,15 +228,15 @@ fout.write(header + '\n\n')
 fout.write('#SPECIES\n')
 
 # Write corrected species list into pre-atm file and continue
-for i in np.arange(np.size(spec_list)):
+for i in np.arange(n_spec):
     fout.write(spec_list[i] + ' ')
 fout.write("\n\n")
 fout.write("#TEADATA\n")
 
 # Write data header from the pre-atm file into each column of atm file
-fout.write(pres_arr[0].ljust(10) + ' ')
-fout.write(temp_arr[0].ljust(7) + ' ')
-for i in np.arange(np.size(spec_list)):
+fout.write('Pressure'.ljust(10) + ' ')
+fout.write('Temp'.ljust(7) + ' ')
+for i in np.arange(n_spec):
     fout.write(spec_list[i].ljust(10)+' ')
 fout.write('\n')
 
@@ -249,14 +251,17 @@ if os.name == 'nt': inshell = True    # Windows
 else:               inshell = False   # OSx / Linux
 
 # Allocate abundances matrix for all species and all T-Ps
-abun_matrix = np.zeros(np.size(spec_list))
+abun_matrix = np.zeros(n_spec)
 
 # Use x, x_bar values from a previous layer as initial guess:
 guess = None
 
+abn   = np.zeros((n_runs, n_spec))
+
+
 # ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
-for q in np.arange(n_runs)[1:]:
+for q in np.arange(n_runs):
 
     # Print for debugging purposes
     if doprint:
@@ -269,7 +274,7 @@ for q in np.arange(n_runs)[1:]:
     temp = temp_arr[q]
 
     # Produce header for the current line
-    mh.make_atmheader(q, spec_list, pres, temp, atom_arr, desc, thermo_dir)
+    mh.make_atmheader(q, spec_list, pres, temp, atom_arr, atom_name, desc, thermo_dir)
 
     # Time / speed testing for balance.py
     if times:
@@ -291,13 +296,7 @@ for q in np.arange(n_runs)[1:]:
           loc_headerfile, maxiter, doprint, times, location_out, guess, xtol)
     guess = x, x_bar, spec_list
 
-    # Insert results from the current line (T-P) to atm file
-    fout.write(pres.rjust(10) + ' ')
-    fout.write(temp.rjust(7) + ' ')
-    for i in np.arange(np.size(spec_list)):
-        cur_abn = x[i] / x_bar
-        fout.write('%1.4e'%cur_abn + ' ')
-    fout.write('\n')
+    abn[q] = x / x_bar
 
     # Save or delete intermediate headers
     if save_headers:
@@ -340,6 +339,15 @@ if not save_outputs:
     # Delete single T-P result directories and files
     for file in single_res:
         os.remove(out_dir + file)
+
+# Write output:
+for q in np.arange(n_runs):
+    # Insert results from the current line (T-P) to atm file
+    fout.write(pres_arr[q].rjust(10) + ' ')
+    fout.write(temp_arr[q].rjust(7) + ' ')
+    for i in np.arange(n_spec):
+        fout.write('{:1.4e} '.format(abn[q,i]))
+    fout.write('\n')
 
 # Close atm file
 fout.close()

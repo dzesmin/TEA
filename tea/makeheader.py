@@ -294,7 +294,8 @@ def single_headarr(spec_list, stoich_data, spec_stoich, is_used):
     return stoich_arr
 
 
-def atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr, q, is_used):
+def atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr, atom_name,
+                q, is_used):
     '''
     This function gathers data needed for TEA to run in a multiple T-P case.
     These are: elemental abundances, species names, and their stoichiometric
@@ -312,7 +313,9 @@ def atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr, q, is_used):
     spec_stoich: float array
          Array containing values from header_setup() for species of interest.
     atom_arr: string array
-         Array containing elemental symbols and abundances.
+         Array containing elemental abundances.
+    atom_name: string array
+         Array containing elemental symbols.
     q: integer
          Current line number in pre-atm file.
     is_used: boolean array
@@ -341,7 +344,7 @@ def atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr, q, is_used):
 
         # Place used elemental abundances into final abundance array
         for m in np.arange(n_atom):
-            if atom_arr[0][m] == cur_ele:
+            if atom_name[m] == cur_ele:
                 cur_abn = atom_arr[q][m]
         stoich_arr[0,1+n] = cur_abn
 
@@ -510,8 +513,8 @@ def make_singleheader(infile, desc, thermo_dir):
     write_header(desc, pressure, temp, stoich_arr, n_spec, g_RT)
 
 
-def make_atmheader(q, spec_list, pressure, temp, atom_arr, desc, \
-                   thermo_dir = 'lib/gdata'):
+def make_atmheader(q, spec_list, pressure, temp, atom_arr, atom_name, desc,
+                   thermo_dir='lib/gdata'):
     '''
     This is the main function that creates a header for one T-P of a
     pre-atm file. It retrieves number of elements and species used for
@@ -530,7 +533,9 @@ def make_atmheader(q, spec_list, pressure, temp, atom_arr, desc, \
     temp float
          Current temperature value.
     atom_arr: string array
-         Array containing elemental symbols and abundances.
+         Array containing elemental abundances.
+    atom_name: string array
+         Array containing elemental symbols.
     desc: string
          Name of output directory given by user.
     thermo_dir = 'lib/gdata':  string
@@ -546,12 +551,12 @@ def make_atmheader(q, spec_list, pressure, temp, atom_arr, desc, \
     n_atom   = np.size(atom_arr[0])
 
     # Execute header setup
-    stoich_data, spec_stoich, g_RT, is_used =                             \
+    stoich_data, spec_stoich, g_RT, is_used = \
                        header_setup(temp, pressure, spec_list, thermo_dir)
 
     # Execute multiple-specific header setup
-    stoich_arr = atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr,\
-                                                               q, is_used)
+    stoich_arr = atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr,
+                                                     atom_name, q, is_used)
     # Write header array to file
     write_header(desc, pressure, temp, stoich_arr, n_spec, g_RT)
 
