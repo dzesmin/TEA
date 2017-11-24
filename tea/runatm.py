@@ -234,7 +234,7 @@ fout.write("\n\n")
 fout.write("#TEADATA\n")
 
 # Write data header from the pre-atm file into each column of atm file
-fout.write('Pressure'.ljust(10) + ' ')
+fout.write('#Pressure'.ljust(10) + ' ')
 fout.write('Temp'.ljust(7) + ' ')
 for i in np.arange(n_spec):
     fout.write(spec_list[i].ljust(10)+' ')

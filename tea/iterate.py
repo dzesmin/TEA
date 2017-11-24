@@ -181,7 +181,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
   it_num  = 1
   while it_num <= maxiter:
       # Output iteration number
-      if ((not doprint) & (not times)):
+      if not doprint  and  not times  and  it_num%10==0:
           stdout.write(' {:d}\r'.format(it_num))
           stdout.flush()
 
@@ -233,8 +233,8 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
 
       xdiff = (lc_data[1]/lc_data[4])/(lc_data[0]/lc_data[3]) - 1
       if np.sum(np.abs(xdiff))/len(xdiff) <= xtol:
-          printout("The solution has converged to the given improvement "
-                   "tolerance error.\n")
+          stdout.write(' {:d}\r'.format(it_num))
+          printout("The solution has converged to the given tolerance error.\n")
           break
 
       it_num += 1
