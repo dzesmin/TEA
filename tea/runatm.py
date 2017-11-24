@@ -276,7 +276,8 @@ for q in np.arange(n_runs)[1:]:
         ini = time.time()
 
     # Get balanced initial guess for the current line, run balance.py
-    subprocess.call([loc_balance, loc_headerfile, desc], shell=inshell)
+    if guess is None:
+        subprocess.call([loc_balance, loc_headerfile, desc], shell=inshell)
 
     # Retrieve balance runtime
     if times:
