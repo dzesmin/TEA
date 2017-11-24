@@ -69,6 +69,8 @@ import makeheader as mh
 import readconf   as rc
 import iterate    as it
 
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
+
 # =============================================================================
 # This program runs TEA over an input file that contains only one T-P.
 # The code retrieves the input file and the current directory name given by the
@@ -111,12 +113,9 @@ Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
-         location_TEA, abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol = TEApars
 
-# Correct location_TEA name
-if location_TEA[-1] != '/':
-    location_TEA += '/'
-
+# Correct location name
 if location_out[-1] != '/':
     location_out += '/'
 
@@ -139,10 +138,10 @@ if os.path.exists(location_out + desc):
               "  or quit and choose another output name.\n")
 
 # Set up locations of necessary scripts and directories of files
-inputs_dir     = location_out + desc + "/inputs/"
 thermo_dir     = location_TEA + "lib/gdata"
 loc_balance    = location_TEA + "tea/balance.py"
 loc_iterate    = location_TEA + "tea/iterate.py"
+inputs_dir     = location_out + desc + "/inputs/"
 loc_headerfile = location_out + desc + "/headers/" + "header_" + desc + ".txt"
 loc_outputs    = location_out + desc + "/outputs/"
 loc_transient  = location_out + desc + "/outputs/" + "transient/"

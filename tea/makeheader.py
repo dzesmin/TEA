@@ -63,6 +63,8 @@ from scipy.interpolate import UnivariateSpline
 
 import readconf as rc
 
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
+
 # =============================================================================
 # This module contains functions to write headers containing all necessary
 # chemical information for a single T-P and multiple
@@ -75,12 +77,9 @@ import readconf as rc
 
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
-         location_TEA, abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol = TEApars
 
 # Correct directory names
-if location_TEA[-1] != '/':
-    location_TEA += '/'
-
 if location_out[-1] != '/':
     location_out += '/'
 

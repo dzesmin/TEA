@@ -65,6 +65,8 @@ import shutil
 
 from prepipe import *
 
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..")
+
 # =============================================================================
 # This code makes the thermo_dir (default: 'gdata') directory that carries 
 # converted JANAF tables with the information needed for TEA to run: 
@@ -99,10 +101,6 @@ from prepipe import *
 # readJANAF.py can also be executed on its own with the simple command: 
 # readJANAF.py. 
 # =============================================================================
-
-# Correct directory names
-if location_TEA[-1] != '/':
-    location_TEA += '/'
 
 # Print indicator that readJANAF.py is executing
 print("\nRunning readJANAF...\n")

@@ -78,7 +78,6 @@ def read():
        save_outputs: Bool
        doprint: Bool
        times: Bool
-       location_TEA: String
        abun_file: String
        location_out: String
        xtol: Float
@@ -111,7 +110,6 @@ def read():
   save_outputs = config.getboolean('TEA', 'save_outputs')
   doprint      = config.getboolean('TEA', 'doprint')
   times        = config.getboolean('TEA', 'times')
-  location_TEA = config.get       ('TEA', 'location_TEA')
   abun_file    = config.get       ('TEA', 'abun_file')
   location_out = config.get       ('TEA', 'location_out')
   if config.has_option("TEA", "xtol"):
@@ -126,5 +124,5 @@ def read():
   output_species = config.get('PRE-ATM', 'output_species')
 
   return [maxiter, save_headers, save_outputs, doprint, times,
-         location_TEA, abun_file, location_out, xtol], \
+          abun_file, location_out, xtol], \
          [PT_file, pre_atm_name, input_elem, output_species]

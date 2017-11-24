@@ -62,9 +62,9 @@ import os
 import string
 import re
 
-prepipe  = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(prepipe[:-7] + "tea/")
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
+sys.path.append(location_TEA + "tea/")
 import readconf as rc
 
 # ============================================================================
@@ -78,11 +78,8 @@ import readconf as rc
 
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
-         location_TEA, abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol = TEApars
 
-# Correct directory names
-if location_TEA[-1] != '/':
-    location_TEA += '/'
 
 def comp(specie):
     '''

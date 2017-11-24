@@ -71,6 +71,8 @@ import format   as form
 import makeheader as mh
 import readatm  as ra
 
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
+
 # =============================================================================
 # This program runs TEA over a pre-atm file that contains multiple T-P points.
 # The code first retrieves the pre-atm file, and the current directory
@@ -125,12 +127,9 @@ Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, doprint, times, \
-         location_TEA, abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol = TEApars
 
 # Correct directory names
-if location_TEA[-1] != '/':
-    location_TEA += '/'
-
 if location_out[-1] != '/':
     location_out += '/'
 
@@ -147,9 +146,9 @@ except:
 desc    = sys.argv[1:][1]
 
 # Set up locations of necessary scripts and directories of files
-inputs_dir       = location_out + desc + "/inputs/"
 thermo_dir       = location_TEA + "lib/gdata"
 loc_balance      = location_TEA + "tea/balance.py"
+inputs_dir       = location_out + desc + "/inputs/"
 loc_headerfile   = location_out + desc + "/headers/" + "header_" + desc + ".txt"
 loc_outputs      = location_out + desc + "/outputs/"
 loc_transient    = location_out + desc + "/outputs/" + "transient/"
