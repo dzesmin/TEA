@@ -152,7 +152,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
   g_RT     = header[7]
 
   # Retrieve and set initial values
-  x, xbar, speclist = guess
+  x, x_bar, speclist = guess
 
   # Prepare data object for iterative process
   #         (see description of the 'input' object in lagrange.py)
