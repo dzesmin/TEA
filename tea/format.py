@@ -76,7 +76,7 @@ from sys import stdout
 
 def readheader(file):
     '''
-    This function reads the current header file (one T-P) and returns data common
+    Read the current header file (one T-P) and returns data common
     to each step of TEA. It searches only for the required chemical data and
     fills out the output arrays. The function is used by balance.py,
     lagrange.py, lambdacorr.py, and iterate.py.

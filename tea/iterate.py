@@ -92,7 +92,7 @@ from   format import printout
 
 
 def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
-            guess=None, xtol=3e-6):
+            guess, xtol=3e-6):
   """
   Run iterative Lagrangian minimization and lambda correction.
 
@@ -109,9 +109,8 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
      If True, track excecution times.
   location_out:
   guess: 1D list
-     If not None, a three-element list with input guess values for
-     x, x_bar, and speclist.  Otherwise, take values from balance.py's
-     output.
+     A three-element list with input guess values for x, x_bar, and
+     speclist.
   xtol: Float
      Error between iterations that is acceptable for convergence.
      The routine has converged when the sum of the relative improvement
@@ -152,19 +151,8 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
   b        = header[6]
   g_RT     = header[7]
 
-
   # Retrieve and set initial values
-  if guess is not None:
-      x        = guess[0]
-      x_bar    = guess[1]
-      speclist = guess[2]
-  else:
-      # Locate and read initial iteration output from balance.py
-      infile    = datadir + '/lagrange-iteration-0-machine-read.txt'
-      input     = form.readoutput(infile)
-      speclist = input[2]
-      x        = input[3]
-      x_bar    = float(input[6])
+  x, xbar, speclist = guess
 
   # Prepare data object for iterative process
   #         (see description of the 'input' object in lagrange.py)

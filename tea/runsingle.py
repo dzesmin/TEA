@@ -68,6 +68,7 @@ import time
 import makeheader as mh
 import readconf   as rc
 import iterate    as it
+import balance    as bal
 
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
@@ -139,7 +140,6 @@ if os.path.exists(location_out + desc):
 
 # Set up locations of necessary scripts and directories of files
 thermo_dir     = location_TEA + "lib/gdata"
-loc_balance    = location_TEA + "tea/balance.py"
 loc_iterate    = location_TEA + "tea/iterate.py"
 inputs_dir     = location_out + desc + "/inputs/"
 loc_headerfile = location_out + desc + "/headers/" + "header_" + desc + ".txt"
@@ -181,16 +181,12 @@ if times:
     elapsed = new - end
     print("pre-loop:           " + str(elapsed))
 
-# Detect operating system for sub-process support
-if os.name == 'nt': inshell = True    # Windows
-else:               inshell = False   # OSx / Linux
-
 # Execute main TEA loop
 mh.make_singleheader(infile, desc, thermo_dir)
-subprocess.call([loc_balance, loc_headerfile, desc, str(doprint)], shell=inshell)
+guess = bal.balance(loc_headerfile, desc, doprint)
 header = form.readheader(loc_headerfile)
 y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
-                     loc_headerfile, maxiter, doprint, times, location_out)
+           loc_headerfile, maxiter, doprint, times, location_out, guess, xtol)
 
 
 # Save or delete headers file

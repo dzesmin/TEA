@@ -544,7 +544,6 @@ def make_atmheader(q, spec_list, pressure, temp, atom_arr, atom_name, desc,
     -------
     None
     '''
-
     # Retrieve number of elements and species used
     n_spec   = np.size(spec_list)
     n_atom   = np.size(atom_arr[0])
