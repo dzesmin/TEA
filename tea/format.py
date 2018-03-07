@@ -89,26 +89,25 @@ def readheader(file):
     Returns
     -------
     pressure: float
-              Current pressure.
+       Current pressure.
     temp: float
-              Current temperature.
+       Current temperature.
     i: integer
-              Number of molecular species.
+       Number of molecular species.
     j: integer
-              Number of elements
+       Number of elements
     speclist: string array
-              Array containing names of molecular species.
+       Array containing names of molecular species.
     a: integer array
-              Array of stoichiometric values for each element in the species.
+       Array of stoichiometric values for each element in the species.
     b: float array
-              Array containing elemental abundances - ratio of the number density
-              of a single element to the total sum of elemental number densities
-              in the mixture.
+       Array containing elemental abundances - ratio of the number density
+       of a single element to the total sum of elemental number densities
+       in the mixture.
     g_RT: float array
-              Array containing chemical potentials for each species at the
-              current T-P.
+       Array containing chemical potentials for each species at the
+       current T-P.
     '''
-
     # Open header file to read
     f = open(file, 'r+')
 
@@ -247,8 +246,8 @@ def readoutput(file):
     return(header, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar)
 
 
-def output(datadir, header, it_num, speclist, y, x, delta, y_bar, \
-            x_bar, delta_bar, file, doprint = False):
+def output(header, it_num, speclist, y, x, delta, y_bar,
+            x_bar, delta_bar, file, doprint=False):
     '''
     This function produces machine-readable output files. The files are saved
     only if saveout = True in TEA.cfg file. The function is used by the
@@ -261,8 +260,6 @@ def output(datadir, header, it_num, speclist, y, x, delta, y_bar, \
 
     Parameters
     ----------
-    datadir:   string
-              Current directory where TEA is run.
     header:   string
               Name of the header file used.
     it_num:   integer
@@ -291,12 +288,7 @@ def output(datadir, header, it_num, speclist, y, x, delta, y_bar, \
     doprint:  string
               Parameter in configuration file that allows printing for
               debugging purposes.
-
-    Returns
-    -------
-    None
     '''
-
     # Open file to write
     f = open(file, 'w+')
 
@@ -341,11 +333,11 @@ def output(datadir, header, it_num, speclist, y, x, delta, y_bar, \
     f.close()
 
     # Debugging check
-    if doprint == True:
+    if doprint:
         print('\n\nMade file \'' + file + '\' containing machine data.')
 
 
-def fancyout(datadir, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar, \
+def fancyout(datadir, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
              file, doprint = False):
     '''
     This function produces human readable output files. The files are saved
@@ -390,12 +382,7 @@ def fancyout(datadir, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar, \
     doprint: string
               Parameter in configuration file that allows printing for
               debugging purposes.
-
-    Returns
-    -------
-    None
     '''
-
     # Open file to write
     f = open(file, 'w+')
 
@@ -450,7 +437,7 @@ def fancyout(datadir, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar, \
         f.close()
 
 
-def fancyout_results(datadir, header, it_num, speclist, y, x, delta, y_bar, \
+def fancyout_results(header, it_num, speclist, y, x, delta, y_bar,
                      x_bar, delta_bar, pressure, temp, file, doprint):
     '''
     This function produces the final result output for each T-P in the
@@ -461,8 +448,6 @@ def fancyout_results(datadir, header, it_num, speclist, y, x, delta, y_bar, \
 
     Parameters
     ----------
-    datadir:  string
-              Current directory where TEA is run.
     header:   string
               Name of the header file used.
     it_num:   integer
@@ -491,12 +476,7 @@ def fancyout_results(datadir, header, it_num, speclist, y, x, delta, y_bar, \
     doprint:  string
               Parameter in configuration file that allows printing for
               debugging purposes.
-
-    Returns
-    -------
-    None
     '''
-
     # Open file to read
     f = open(file, 'w+')
 

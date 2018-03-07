@@ -91,28 +91,37 @@ from   format import printout
 # =============================================================================
 
 
-def iterate(pressure, a, b, g_RT, maxiter, doprint, times, location_out,
-            guess, xtol=3e-6, desc=None):
+def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
+            guess, xtol=3e-6, save_info=None):
   """
   Run iterative Lagrangian minimization and lambda correction.
 
   Parameters
   ----------
+  pressure: Float
+     Atmospheric pressure (bar).
+  a: 2D float ndarray
+     Species stoichiometric coefficients.
+  b: 1D float ndarray
+     Elemental mixing fractions.
+  g_RT: 1D float ndarray
+     Species chemical potentials.
   maxiter: Integer
      Maximum number of iterations.
   doprint: Bool
      If True, print information to screen.
   times: Bool
      If True, track excecution times.
-  location_out:
   guess: 1D list
-     A three-element list with input guess values for x, x_bar, and
-     speclist.
+     A two-element list with input guess values for x and x_bar.
   xtol: Float
      Error between iterations that is acceptable for convergence.
      The routine has converged when the sum of the relative improvement
      per species becomes less than xtol, i.e.:
        sum(abs((y-x)/y)) / len(x) <= xtol.
+  save_info: List of stuff
+     If not None, save info to files.  The list contains:
+        [location_out, desc, speclist, temp]
 
   Returns
   -------
@@ -168,11 +177,12 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times, location_out,
       if times:
           fin = time.time()
           elapsed = fin - ini
-          print("lagrange" + str(it_num).rjust(4) + " :      " + str(elapsed))
+          print("lagrange {:>4d}:  {:f} s." + format(it_num, elapsed))
 
       # Print for debugging purposes
       if doprint:
-          printout('Iteration %d Lagrange complete. Starting lambda correction...', it_num)
+          printout("Iteration {:d} Lagrange complete.  Starting lambda "
+                   "correction...".format(it_num))
 
       # Check if x_i have negative mole numbers, if so, do lambda correction
       if np.any(lc_data[1] < 0):
@@ -191,17 +201,19 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times, location_out,
           if times:
               fin = time.time()
               elapsed = fin - ini
-              print("lambcorr" + str(it_num).rjust(4) + " :      " + str(elapsed))
+              print("lambcorr {:>4d}:  {:f} s." + format(it_num, elapsed))
 
           # Print for debugging purposes
           if doprint:
-              printout('Iteration %d lambda correction complete. Checking precision...', it_num)
+              printout("Iteration {:d} lambda correction complete.  "
+                       "Checking precision...".format(it_num))
 
       # Lambda correction is not needed
       else:
           # Print for debugging purposes
           if doprint:
-              printout('Iteration %d did not need lambda correction.', it_num)
+              printout('Iteration {:d} did not need lambda correction.'.
+                        format(it_num))
 
       xdiff = (lc_data[1]/lc_data[4])/(lc_data[0]/lc_data[3]) - 1
       if np.sum(np.abs(xdiff))/len(xdiff) <= xtol:
@@ -233,26 +245,29 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times, location_out,
   # Calculate delta_bar values
   delta_bar = x_bar_new - x_bar
 
-  write = False
-  if write:
+  if save_info is not None:
+    location_out, desc, speclist, temp = save_info
+    hfolder = location_out + desc + "/headers/"
+    headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+                      hfolder, desc, temp, pressure)
     # Create and name outputs and results directories if they do not exist
-    #datadir   = location_out + desc + '/outputs/' + 'transient/'
-    datadirr  = location_out + desc + '/results'
 
+    #datadir   = location_out + desc + '/outputs/' + 'transient/'
     #if not os.path.exists(datadir):
     #  os.makedirs(datadir)
+    datadirr = '{:s}{:s}/results/results_{:.0f}K_{:.2e}bar'.format(
+                   location_out, desc, temp, pressure)
     if not os.path.exists(datadirr):
       os.makedirs(datadirr)
 
-    # Name output files with corresponding iteration number name
-    file_results       = datadirr + '/results-machine-read.txt'
-    file_fancyResults  = datadirr + '/results-visual.txt'
-
     # Export all values into machine and human readable output files
-    form.output(datadirr, headerfile, it_num, speclist, x, x_new, delta,
-              x_bar, x_bar_new, delta_bar, file_results, doprint)
-    form.fancyout_results(datadirr, headerfile, it_num, speclist, x, x_new,
-                        delta, x_bar, x_bar_new, delta_bar, pressure,
-                        temp, file_fancyResults, doprint)
+    file = "{:s}/results-machine-read.txt".format(datadirr)
+    form.output(headerfile, it_num, speclist, x, x_new, delta,
+                x_bar, x_bar_new, delta_bar, file, doprint)
+
+    file = "{:s}/results-visual.txt".format(datadirr)
+    form.fancyout_results(headerfile, it_num, speclist, x, x_new,
+                          delta, x_bar, x_bar_new, delta_bar, pressure,
+                          temp, file, doprint)
 
   return input_new

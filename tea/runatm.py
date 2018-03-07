@@ -157,12 +157,12 @@ thermo_dir = location_TEA + "lib/gdata"
 
 
 # FINDME: Use save_headers as flag (TBI, rename as savefiles).
+save_info = None
 if save_headers:
   inputs_dir       = location_out + desc + "/inputs/"
   loc_outputs      = location_out + desc + "/outputs/"
   loc_transient    = location_out + desc + "/outputs/" + "transient/"
   out_dir          = location_out + desc + "/results/"
-  single_res       = ["results-machine-read.txt", "results-visual.txt"]
 
   # Check if output directory already exists and inform user:
   if os.path.exists(inputs_dir):
@@ -301,9 +301,11 @@ for q in np.arange(n_runs):
         elapsed = fin - ini
         print("balance.py:         " + str(elapsed))
 
+    if save_headers:
+      save_info = location_out, desc, speclist, temp
     # Execute main TEA loop for the current line, run iterate.py
     y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr,
-          b, g_RT, maxiter, doprint, times, location_out, guess, xtol)
+              b, g_RT, maxiter, doprint, times, guess, xtol, save_info)
     guess = x, x_bar
 
     abn[q] = x/x_bar
@@ -322,16 +324,6 @@ for q in np.arange(n_runs):
                 os.remove(new_name + file)
             shutil.rmtree(new_name)
         os.rename(old_name, new_name)
-
-        # Save directory for each single T-P result and its results
-        single_dir = "{:s}results_{:.0f}K_{:.2e}bar/".format(
-                                                  out_dir, temp, pressure)
-        if not os.path.exists(single_dir):
-          os.makedirs(single_dir)
-        for file in single_res:
-            if os.path.isfile(single_dir + file):
-                os.remove(single_dir + file)
-            os.rename(out_dir + file, single_dir + file)
 
 # Write output:
 for q in np.arange(n_runs):
