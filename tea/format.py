@@ -337,8 +337,8 @@ def output(header, it_num, speclist, y, x, delta, y_bar,
         print('\n\nMade file \'' + file + '\' containing machine data.')
 
 
-def fancyout(datadir, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
-             file, doprint = False):
+def fancyout(it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
+             file, doprint=False):
     '''
     This function produces human readable output files. The files are saved
     only if saveout = True in TEA.cfg file. The function is used by the
@@ -352,10 +352,6 @@ def fancyout(datadir, it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
 
     Parameters
     ----------
-    datadir: string
-              Current directory where TEA is run.
-    header: string
-              Name of the header file used.
     it_num: integer
               Iteration number.
     speclist: string array

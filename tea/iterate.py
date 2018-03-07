@@ -171,7 +171,7 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
           ini = time.time()
 
       # Execute Lagrange minimization
-      lc_data = lg.lagrange(it_num, doprint, lc_data, info)
+      lc_data = lg.lagrange(it_num, doprint, lc_data, info, save_info)
 
       # Time / speed testing for lagrange.py
       if times:
@@ -195,7 +195,7 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
               ini = time.time()
 
           # Execute lambda correction
-          lc_data = lc.lambdacorr(it_num, doprint, lc_data, info)
+          lc_data = lc.lambdacorr(it_num, doprint, lc_data, info, save_info)
 
           # Print for debugging purposes
           if times:
@@ -251,10 +251,6 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
     headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
                       hfolder, desc, temp, pressure)
     # Create and name outputs and results directories if they do not exist
-
-    #datadir   = location_out + desc + '/outputs/' + 'transient/'
-    #if not os.path.exists(datadir):
-    #  os.makedirs(datadir)
     datadirr = '{:s}{:s}/results/results_{:.0f}K_{:.2e}bar'.format(
                    location_out, desc, temp, pressure)
     if not os.path.exists(datadirr):

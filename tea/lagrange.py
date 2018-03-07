@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 ############################# BEGIN FRONTMATTER ################################
 #                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
@@ -56,13 +54,14 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
+import os
 import numpy as np
 from sympy.core    import Symbol
 from sympy.solvers import solve
 
 import format as form
 
-def lagrange(it_num, doprint, input, info, datadir=None):
+def lagrange(it_num, doprint, input, info, save_info=None):
     '''
     This code applies Lagrange's method and calculates minimum based on the
     methodology elaborated in the TEA theory document in Section (3). Equations in
@@ -92,7 +91,7 @@ def lagrange(it_num, doprint, input, info, datadir=None):
              lambdacorr corrected values.
     info:    List
              FINDME
-    datadir: string
+    save_info: string
              Current directory where TEA is run.
 
     Returns
@@ -215,15 +214,26 @@ def lagrange(it_num, doprint, input, info, datadir=None):
                                   # final values
 
     # Name output files with corresponding iteration number name
-    if doprint:
-      file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \
-                                         'machine-read-nocorr.txt'
-      file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
-                                              '-visual-nocorr.txt'
+    if save_info:
+      location_out, desc, speclist, temp = save_info
+      hfolder = location_out + desc + "/headers/"
+      headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+                        hfolder, desc, temp, pressure)
+      # Create and name outputs and results directories if they do not exist
+      datadir   = location_out + desc + '/outputs/'
+      datadir = "{:s}/{:s}_{:.0f}K_{:.2e}bar/".format(
+                  datadir, desc, temp, pressure)
+      if not os.path.exists(datadir):
+        os.makedirs(datadir)
+
+      file = '{:s}/lagrange_iteration-{:03d}_machine-read-nocorr.txt'.format(
+              datadir, it_num)
       # Export all values into machine and human readable output files
-      form.output(datadir, header, it_num, speclist, y, x,
-                       delta, y_bar, x_bar, delta_bar, file, doprint)
-      form.fancyout(datadir, it_num, speclist, y, x, delta,
-                         y_bar, x_bar, delta_bar, file_fancy, doprint)
+      form.output(headerfile, it_num, speclist, y, x, delta,
+                  y_bar, x_bar, delta_bar, file, doprint)
+      file = '{:s}/lagrange_iteration-{:03d}_visual-nocorr.txt'.format(
+              datadir, it_num)
+      form.fancyout(it_num, speclist, y, x, delta, y_bar, x_bar,
+                    delta_bar, file, doprint)
 
     return y, x, delta, y_bar, x_bar, delta_bar

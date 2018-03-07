@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 ############################# BEGIN FRONTMATTER ################################
 #                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
@@ -74,7 +72,7 @@ def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
     return dF_dlam
 
 
-def lambdacorr(it_num, doprint, input, info, datadir=None):
+def lambdacorr(it_num, doprint, input, info, save_info=None):
     '''
     This module applies lambda correction method (see Section 4 in the TEA theory
     document). When input mole numbers are negative, the code corrects them to
@@ -90,19 +88,20 @@ def lambdacorr(it_num, doprint, input, info, datadir=None):
     Parameters
     ----------
     it_num:  integer
-             Iteration number.
+       Iteration number.
     doprint: string
-             Parameter in configuration file that allows printing for
-             debugging purposes.
-    input:   object
-             Object containing all of the results/data from the previous
-             calculation in lagrange.py or lambdacorr.py. It is a list
-             containing current header directory, current iteration
-             number, array of species names, array of initial guess,
-             array of non-corrected Lagrange values, and array of
-             lambdacorr corrected values.
-    datadir: string
-             Current directory where TEA is run.
+       Parameter in configuration file that allows printing for
+       debugging purposes.
+    input: List
+       A list containing the results/data from the previous
+       calculation in lagrange.py or lambdacorr.py:
+       the current header directory, current iteration
+       number, array of species names, array of initial guess,
+       array of non-corrected Lagrange values, and array of
+       lambdacorr corrected values.
+    save_info: List of stuff
+       If not None, save info to files.  The list contains:
+        [location_out, desc, speclist, temp]
 
     Returns
     -------
@@ -203,16 +202,24 @@ def lambdacorr(it_num, doprint, input, info, datadir=None):
     delta_corr = y - x_corr
     delta_corr_bar = x_corr_bar - y_bar
 
-    if doprint:
-      # Name output files with corresponding iteration number name
-      file       = datadir + '/lagrange-iteration-' + np.str(it_num) + \
-                                           '-machine-read.txt'
-      file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
-                                                 '-visual.txt'
+    if save_info is not None:
+      location_out, desc, speclist, temp = save_info
+      hfolder = location_out + desc + "/headers/"
+      headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+                        hfolder, desc, temp, pressure)
+      # Create and name outputs and results directories if they do not exist
+      datadir   = location_out + desc + '/outputs/'
+      datadir = "{:s}/{:s}_{:.0f}K_{:.2e}bar/".format(
+                  datadir, desc, temp, pressure)
+
       # Export all values into machine and human readable output files
-      form.output(datadir, header, it_num, speclist, y, x_corr, delta_corr,
+      file = '{:s}/lagrange_iteration-{:03d}_machine-read.txt'.format(
+              datadir, it_num)
+      form.output(headerfile, it_num, speclist, y, x_corr, delta_corr,
                     y_bar, x_corr_bar, delta_corr_bar, file, doprint)
-      form.fancyout(datadir, it_num, speclist, y, x_corr, delta_corr, y_bar,
-                     x_corr_bar, delta_corr_bar, file_fancy, doprint)
+      file = '{:s}/lagrange_iteration-{:03d}_visual.txt'.format(
+              datadir, it_num)
+      form.fancyout(it_num, speclist, y, x_corr, delta_corr, y_bar,
+                     x_corr_bar, delta_corr_bar, file, doprint)
 
     return y, x_corr, delta_corr, y_bar, x_corr_bar, delta_corr_bar

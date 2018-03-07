@@ -160,8 +160,6 @@ thermo_dir = location_TEA + "lib/gdata"
 save_info = None
 if save_headers:
   inputs_dir       = location_out + desc + "/inputs/"
-  loc_outputs      = location_out + desc + "/outputs/"
-  loc_transient    = location_out + desc + "/outputs/" + "transient/"
   out_dir          = location_out + desc + "/results/"
 
   # Check if output directory already exists and inform user:
@@ -172,31 +170,14 @@ if save_headers:
   # Create directories
   if not os.path.exists(inputs_dir):
       os.makedirs(inputs_dir)
-  if not os.path.exists(out_dir):
-      os.makedirs(out_dir)
-  if not os.path.exists(loc_transient):
-      os.makedirs(loc_transient)
-
-  # Inform user if TEA.cfg file already exists in inputs/ directory
-  if os.path.isfile(inputs_dir + TEA_config):
-      print("  " + str(TEA_config) + " overwritten in inputs/ directory.")
-  # Copy TEA.cfg file to current inputs directory
+  # Copy TEA.cfg file to current inputs directory:
   shutil.copy2(TEA_config, inputs_dir + TEA_config)
-
-  # Inform user if abundances file already exists in inputs/ directory
+  # Copy abundances file to inputs/ directory:
   head, abun_filename = ntpath.split(abun_file)
-  if os.path.isfile(inputs_dir + abun_filename):
-      print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
-  # Copy abundances file to inputs/ directory
-  shutil.copy2(abun_file, inputs_dir + abun_filename)
-
-  # Inform user if pre-atm file already exists in inputs/ directory
+  shutil.copy2(abun_file,  inputs_dir + abun_filename)
+  # Copy pre-atm file to inputs/ directory:
   head, preatm_filename = ntpath.split(infile)
-  if os.path.isfile(inputs_dir + preatm_filename):
-      print("  " + str(preatm_filename) + " overwritten in inputs/ directory.")
-  else:
-      # Copy pre-atm file to inputs/ directory
-      shutil.copy2(infile, inputs_dir + preatm_filename)
+  shutil.copy2(infile,     inputs_dir + preatm_filename)
 
 
 # Read pre-atm file
@@ -309,21 +290,6 @@ for q in np.arange(n_runs):
     guess = x, x_bar
 
     abn[q] = x/x_bar
-
-    # Save or delete intermediate headers
-    if save_headers:
-        # Save lagrange.py, lambdacorr.py outputs, and single T-P results:
-        # Save directory for each T-P and its output files
-        if not os.path.exists(loc_outputs):
-            os.makedirs(loc_outputs)
-        old_name = loc_transient
-        new_name = "{:s}{:s}_{:.0f}K_{:.2e}bar_{:s}".format(
-               loc_outputs, desc, temp, pressure, loc_outputs[-1:])
-        if os.path.exists(new_name):
-            for file in os.listdir(new_name):
-                os.remove(new_name + file)
-            shutil.rmtree(new_name)
-        os.rename(old_name, new_name)
 
 # Write output:
 for q in np.arange(n_runs):
