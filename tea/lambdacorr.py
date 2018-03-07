@@ -57,13 +57,15 @@
 ############################## END FRONTMATTER #################################
 
 import numpy as np
+
 import format as form
+
 
 def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
     """
-    # Set equation (34) TEA theory document
-    # dF(lam)/dlam = sum_i delta_i[(g(T)/RT)_i + lnP +
-    #                ln (yi+lam*delta_i)/(y_bar+lam*delta_bar)]
+    Equation (34) TEA theory document:
+      dF(lam)/dlam = sum_i delta_i[(g(T)/RT)_i + ln(P) +
+                                   ln(yi+lam*delta_i)/(y_bar+lam*delta_bar)]
     """
     dF_dlam = 0
     for n in np.arange(i):
@@ -72,7 +74,7 @@ def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
     return dF_dlam
 
 
-def lambdacorr(it_num, datadir, doprint, input, info):
+def lambdacorr(it_num, doprint, input, info, datadir=None):
     '''
     This module applies lambda correction method (see Section 4 in the TEA theory
     document). When input mole numbers are negative, the code corrects them to
@@ -89,8 +91,6 @@ def lambdacorr(it_num, datadir, doprint, input, info):
     ----------
     it_num:  integer
              Iteration number.
-    datadir: string
-             Current directory where TEA is run.
     doprint: string
              Parameter in configuration file that allows printing for
              debugging purposes.
@@ -101,6 +101,8 @@ def lambdacorr(it_num, datadir, doprint, input, info):
              number, array of species names, array of initial guess,
              array of non-corrected Lagrange values, and array of
              lambdacorr corrected values.
+    datadir: string
+             Current directory where TEA is run.
 
     Returns
     -------
@@ -138,8 +140,6 @@ def lambdacorr(it_num, datadir, doprint, input, info):
     pressure = info[0]
     i        = info[1]
     g_RT     = info[5]
-    header   = info[6]
-    speclist = info[7]
 
     # Take final values from last iteration, lagrange.py
     y         = input[0]

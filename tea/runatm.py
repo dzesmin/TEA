@@ -139,33 +139,6 @@ infile  = sys.argv[1:][0]
 # Retrieve current output directory name given by user
 desc    = sys.argv[1:][1]
 
-# If input file does not exist break
-try:
-    f = open(infile)
-except:
-    raise IOError ("\n\nPre-atmospheric file does not exist.\n")
-
-# Set up locations of necessary scripts and directories of files
-thermo_dir       = location_TEA + "lib/gdata"
-
-inputs_dir       = location_out + desc + "/inputs/"
-loc_headerfile   = location_out + desc + "/headers/" + "header_" + desc + ".txt"
-loc_outputs      = location_out + desc + "/outputs/"
-loc_transient    = location_out + desc + "/outputs/" + "transient/"
-out_dir          = location_out + desc + "/results/"
-single_res       = ["results-machine-read.txt", "results-visual.txt"]
-
-# Check if output directory already exists and inform user:
-if os.path.exists(inputs_dir):
-    raw_input("  Output directory " + str(inputs_dir) + " already exists.\n"
-              "  Press enter to continue and overwrite existing files,\n"
-              "  or quit and choose another output name.\n")
-
-# Create directories
-if not os.path.exists(inputs_dir): os.makedirs(inputs_dir)
-if not os.path.exists(out_dir): os.makedirs(out_dir)
-if not os.path.exists(loc_transient): os.makedirs(loc_transient)
-
 # Check if config file exists in the working directory
 TEA_config = 'TEA.cfg'
 try:
@@ -173,26 +146,59 @@ try:
 except IOError:
     print("\nConfig file is missing. Place TEA.cfg in the working directory.\n")
 
-# Inform user if TEA.cfg file already exists in inputs/ directory
-if os.path.isfile(inputs_dir + TEA_config):
-    print("  " + str(TEA_config) + " overwritten in inputs/ directory.")
-# Copy TEA.cfg file to current inputs directory
-shutil.copy2(TEA_config, inputs_dir + TEA_config)
+# If input file does not exist break
+try:
+    f = open(infile)
+except:
+    raise IOError ("\n\nPre-atmospheric file does not exist.\n")
 
-# Inform user if abundances file already exists in inputs/ directory
-head, abun_filename = ntpath.split(abun_file)
-if os.path.isfile(inputs_dir + abun_filename):
-    print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
-# Copy abundances file to inputs/ directory
-shutil.copy2(abun_file, inputs_dir + abun_filename)
+# Set up locations of necessary scripts and directories of files
+thermo_dir = location_TEA + "lib/gdata"
 
-# Inform user if pre-atm file already exists in inputs/ directory
-head, preatm_filename = ntpath.split(infile)
-if os.path.isfile(inputs_dir + preatm_filename):
-    print("  " + str(preatm_filename) + " overwritten in inputs/ directory.")
-else:
-    # Copy pre-atm file to inputs/ directory
-    shutil.copy2(infile, inputs_dir + preatm_filename)
+
+# FINDME: Use save_headers as flag (TBI, rename as savefiles).
+if save_headers:
+  inputs_dir       = location_out + desc + "/inputs/"
+  loc_headerfile   = location_out + desc + "/headers/" + "header_" + desc + ".txt"
+  loc_outputs      = location_out + desc + "/outputs/"
+  loc_transient    = location_out + desc + "/outputs/" + "transient/"
+  out_dir          = location_out + desc + "/results/"
+  single_res       = ["results-machine-read.txt", "results-visual.txt"]
+
+  # Check if output directory already exists and inform user:
+  if os.path.exists(inputs_dir):
+      raw_input("  Output directory " + str(inputs_dir) + " already exists.\n"
+                "  Press enter to continue and overwrite existing files,\n"
+                "  or quit and choose another output name.\n")
+  # Create directories
+  if not os.path.exists(inputs_dir):
+      os.makedirs(inputs_dir)
+  if not os.path.exists(out_dir):
+      os.makedirs(out_dir)
+  if not os.path.exists(loc_transient):
+      os.makedirs(loc_transient)
+
+  # Inform user if TEA.cfg file already exists in inputs/ directory
+  if os.path.isfile(inputs_dir + TEA_config):
+      print("  " + str(TEA_config) + " overwritten in inputs/ directory.")
+  # Copy TEA.cfg file to current inputs directory
+  shutil.copy2(TEA_config, inputs_dir + TEA_config)
+
+  # Inform user if abundances file already exists in inputs/ directory
+  head, abun_filename = ntpath.split(abun_file)
+  if os.path.isfile(inputs_dir + abun_filename):
+      print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
+  # Copy abundances file to inputs/ directory
+  shutil.copy2(abun_file, inputs_dir + abun_filename)
+
+  # Inform user if pre-atm file already exists in inputs/ directory
+  head, preatm_filename = ntpath.split(infile)
+  if os.path.isfile(inputs_dir + preatm_filename):
+      print("  " + str(preatm_filename) + " overwritten in inputs/ directory.")
+  else:
+      # Copy pre-atm file to inputs/ directory
+      shutil.copy2(infile, inputs_dir + preatm_filename)
+
 
 # Read pre-atm file
 n_runs, spec_list, pres_arr, temp_arr, atom_arr, atom_name, end_head = \
@@ -217,14 +223,18 @@ spec_list = np.copy(good_spec)
 
 # =================== Start writing final atm file ===================
 # Open final atm file for writing, keep open to add new lines
-fout_name = out_dir + desc + '.tea'
+fout_name = desc + '.tea'
+if save_headers:
+    fout_name = out_dir + desc + '.tea'
+
+# FINDME: If fout is None, return array
 fout = open(fout_name, 'w+')
 
 # Write a header file
 fout.write(
-  "# This is a final TEA output file with calculated abundances (mixing"
-  "\nfractions) for all listed species."
-  "\n# Units: pressure (bar), temperature (K), abundance (unitless).\n\n")
+    "# This is a final TEA output file with calculated abundances (mixing"
+    "\nfractions) for all listed species."
+    "\n# Units: pressure (bar), temperature (K), abundance (unitless).\n\n")
 fout.write('#SPECIES\n')
 
 # Write corrected species list into pre-atm file and continue
@@ -253,6 +263,10 @@ abun_matrix = np.zeros(n_spec)
 guess = None
 abn   = np.zeros((n_runs, n_spec))
 
+# Load gdata:
+free_energy, heat = mh.read_gdata(spec_list, thermo_dir)
+stoich_arr = mh.read_stoich(spec_list)
+
 # ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
 for q in np.arange(n_runs):
@@ -265,19 +279,21 @@ for q in np.arange(n_runs):
     # Radius, pressure, and temp for the current line
     pressure = float(pres_arr[q])
     temp     = float(temp_arr[q])
+    b = np.array(atom_arr[q], np.double)
 
     # Produce header for the current line
-    mh.make_atmheader(q, spec_list, pressure, temp, atom_arr,
-                      atom_name, desc, thermo_dir)
+    g_RT = mh.calc_gRT(free_energy, heat, temp)
+    if save_headers:
+      mh.write_header(desc, pressure, temp, stoich_arr, nspec,
+                      g_RT, location_out)
 
     # Time / speed testing for balance.py
     if times:
         ini = time.time()
 
     # Get balanced initial guess for the current line
-    header = form.readheader(loc_headerfile)
     if guess is None:
-        guess = bal.balance(header[5], header[6], doprint)
+        guess = bal.balance(stoich_arr, b, doprint)
 
     # Retrieve balance runtime
     if times:
@@ -286,8 +302,8 @@ for q in np.arange(n_runs):
         print("balance.py:         " + str(elapsed))
 
     # Execute main TEA loop for the current line, run iterate.py
-    y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
-          loc_headerfile, maxiter, doprint, times, location_out, guess, xtol)
+    y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr,
+          b, g_RT, maxiter, doprint, times, location_out, guess, xtol)
     guess = x, x_bar
 
     abn[q] = x/x_bar
@@ -302,10 +318,10 @@ for q in np.arange(n_runs):
             os.remove(new_name)
         os.rename(old_name, new_name)
 
-    # Save or delete lagrange.py, lambdacorr.py outputs and single T-P results
-    if save_outputs:
+        # Save lagrange.py, lambdacorr.py outputs, and single T-P results:
         # Save directory for each T-P and its output files
-        if not os.path.exists(loc_outputs): os.makedirs(loc_outputs)
+        if not os.path.exists(loc_outputs):
+            os.makedirs(loc_outputs)
         old_name = loc_transient
         new_name = "{:s}{:s}_{:.0f}K_{:.2e}bar_{:s}".format(
                loc_outputs, desc, temp, pressure, loc_outputs[-1:])
@@ -324,16 +340,6 @@ for q in np.arange(n_runs):
             if os.path.isfile(single_dir + file):
                 os.remove(single_dir + file)
             os.rename(out_dir + file, single_dir + file)
-
-if not save_headers:
-    # Delete header files for each T-P
-    shutil.rmtree(location_out + desc + "/headers/" )
-if not save_outputs:
-    # Delete output directories and files
-    shutil.rmtree(loc_outputs)
-    # Delete single T-P result directories and files
-    for file in single_res:
-        os.remove(out_dir + file)
 
 # Write output:
 for q in np.arange(n_runs):

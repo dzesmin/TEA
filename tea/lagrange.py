@@ -62,7 +62,7 @@ from sympy.solvers import solve
 
 import format as form
 
-def lagrange(it_num, datadir, doprint, input, info):
+def lagrange(it_num, doprint, input, info, datadir=None):
     '''
     This code applies Lagrange's method and calculates minimum based on the
     methodology elaborated in the TEA theory document in Section (3). Equations in
@@ -80,8 +80,6 @@ def lagrange(it_num, datadir, doprint, input, info):
     ----------
     it_num:  integer
              Iteration number.
-    datadir: string
-             Current directory where TEA is run.
     doprint: string
              Parameter in configuration file that allows printing for
              debugging purposes.
@@ -94,6 +92,8 @@ def lagrange(it_num, datadir, doprint, input, info):
              lambdacorr corrected values.
     info:    List
              FINDME
+    datadir: string
+             Current directory where TEA is run.
 
     Returns
     -------
@@ -120,8 +120,6 @@ def lagrange(it_num, datadir, doprint, input, info):
     a        = info[3]
     b        = info[4]
     g_RT     = info[5]
-    header   = info[6]
-    speclist = info[7]
 
     # Use final values from last iteration (x values) as new initial
     y     = input[1]

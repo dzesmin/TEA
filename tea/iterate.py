@@ -91,16 +91,13 @@ from   format import printout
 # =============================================================================
 
 
-def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
-            guess, xtol=3e-6):
+def iterate(pressure, a, b, g_RT, maxiter, doprint, times, location_out,
+            guess, xtol=3e-6, desc=None):
   """
   Run iterative Lagrangian minimization and lambda correction.
 
   Parameters
   ----------
-  header: 1D list
-  desc: String
-  headerfile: String
   maxiter: Integer
      Maximum number of iterations.
   doprint: Bool
@@ -135,22 +132,8 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
           Change in total of initial and final mole numbers of molecular
           species.
   """
-  # Create and name outputs and results directories if they do not exist
-  datadir   = location_out + desc + '/outputs/' + 'transient/'
-  datadirr  = location_out + desc + '/results'
-
-  if not os.path.exists(datadir): os.makedirs(datadir)
-  if not os.path.exists(datadirr): os.makedirs(datadirr)
-
   # Retrieve header info
-  pressure = header[0]
-  temp     = header[1]
-  i        = header[2]
-  j        = header[3]
-  speclist = header[4]
-  a        = header[5]
-  b        = header[6]
-  g_RT     = header[7]
+  i, j = np.shape(a)
 
   # Retrieve and set initial values
   x, x_bar = guess
@@ -158,7 +141,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
   # Prepare data object for iterative process
   #         (see description of the 'input' object in lagrange.py)
   lc_data = x, x, 0, x_bar, x_bar, 0
-  info = pressure, i, j, a, b, g_RT, header, speclist
+  info = pressure, i, j, a, b, g_RT
 
   # Time / speed testing
   if times:
@@ -179,7 +162,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
           ini = time.time()
 
       # Execute Lagrange minimization
-      lc_data = lg.lagrange(it_num, datadir, doprint, lc_data, info)
+      lc_data = lg.lagrange(it_num, doprint, lc_data, info)
 
       # Time / speed testing for lagrange.py
       if times:
@@ -202,7 +185,7 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
               ini = time.time()
 
           # Execute lambda correction
-          lc_data = lc.lambdacorr(it_num, datadir, doprint, lc_data, info)
+          lc_data = lc.lambdacorr(it_num, doprint, lc_data, info)
 
           # Print for debugging purposes
           if times:
@@ -250,15 +233,26 @@ def iterate(header, desc, headerfile, maxiter, doprint, times, location_out,
   # Calculate delta_bar values
   delta_bar = x_bar_new - x_bar
 
-  # Name output files with corresponding iteration number name
-  file_results       = datadirr + '/results-machine-read.txt'
-  file_fancyResults  = datadirr + '/results-visual.txt'
+  write = False
+  if write:
+    # Create and name outputs and results directories if they do not exist
+    #datadir   = location_out + desc + '/outputs/' + 'transient/'
+    datadirr  = location_out + desc + '/results'
 
-  # Export all values into machine and human readable output files
-  form.output(datadirr, headerfile, it_num, speclist, x, x_new, delta,    \
+    #if not os.path.exists(datadir):
+    #  os.makedirs(datadir)
+    if not os.path.exists(datadirr):
+      os.makedirs(datadirr)
+
+    # Name output files with corresponding iteration number name
+    file_results       = datadirr + '/results-machine-read.txt'
+    file_fancyResults  = datadirr + '/results-visual.txt'
+
+    # Export all values into machine and human readable output files
+    form.output(datadirr, headerfile, it_num, speclist, x, x_new, delta,
               x_bar, x_bar_new, delta_bar, file_results, doprint)
-  form.fancyout_results(datadirr, headerfile, it_num, speclist, x, x_new, \
-                        delta, x_bar, x_bar_new, delta_bar, pressure, \
+    form.fancyout_results(datadirr, headerfile, it_num, speclist, x, x_new,
+                        delta, x_bar, x_bar_new, delta_bar, pressure,
                         temp, file_fancyResults, doprint)
 
   return input_new
