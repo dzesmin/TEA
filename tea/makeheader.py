@@ -227,82 +227,72 @@ def calc_gRT(free_energy, heat, temp):
     return g_RT
 
 
-def write_header(desc, pressure, temp, stoich_arr, nspec, g_RT, location_out):
-    '''
+def write_header(hfolder, desc, temp, pressure, speclist, atomlist,
+                 stoich_arr, b, g_RT):
+    """
     This function writes a header file that contains all necessary data
     for TEA to run. It is run by make_atmheader() and make_singleheader().
 
     Parameters
     ----------
+    hfolder: String
+       Folder where to store the header file.
     desc: string
-         Name of output directory given by user.
-    pressure: float
-         Current pressure value.
+       Name of output file.
     temp: float
-         Current temperature value.
+       Temperature value (in Kelvin degrees).
+    pressure: float
+       Pressure value (in bars).
+    speclist: 1D list of strings
+       Names of the species.
+    atomlist:L 1D list of strings
+       Names of the elements.
     stoich_arr: array
-         Array containing elemental abundances, species names, and their
-         stoichiometric values.
-    nspec: integer
-         Number of species.
+       Array containing the stoichiometric values of the species.
+    b: 1D float ndarray
+       Elemental mixing fractions.
     g_RT: float array
-         Array containing chemical potentials for each species at the
-         current T-P.
-
-    Returns
-    -------
-    None
-    '''
-    # Comment at top of header file
-
+       Chemical potentials of the species.
+    """
+    nspec, natom = np.shape(stoich_arr)
     # Make header directory if it does not exist to store header files
-    if not os.path.exists(location_out + desc + '/headers/'):
-        os.makedirs(location_out + desc + '/headers/')
-
+    if not os.path.exists(hfolder):
+        os.makedirs(hfolder)
     # Create header file to be used by the main pipeline
-    outfile = location_out + desc + '/headers/' + 'header_' + desc + ".txt"
+    outfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+                    hfolder, desc, temp, pressure)
 
     # Open file to write
     f = open(outfile, 'w+')
 
-    # Write comments and data
+    # Comment at top of header file
     f.write(
     "# This is a header file for one T-P. It contains the following data:\n"
     "# pressure (bar), temperature (K), elemental abundances (b, unitless),\n"
     "# species names, stoichiometric values of each element in the species (a),\n"
     "# and chemical potentials.\n\n")
-    f.write(np.str(pressure) + '\n')
-    f.write(np.str(temp)     + '\n')
+    f.write("{:.5e}\n".format(pressure))
+    f.write("{:.3f}\n".format(temp))
 
-    b_line = stoich_arr[0][0]
-    for i in np.arange(np.shape(stoich_arr)[1] - 1):
-        b_line += ' ' + np.str(stoich_arr[0][i + 1])
-    f.write(b_line + '\n')
+    # Elemental abundances:
+    bstr = " ".join(["{:.6e}".format(x) for x in b])
+    f.write("b {:s}\n".format(bstr))
 
-    # Retrieve the width of the stoichiometric array
-    width = np.shape(stoich_arr)[1]
-
-    # Add title for list of chemical potentials
-    g_RT = np.append(["Chemical potential"], g_RT)
-
-    # Add title for species names
-    stoich_arr[1][0] = "# Species"
+    # Title for species names
+    f.write("# Species")
+    for j in np.arange(natom):
+      f.write("{:>3s}".format(atomlist[j]))
+    f.write("  Chemical potential\n")
 
     # Loop over all species and titles
-    for i in np.arange(nspec + 1):
+    for i in np.arange(nspec):
         # Loop over species and number of elements
-        for j in np.arange(width):
-            # Write species names
-            if j == 0:
-                f.write(np.str(stoich_arr[i+1][j]).rjust(9) + "  ")
+        f.write("{:>9s}".format(speclist[i]))
+        for j in np.arange(natom):
             # Write elemental number density
-            else:
-                f.write(np.str(stoich_arr[i+1][j]).ljust(3))
+            f.write("{:>3.0f}".format(stoich_arr[i,j]))
         # Write chemical potentials, adjust spacing for minus sign
-        if g_RT[i][0] == '-':
-            f.write(np.str(g_RT[i]).rjust(13) + '\n')
-        else:
-            f.write(np.str(g_RT[i]).rjust(14) + '\n')
+        f.write("  {:-14.10f}\n".format(g_RT[i]))
 
     f.close()
 
@@ -346,7 +336,7 @@ def make_singleheader(infile, desc, thermo_dir, location_out):
     f = open(infile, 'r')
 
     # Allocate species list
-    spec_list = []
+    speclist = []
 
     # Begin by reading first line of file (l = 0)
     l = 0
@@ -355,26 +345,29 @@ def make_singleheader(infile, desc, thermo_dir, location_out):
     for line in f.readlines():
         # Retrieve temperature
         if l == 0:
-            temp = np.float([value for value in line.split()][0])
+            temp     = float([value for value in line.split()][0])
         # Retrieve pressure
         if l == 1:
-            pressure = np.float([value for value in line.split()][0])
+            pressure = float([value for value in line.split()][0])
         # Retrieve list of species
         if l > 1:
             val = [value for value in line.split()][0]
-            spec_list = np.append(spec_list, val)
+            speclist = np.append(speclist, val)
         l += 1
 
     f.close()
 
     # Retrieve number of species used
-    nspec = np.size(spec_list)
+    nspec = np.size(speclist)
 
     # Load and evaluate gdata:
-    free_energy, heat = mh.read_gdata(spec_list, thermo_dir)
+    free_energy, heat = mh.read_gdata(speclist, thermo_dir)
     g_RT = mh.calc_gRT(free_energy, heat, temp)
-    stoich_arr = mh.read_stoich(spec_list)
-    # FINDME: get b values for write_header()
+    stoich_arr = mh.read_stoich(speclist)
 
+    # FINDME: get b values for write_header()
+    #         get atomlist
     # Write header array to file
-    write_header(desc, pressure, temp, stoich_arr, nspec, g_RT, location_out)
+    hfolder = location_out + desc + "/headers/"
+    write_header(hfolder, desc, temp, pressure, speclist, atomlist,
+                 stoich_arr, b, g_RT)

@@ -159,7 +159,6 @@ thermo_dir = location_TEA + "lib/gdata"
 # FINDME: Use save_headers as flag (TBI, rename as savefiles).
 if save_headers:
   inputs_dir       = location_out + desc + "/inputs/"
-  loc_headerfile   = location_out + desc + "/headers/" + "header_" + desc + ".txt"
   loc_outputs      = location_out + desc + "/outputs/"
   loc_transient    = location_out + desc + "/outputs/" + "transient/"
   out_dir          = location_out + desc + "/results/"
@@ -201,25 +200,25 @@ if save_headers:
 
 
 # Read pre-atm file
-n_runs, spec_list, pres_arr, temp_arr, atom_arr, atom_name, end_head = \
+n_runs, speclist, pres_arr, temp_arr, atom_arr, atom_name, end_head = \
                                                  ra.readatm(infile)
 
 # Number of output species:
-n_spec = np.size(spec_list)
+nspec = np.size(speclist)
 
 # Correct species list for only species found in thermo_dir
 gdata_files = os.listdir(thermo_dir)
 good_spec   = []
-for i in np.arange(n_spec):
-    spec_file = spec_list[i] + '.txt'
+for i in np.arange(nspec):
+    spec_file = speclist[i] + '.txt'
     if spec_file in gdata_files:
-        good_spec = np.append(good_spec, spec_list[i])
+        good_spec = np.append(good_spec, speclist[i])
     else:
-        print('Species ' + spec_list[i] + ' does not exist in /' \
+        print('Species ' + speclist[i] + ' does not exist in /' \
                   + thermo_dir.split("/")[-1] + ' ! IGNORED THIS SPECIES.')
 
 # Update list of valid species
-spec_list = np.copy(good_spec)
+speclist = np.copy(good_spec)
 
 # =================== Start writing final atm file ===================
 # Open final atm file for writing, keep open to add new lines
@@ -238,16 +237,16 @@ fout.write(
 fout.write('#SPECIES\n')
 
 # Write corrected species list into pre-atm file and continue
-for i in np.arange(n_spec):
-    fout.write(spec_list[i] + ' ')
+for i in np.arange(nspec):
+    fout.write(speclist[i] + ' ')
 fout.write("\n\n")
 fout.write("#TEADATA\n")
 
 # Write data header from the pre-atm file into each column of atm file
 fout.write('#Pressure'.ljust(10) + ' ')
 fout.write('Temp'.ljust(7) + ' ')
-for i in np.arange(n_spec):
-    fout.write(spec_list[i].ljust(10)+' ')
+for i in np.arange(nspec):
+    fout.write(speclist[i].ljust(10)+' ')
 fout.write('\n')
 
 # Times / speed check for pre-loop runtime
@@ -257,15 +256,15 @@ if times:
     print("pre-loop:           " + str(elapsed))
 
 # Allocate abundances matrix for all species and all T-Ps
-abun_matrix = np.zeros(n_spec)
+abun_matrix = np.zeros(nspec)
 
 # Use x, x_bar values from a previous layer as initial guess:
 guess = None
-abn   = np.zeros((n_runs, n_spec))
+abn   = np.zeros((n_runs, nspec))
 
 # Load gdata:
-free_energy, heat = mh.read_gdata(spec_list, thermo_dir)
-stoich_arr = mh.read_stoich(spec_list)
+free_energy, heat = mh.read_gdata(speclist, thermo_dir)
+stoich_arr = mh.read_stoich(speclist)
 
 # ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
@@ -284,8 +283,9 @@ for q in np.arange(n_runs):
     # Produce header for the current line
     g_RT = mh.calc_gRT(free_energy, heat, temp)
     if save_headers:
-      mh.write_header(desc, pressure, temp, stoich_arr, nspec,
-                      g_RT, location_out)
+      hfolder = location_out + desc + "/headers/"
+      mh.write_header(hfolder, desc, temp, pressure, speclist, atom_name,
+                      stoich_arr, b, g_RT)
 
     # Time / speed testing for balance.py
     if times:
@@ -310,14 +310,6 @@ for q in np.arange(n_runs):
 
     # Save or delete intermediate headers
     if save_headers:
-        # Save header files for each T-P
-        old_name = loc_headerfile
-        new_name = "{:s}_{:.0f}K_{:.2e}bar_{:s}".format(
-               loc_headerfile[0:-4], temp, pressure, loc_headerfile[-4:])
-        if os.path.isfile(new_name):
-            os.remove(new_name)
-        os.rename(old_name, new_name)
-
         # Save lagrange.py, lambdacorr.py outputs, and single T-P results:
         # Save directory for each T-P and its output files
         if not os.path.exists(loc_outputs):
@@ -346,7 +338,7 @@ for q in np.arange(n_runs):
     # Insert results from the current line (T-P) to atm file
     fout.write(pres_arr[q].rjust(10) + ' ')
     fout.write(temp_arr[q].rjust(7) + ' ')
-    for i in np.arange(n_spec):
+    for i in np.arange(nspec):
         fout.write('{:1.4e} '.format(abn[q,i]))
     fout.write('\n')
 
