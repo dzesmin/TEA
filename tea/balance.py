@@ -67,7 +67,7 @@ from sympy.solvers import solve
 import format as form
 
 
-def balance(header, desc, doprint=False, loc_out=None):
+def balance(a, b, doprint=False, loc_out=None):
   """
   This code produces an initial guess for the first TEA iteration by
   fulfilling the mass balance condition, sum_i(ai_j * y_i) = bj (equation (17)
@@ -75,10 +75,9 @@ def balance(header, desc, doprint=False, loc_out=None):
   are stoichiometric coefficients, and b's are elemental fractions by number,
   i.e., ratio of number densities of element 'j' to the total number densities
   of all elements in the system (see the end of the Section 2 in the TEA theory
-  paper). The code writes the result into machine- and human-readable files.
+  paper). The code writes the result into machine- and human-readable files,
+  if requested.
  
-  The code begins by making a directory for the output results. Then, it reads
-  the header file and imports all relevant chemical data from it.
   To satisfy the mass balance equation, some yi variables remain as free
   parameters. The number of free parameters is set to the number of total
   elements in the system, thus ensuring that the mass balance equation can
@@ -102,28 +101,35 @@ def balance(header, desc, doprint=False, loc_out=None):
 
   Parameters
   ----------
-  header: String
-     Input header file.
-  desc: String
-     Directory name
+  a: 2D float ndarray
+     Stoichiometric coefficients of the species.
+  b: 1D float ndarray
+     Elemental mixing fractions.
   doprint: Bool
-     ???
+     Flag to increase verbosity.
   loc_out: String
-     If not None, folder where to save results.
+     If not None, save results to this folder.
+
+  Returns
+  -------
+  y: 1D float ndarray
+     Initial non-zero guesses for the species mixing ratios that
+     satisfy the mass-balance equation.
+  y_bar: Float
+     Sum of the mixing ratios.
   """
   # Read in values from header file
-  pressure, temp, i, j, speclist, a, b, c = form.readheader(header)
-
+  nspec, natom = np.shape(a)
   # Print b values for debugging purposes
   if doprint:
       print("b values: " + str(b))
 
   # Find chunk of ai_j array that will allow the corresponding yi values
   #      to be free variables such that all elements are considered
-  for n in np.arange(i - j + 1):
+  for n in np.arange(nspec - natom + 1):
       # Get lower and upper indices for chunk of ai_j array to check
       lower = n
-      upper = n + j
+      upper = n + natom
 
       # Retrieve chunk of ai_j that would contain free variables
       a_chunk = a[lower:upper]
@@ -138,7 +144,7 @@ def balance(header, desc, doprint=False, loc_out=None):
       # If zero not found, create list of free variables' indices
       if has_zero == False:
           free_id = []
-          for m in np.arange(j):
+          for m in np.arange(natom):
               if doprint:
                   print('Using y_{:d} as a free variable.'.format(n + m + 1))
               free_id.append(n + m)
@@ -147,31 +153,30 @@ def balance(header, desc, doprint=False, loc_out=None):
   # Set initial guess of non-free y_i
   scale = 0.1
 
-  # Assume that all or some y_i are negative or zeros
+  # Loop until all y_i are non-zero positive:
   nofit = True
-
-  # Loop until all y_i are non-zero positive
   while nofit:
       # Set up list of 'known' initial mole numbers before and after free chunk
       pre_free = np.zeros(free_id[0]) + scale
-      post_free = np.zeros(i - free_id[-1] - 1) + scale
+      post_free = np.zeros(nspec - free_id[-1] - 1) + scale
 
       # Set up list of free variables
       free = []
-      for m in np.arange(j):
+      for m in np.arange(natom):
           name = 'y_unknown_' + np.str(m)
           free = np.append(free, Symbol(name))
 
       # Combine free and 'known' to make array of y_initial mole numbers
-      y_init = np.append(pre_free,      free)
-      y_init = np.append(  y_init, post_free)
+      y_init = np.append(pre_free, free)
+      y_init = np.append(y_init,   post_free)
 
-      # Make 'j' equations satisfying mass balance equation (17) in TEA theory doc:
+      # Make 'j' equations satisfying mass balance equation (17) in TEA
+      # theory doc:
       # sum_i(ai_j * y_i) = b_j
       eq = [[]]
-      for m in np.arange(j):
+      for m in np.arange(natom):
           rhs = 0
-          for n in np.arange(i):
+          for n in np.arange(nspec):
               rhs += a[n, m] * y_init[n]
           rhs -= b[m]
           eq = np.append(eq, rhs)
@@ -191,46 +196,44 @@ def balance(header, desc, doprint=False, loc_out=None):
       else:
           # Assume no negatives and check
           hasneg = False
-          for m in np.arange(j):
+          for m in np.arange(natom):
               if result[free[m]] < 0:
                   hasneg = True
           # If negatives found, decrease scale size
           if hasneg:
               scale /= 10
               if doprint:
-                  print("Negative numbers found in fit.")
-                  print("Correcting initial guesses for realistic mass. \
-                          Trying " + str(scale) + "...")
+                  print("Negative numbers found in fit."
+                      "\n  Correcting initial guesses for realistic mass."
+                      "\n  Trying scale of {:.0e}.".format(scale))
           # If no negatives found, exit the loop (good fit is found)
           else:
               nofit = False
               if doprint:
-                  print(str(scale) + " provided a viable initial guess.")
+                  print("A scale of {:.0e} provided a viable initial guess.".
+                        format(scale))
 
   # Gather the results
   fit = []
-  for m in np.arange(j):
+  for m in np.arange(natom):
       fit = np.append(fit, result[free[m]])
 
   # Put the result into the final y_init array
-  y_init[free_id[0]:free_id[j-1]+1] = fit
+  y_init[free_id[0]:free_id[natom-1]+1] = fit
 
   # This part of the code is only for debugging purposes
   # It rounds the values and checks whether the balance equation is satisfied
   # No values are changed and this serves solely as a check
   if doprint == True:
-      print('\nCHECKS:')
-  for m in np.arange(j):
-      bool = round((sum(a[:,m] * y_init[:])), 2) == round(b[m], 2)
-      if bool == True:
+      print('\nChecks:')
+  for m in np.arange(natom):
+      flag = round((sum(a[:,m] * y_init[:])), 2) == round(b[m], 2)
+      if flag:
           if doprint:
-              print('Equation ' + np.str(m+1) + ' is satisfied.')
-      if bool == False:
-          print('Equation ' + np.str(m+1) + \
-                           ' is NOT satisfied. Check for errors!')
+              print('Equation {:d} is satisfied.'.format(m+1))
+      else:
+          print('Equation {:d} is NOT satisfied. Check for errors'.format(m+1))
 
-  # Set iteration number to zero
-  it_num = 0
 
   # Put all initial mole numbers in y array
   y     = np.array(y_init, dtype=np.double)
@@ -238,19 +241,21 @@ def balance(header, desc, doprint=False, loc_out=None):
   y_bar = np.sum(y, dtype=np.double)
 
   # Initialize delta variables to 0. (this signifies the first iteration)
-  delta     = np.zeros(i)
+  delta     = np.zeros(nspec)
   delta_bar = np.sum(delta)
 
   if loc_out is not None:
+    # FINDME: need to unpack: datadir, header, speclist
+    # Set iteration number to zero
+    it_num = 0
     # Put results into machine readable file
-    file = loc_out + '/lagrange-iteration-' + np.str(it_num) + \
-                                                  '-machine-read.txt'
+    file = '{:s}/lagrange-iteration-{:d}-machine-read.txt'.format(
+                                                            loc_out, it_num)
     form.output(datadir, header, it_num, speclist, y, y, delta,
                 y_bar, y_bar, delta_bar, file, doprint)
     # Put results into human readable file
-    file_fancy = loc_out + '/lagrange-iteration-' + np.str(it_num) + \
-                                                        '-visual.txt'
+    file = '{:s}/lagrange-iteration-{:d}-visual.txt'.format(loc_out, it_num)
     form.fancyout(datadir, it_num, speclist, y, y, delta, y_bar,
-                  y_bar, delta_bar, file_fancy, doprint)
+                  y_bar, delta_bar, file, doprint)
 
-  return y, y_bar, speclist
+  return y, y_bar

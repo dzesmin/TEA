@@ -70,6 +70,7 @@ import iterate  as it
 import format   as form
 import makeheader as mh
 import readatm  as ra
+import balance  as bal
 
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
@@ -135,6 +136,8 @@ if location_out[-1] != '/':
 
 # Retrieve pre-atm file
 infile  = sys.argv[1:][0]
+# Retrieve current output directory name given by user
+desc    = sys.argv[1:][1]
 
 # If input file does not exist break
 try:
@@ -142,12 +145,9 @@ try:
 except:
     raise IOError ("\n\nPre-atmospheric file does not exist.\n")
 
-# Retrieve current output directory name given by user
-desc    = sys.argv[1:][1]
-
 # Set up locations of necessary scripts and directories of files
 thermo_dir       = location_TEA + "lib/gdata"
-loc_balance      = location_TEA + "tea/balance.py"
+
 inputs_dir       = location_out + desc + "/inputs/"
 loc_headerfile   = location_out + desc + "/headers/" + "header_" + desc + ".txt"
 loc_outputs      = location_out + desc + "/outputs/"
@@ -155,7 +155,7 @@ loc_transient    = location_out + desc + "/outputs/" + "transient/"
 out_dir          = location_out + desc + "/results/"
 single_res       = ["results-machine-read.txt", "results-visual.txt"]
 
-# Check if output directory already exists and inform user
+# Check if output directory already exists and inform user:
 if os.path.exists(inputs_dir):
     raw_input("  Output directory " + str(inputs_dir) + " already exists.\n"
               "  Press enter to continue and overwrite existing files,\n"
@@ -221,9 +221,10 @@ fout_name = out_dir + desc + '.tea'
 fout = open(fout_name, 'w+')
 
 # Write a header file
-header      = "# This is a final TEA output file with calculated abundances (mixing fractions) for all listed species.\n\
-# Units: pressure (bar), temperature (K), abundance (unitless)."
-fout.write(header + '\n\n')
+fout.write(
+  "# This is a final TEA output file with calculated abundances (mixing"
+  "\nfractions) for all listed species."
+  "\n# Units: pressure (bar), temperature (K), abundance (unitless).\n\n")
 fout.write('#SPECIES\n')
 
 # Write corrected species list into pre-atm file and continue
@@ -245,23 +246,16 @@ if times:
     elapsed = new - end
     print("pre-loop:           " + str(elapsed))
 
-# Detect operating system for sub-process support
-if os.name == 'nt': inshell = True    # Windows
-else:               inshell = False   # OSx / Linux
-
 # Allocate abundances matrix for all species and all T-Ps
 abun_matrix = np.zeros(n_spec)
 
 # Use x, x_bar values from a previous layer as initial guess:
 guess = None
-
 abn   = np.zeros((n_runs, n_spec))
-
 
 # ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
 for q in np.arange(n_runs):
-
     # Print for debugging purposes
     if doprint:
         print("\nReading atm file, TP line " + str(q))
@@ -269,19 +263,21 @@ for q in np.arange(n_runs):
         print('\nLayer {:d}'.format(q))
 
     # Radius, pressure, and temp for the current line
-    pres = pres_arr[q]
-    temp = temp_arr[q]
+    pressure = float(pres_arr[q])
+    temp     = float(temp_arr[q])
 
     # Produce header for the current line
-    mh.make_atmheader(q, spec_list, pres, temp, atom_arr, atom_name, desc, thermo_dir)
+    mh.make_atmheader(q, spec_list, pressure, temp, atom_arr,
+                      atom_name, desc, thermo_dir)
 
     # Time / speed testing for balance.py
     if times:
         ini = time.time()
 
-    # Get balanced initial guess for the current line, run balance.py
+    # Get balanced initial guess for the current line
+    header = form.readheader(loc_headerfile)
     if guess is None:
-        subprocess.call([loc_balance, loc_headerfile, desc], shell=inshell)
+        guess = bal.balance(header[5], header[6], doprint)
 
     # Retrieve balance runtime
     if times:
@@ -290,19 +286,18 @@ for q in np.arange(n_runs):
         print("balance.py:         " + str(elapsed))
 
     # Execute main TEA loop for the current line, run iterate.py
-    header = form.readheader(loc_headerfile)
     y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
           loc_headerfile, maxiter, doprint, times, location_out, guess, xtol)
-    guess = x, x_bar, spec_list
+    guess = x, x_bar
 
-    abn[q] = x / x_bar
+    abn[q] = x/x_bar
 
     # Save or delete intermediate headers
     if save_headers:
         # Save header files for each T-P
         old_name = loc_headerfile
-        new_name = loc_headerfile[0:-4] + "_" + '%.0f'%float(temp) + "K_" + \
-                   '%1.2e'%float(pres) + "bar" + loc_headerfile[-4::]
+        new_name = "{:s}_{:.0f}K_{:.2e}bar_{:s}".format(
+               loc_headerfile[0:-4], temp, pressure, loc_headerfile[-4:])
         if os.path.isfile(new_name):
             os.remove(new_name)
         os.rename(old_name, new_name)
@@ -312,8 +307,8 @@ for q in np.arange(n_runs):
         # Save directory for each T-P and its output files
         if not os.path.exists(loc_outputs): os.makedirs(loc_outputs)
         old_name = loc_transient
-        new_name = loc_outputs + desc + "_" + '%.0f'%float(temp) + "K_"  \
-                   '%1.2e'%float(pres) + "bar" + loc_outputs[-1::]
+        new_name = "{:s}{:s}_{:.0f}K_{:.2e}bar_{:s}".format(
+               loc_outputs, desc, temp, pressure, loc_outputs[-1:])
         if os.path.exists(new_name):
             for file in os.listdir(new_name):
                 os.remove(new_name + file)
@@ -321,9 +316,10 @@ for q in np.arange(n_runs):
         os.rename(old_name, new_name)
 
         # Save directory for each single T-P result and its results
-        single_dir = out_dir + "results_" + '%.0f'%float(temp) + "K_" + \
-                     '%1.2e'%float(pres) + "bar" + "/"
-        if not os.path.exists(single_dir): os.makedirs(single_dir)
+        single_dir = "{:s}results_{:.0f}K_{:.2e}bar/".format(
+                                                  out_dir, temp, pressure)
+        if not os.path.exists(single_dir):
+          os.makedirs(single_dir)
         for file in single_res:
             if os.path.isfile(single_dir + file):
                 os.remove(single_dir + file)

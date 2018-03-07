@@ -162,10 +162,10 @@ def lambdacorr(it_num, datadir, doprint, input, info):
     # Create exponential range, low_range
     # Exponent parameter that gives a value close to zero for the start of
     #          lambda exploration
-    lower       = -50
+    lower = -50
 
     # Define number of steps to explore exponential range
-    steps       = 100
+    steps = 100
 
     # Create lower exponential range
     low_range = np.exp(np.linspace(lower, 0, steps+1))
@@ -210,9 +210,9 @@ def lambdacorr(it_num, datadir, doprint, input, info):
       file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
                                                  '-visual.txt'
       # Export all values into machine and human readable output files
-      form.output(datadir, header, it_num, speclist, y, x_corr, delta_corr,  \
+      form.output(datadir, header, it_num, speclist, y, x_corr, delta_corr,
                     y_bar, x_corr_bar, delta_corr_bar, file, doprint)
-      form.fancyout(datadir, it_num, speclist, y, x_corr, delta_corr, y_bar, \
+      form.fancyout(datadir, it_num, speclist, y, x_corr, delta_corr, y_bar,
                      x_corr_bar, delta_corr_bar, file_fancy, doprint)
 
     return y, x_corr, delta_corr, y_bar, x_corr_bar, delta_corr_bar

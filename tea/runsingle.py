@@ -182,9 +182,9 @@ if times:
     print("pre-loop:           " + str(elapsed))
 
 # Execute main TEA loop
-mh.make_singleheader(infile, desc, thermo_dir)
-guess = bal.balance(loc_headerfile, desc, doprint)
+mh.make_singleheader(infile, desc, thermo_dir, location_out)
 header = form.readheader(loc_headerfile)
+guess = bal.balance(header[5], header[6], doprint)
 y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
            loc_headerfile, maxiter, doprint, times, location_out, guess, xtol)
 

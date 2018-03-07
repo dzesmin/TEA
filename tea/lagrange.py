@@ -223,9 +223,9 @@ def lagrange(it_num, datadir, doprint, input, info):
       file_fancy = datadir + '/lagrange-iteration-' + np.str(it_num) + \
                                               '-visual-nocorr.txt'
       # Export all values into machine and human readable output files
-      form.output(datadir, header, it_num, speclist, y, x, \
+      form.output(datadir, header, it_num, speclist, y, x,
                        delta, y_bar, x_bar, delta_bar, file, doprint)
-      form.fancyout(datadir, it_num, speclist, y, x, delta,\
+      form.fancyout(datadir, it_num, speclist, y, x, delta,
                          y_bar, x_bar, delta_bar, file_fancy, doprint)
 
     return y, x, delta, y_bar, x_bar, delta_bar
