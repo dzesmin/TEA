@@ -78,7 +78,7 @@ import readconf as rc
 
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, verb, times, \
-         abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol, ncpu = TEApars
 
 
 def comp(specie):

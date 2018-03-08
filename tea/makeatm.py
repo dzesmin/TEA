@@ -96,7 +96,7 @@ import readconf as rc
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, verb, times, \
-         abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol, ncpu = TEApars
 PT_file, pre_atm_name, input_elem, output_species = PREATpars
 
 # Print license

@@ -63,6 +63,9 @@ import ntpath
 import os
 import shutil
 import time
+import multiprocessing as mp
+import ctypes
+import warnings
 
 import readconf as rc
 import iterate  as it
@@ -72,6 +75,7 @@ import readatm  as ra
 import balance  as bal
 
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
+
 
 # =============================================================================
 # This program runs TEA over a pre-atm file that contains multiple T-P points.
@@ -106,11 +110,38 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # Example: ../TEA/tea/runatm.py ../TEA/tea/doc/examples/multiTP/atm_inputs/multiTP_Example.atm example_multiTP
 # =============================================================================
 
+def worker(pressure, temp, b, free_energy, heat, stoich_arr, guess,
+           maxiter, verb, times, xtol, save_headers, start, end, abn):
+    """
+    Multiprocessing thermochemical-equilibrium calculation.
+    """
+    # Switch off verbosity if using more than one CPU:
+    if ncpu > 1:
+        verb, times = 0, False
+
+    save_info = None
+    for q in np.arange(start, end):
+        if verb >= 1:
+            print('\nLayer {:d}:'.format(q))
+        #  guess = bal.balance(stoich_arr, b[start], False)
+        g_RT = mh.calc_gRT(free_energy, heat, temp[q])
+        if save_headers:
+            save_info = location_out, desc, speclist, temp[q]
+            hfolder = location_out + desc + "/headers/"
+            mh.write_header(hfolder, desc, temp[q], pressure[q], speclist,
+                            atom_name, stoich_arr, b[q], g_RT)
+
+        # Execute main TEA loop for the current line, run iterate.py
+        y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure[q],
+          stoich_arr, b[q], g_RT, maxiter, verb, times, guess, xtol, save_info)
+        guess = x, x_bar
+        abn[q] = x/x_bar
+
 
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, verb, times, \
-         abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol, ncpu = TEApars
 
 # Print license
 if verb >= 1:
@@ -236,8 +267,16 @@ if times:
     elapsed = new - end
     print("pre-loop:           " + str(elapsed))
 
-# Allocate abundances matrix for all species and all T-Ps
-abn = np.zeros((n_runs, nspec))
+# supress warning that ctypeslib will throw:
+with warnings.catch_warnings():
+  warnings.simplefilter("ignore")
+  # Allocate abundances matrix for all species and all T-Ps
+  sm_abn = mp.Array(ctypes.c_double, n_runs*nspec)
+  abn = np.ctypeslib.as_array(sm_abn.get_obj()).reshape((n_runs, nspec))
+
+# Bound ncpu to the manchine capacity:
+ncpu = np.clip(ncpu, 1, mp.cpu_count())
+chunksize = int(n_runs/float(ncpu)+1)
 
 # Load gdata:
 free_energy, heat = mh.read_gdata(speclist, thermo_dir)
@@ -247,49 +286,32 @@ temp_arr = np.array(temp_arr, np.double)
 pres_arr = np.array(pres_arr, np.double)
 atom_arr = np.array(atom_arr, np.double)
 
+# Time / speed testing for balance.py
+if times:
+    ini = time.time()
 # Initial abundances guess:
-guess = None
+guess = bal.balance(stoich_arr, atom_arr[0], verb)
+# Retrieve balance runtime
+if times:
+    fin = time.time()
+    elapsed = fin - ini
+    print("balance.py:         " + str(elapsed))
 
 # ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
-for q in np.arange(n_runs):
-    # Print for debugging purposes
-    if verb >= 1:
-        print('\nLayer {:d}'.format(q))
+processes = []
+for n in np.arange(ncpu):
+  start = n * chunksize
+  end   = np.amin(((n+1) * chunksize, n_runs))
+  proc = mp.Process(target=worker, args=(pres_arr, temp_arr, atom_arr,
+           free_energy, heat, stoich_arr, guess, maxiter, verb, times,
+           xtol, save_headers, start, end, abn))
+  processes.append(proc)
+  proc.start()
+# Make sure all processes finish their work:
+for n in np.arange(ncpu):
+  processes[n].join()
 
-    # Radius, pressure, and temp for the current line
-    pressure = pres_arr[q]
-    temp     = temp_arr[q]
-    b        = np.array(atom_arr[q], np.double)
-
-    # Produce header for the current line
-    g_RT = mh.calc_gRT(free_energy, heat, temp)
-    if save_headers:
-      hfolder = location_out + desc + "/headers/"
-      mh.write_header(hfolder, desc, temp, pressure, speclist, atom_name,
-                      stoich_arr, b, g_RT)
-
-    # Time / speed testing for balance.py
-    if times:
-        ini = time.time()
-
-    # Get balanced initial guess for the current line
-    if guess is None:
-        guess = bal.balance(stoich_arr, b, verb)
-
-    # Retrieve balance runtime
-    if times:
-        fin = time.time()
-        elapsed = fin - ini
-        print("balance.py:         " + str(elapsed))
-
-    if save_headers:
-      save_info = location_out, desc, speclist, temp
-    # Execute main TEA loop for the current line, run iterate.py
-    y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr,
-              b, g_RT, maxiter, verb, times, guess, xtol, save_info)
-    guess = x, x_bar
-    abn[q] = x/x_bar
 
 # Write output:
 for q in np.arange(n_runs):

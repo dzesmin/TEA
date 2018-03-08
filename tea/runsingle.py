@@ -97,7 +97,7 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, save_headers, save_outputs, verb, times, \
-         abun_file, location_out, xtol = TEApars
+         abun_file, location_out, xtol, ncpu = TEApars
 
 # Print license
 if verb >= 1:
