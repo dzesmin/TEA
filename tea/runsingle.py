@@ -96,8 +96,7 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
-maxiter, save_headers, save_outputs, verb, times, \
-         abun_file, location_out, xtol, ncpu = TEApars
+maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
 
 # Print license
 if verb >= 1:
@@ -189,17 +188,21 @@ header = form.readheader(loc_headerfile)
 stoich_arr, b = header[5], header[6]
 
 guess = bal.balance(stoich_arr, b, verb)
-save_info = location_out, desc, speclist, temp
+
+save_info = None
+if savefiles:
+  save_info = location_out, desc, speclist, temp
+
 y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr, b,
            g_RT, maxiter, verb, times, guess, xtol, save_info)
 
 
 # Save or delete headers file
-if save_headers == False:
+if not savefiles:
     shutil.rmtree(location_out + desc + "/headers/")
 
 # Save or delete lagrange.py and lambdacorr.py outputs
-if save_outputs:
+if not savefiles:
     # Save directory for each T-P and its output files
     if not os.path.exists(loc_outputs): os.makedirs(loc_outputs)
     old_name = loc_transient

@@ -74,8 +74,7 @@ def read():
   TEAlist: 1D list
      The TEA configuration parameters:
        maxiter: Integer
-       save_headers: Bool
-       save_outputs: Bool
+       savefiles: Bool
        verb: Integer
        times: Bool
        abun_file: String
@@ -106,8 +105,7 @@ def read():
 
   # read TEA section
   maxiter      = config.getint    ('TEA', 'maxiter')
-  save_headers = config.getboolean('TEA', 'save_headers')
-  save_outputs = config.getboolean('TEA', 'save_outputs')
+  savefiles    = config.getboolean('TEA', 'savefiles')
   times        = config.getboolean('TEA', 'times')
   abun_file    = config.get       ('TEA', 'abun_file')
   location_out = config.get       ('TEA', 'location_out')
@@ -130,6 +128,6 @@ def read():
   input_elem     = config.get('PRE-ATM', 'input_elem')
   output_species = config.get('PRE-ATM', 'output_species')
 
-  return [maxiter, save_headers, save_outputs, verb, times,
-          abun_file, location_out, xtol, ncpu], \
+  return [maxiter, savefiles, verb, times, abun_file,
+          location_out, xtol, ncpu], \
          [PT_file, pre_atm_name, input_elem, output_species]

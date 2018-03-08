@@ -111,7 +111,7 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # =============================================================================
 
 def worker(pressure, temp, b, free_energy, heat, stoich_arr, guess,
-           maxiter, verb, times, xtol, save_headers, start, end, abn):
+           maxiter, verb, times, xtol, savefiles, start, end, abn):
     """
     Multiprocessing thermochemical-equilibrium calculation.
     """
@@ -123,9 +123,8 @@ def worker(pressure, temp, b, free_energy, heat, stoich_arr, guess,
     for q in np.arange(start, end):
         if verb >= 1:
             print('\nLayer {:d}:'.format(q))
-        #  guess = bal.balance(stoich_arr, b[start], False)
         g_RT = mh.calc_gRT(free_energy, heat, temp[q])
-        if save_headers:
+        if savefiles:
             save_info = location_out, desc, speclist, temp[q]
             hfolder = location_out + desc + "/headers/"
             mh.write_header(hfolder, desc, temp[q], pressure[q], speclist,
@@ -140,8 +139,7 @@ def worker(pressure, temp, b, free_energy, heat, stoich_arr, guess,
 
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
-maxiter, save_headers, save_outputs, verb, times, \
-         abun_file, location_out, xtol, ncpu = TEApars
+maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
 
 # Print license
 if verb >= 1:
@@ -187,11 +185,9 @@ except:
 thermo_dir = location_TEA + "lib/gdata"
 
 
-# FINDME: Use save_headers as flag (TBI, rename as savefiles).
-save_info = None
-if save_headers:
-  inputs_dir       = location_out + desc + "/inputs/"
-  out_dir          = location_out + desc + "/results/"
+if savefiles:
+  inputs_dir = location_out + desc + "/inputs/"
+  out_dir    = location_out + desc + "/results/"
 
   # Check if output directory already exists and inform user:
   if os.path.exists(inputs_dir):
@@ -235,7 +231,7 @@ speclist = np.copy(good_spec)
 # =================== Start writing final atm file ===================
 # Open final atm file for writing, keep open to add new lines
 fout_name = desc + '.tea'
-if save_headers:
+if savefiles:
     fout_name = out_dir + desc + '.tea'
 
 # FINDME: If fout is None, return array
@@ -305,7 +301,7 @@ for n in np.arange(ncpu):
   end   = np.amin(((n+1) * chunksize, n_runs))
   proc = mp.Process(target=worker, args=(pres_arr, temp_arr, atom_arr,
            free_energy, heat, stoich_arr, guess, maxiter, verb, times,
-           xtol, save_headers, start, end, abn))
+           xtol, savefiles, start, end, abn))
   processes.append(proc)
   proc.start()
 # Make sure all processes finish their work:
