@@ -84,7 +84,7 @@ def readheader(file):
     Parameters
     ----------
     file: ASCII file
-              Header for the current layer in the atmosphere, e.g., one T-P
+       Header for the current layer in the atmosphere, e.g., one T-P
 
     Returns
     -------
@@ -191,35 +191,34 @@ def readoutput(file):
     Parameters
     ----------
     file: ASCII file
-              Header for the current layer in the atmosphere, i.e. one T-P
+       Header for the current layer in the atmosphere, i.e. one T-P
 
     Returns
     -------
     header:   string
-              Name of the header file used.
+       Name of the header file used.
     it_num:   integer
-              Iteration number.
+       Iteration number.
     speclist: string array
-              Array containing names of molecular species.
+       Array containing names of molecular species.
     y: float array
-              Array containing initial mole numbers of molecular species for
-              current iteration.
+       Array containing initial mole numbers of molecular species for
+       current iteration.
     x: float array
-              Array containing final mole numbers of molecular species for
-              current iteration.
+       Array containing final mole numbers of molecular species for
+       current iteration.
     delta: float array
-              Array containing change in mole numbers of molecular species for
-              current iteration.
+       Array containing change in mole numbers of molecular species for
+       current iteration.
     y_bar: float
-              Array containing sum of initial mole numbers for all molecular
-              species for current iteration.
+       Array containing sum of initial mole numbers for all molecular
+       species for current iteration.
     x_bar: float
-              Array containing sum of final mole numbers for all molecular
-              species for current iteration.
+       Array containing sum of final mole numbers for all molecular
+       species for current iteration.
     delta_bar: float
-              Change in total mole numbers of all species.
+       Change in total mole numbers of all species.
     '''
-
     # Open output file to read
     f = open(file, 'r')
 
@@ -247,7 +246,7 @@ def readoutput(file):
 
 
 def output(header, it_num, speclist, y, x, delta, y_bar,
-            x_bar, delta_bar, file, doprint=False):
+            x_bar, delta_bar, file, verb=0):
     '''
     This function produces machine-readable output files. The files are saved
     only if saveout = True in TEA.cfg file. The function is used by the
@@ -261,33 +260,32 @@ def output(header, it_num, speclist, y, x, delta, y_bar,
     Parameters
     ----------
     header:   string
-              Name of the header file used.
+       Name of the header file used.
     it_num:   integer
-              Iteration number.
+       Iteration number.
     speclist: string array
-              Array containing names of molecular species.
+       Array containing names of molecular species.
     y: float array
-              Array containing initial mole numbers of molecular species for
-              current iteration.
+       Array containing initial mole numbers of molecular species for
+       current iteration.
     x: float array
-              Array containing final mole numbers of molecular species for
-              current iteration.
+       Array containing final mole numbers of molecular species for
+       current iteration.
     delta: float array
-              Array containing change in mole numbers of molecular species for
-              current iteration.
+       Array containing change in mole numbers of molecular species for
+       current iteration.
     y_bar: float
-              Array containing sum of initial mole numbers for all molecular
-              species for current iteration.
+       Array containing sum of initial mole numbers for all molecular
+       species for current iteration.
     x_bar: float
-              Array containing sum of final mole numbers for all molecular
-              species for current iteration.
+       Array containing sum of final mole numbers for all molecular
+       species for current iteration.
     delta_bar: float
-              Change in total mole numbers of all species.
+       Change in total mole numbers of all species.
     file: string
-              Name of output file to be written.
-    doprint:  string
-              Parameter in configuration file that allows printing for
-              debugging purposes.
+       Name of output file to be written.
+    verb: Integer
+       Verbosity level (0=mute, 1=quiet, 2=verbose).
     '''
     # Open file to write
     f = open(file, 'w+')
@@ -333,12 +331,12 @@ def output(header, it_num, speclist, y, x, delta, y_bar,
     f.close()
 
     # Debugging check
-    if doprint:
+    if verb > 1:
         print('\n\nMade file \'' + file + '\' containing machine data.')
 
 
 def fancyout(it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
-             file, doprint=False):
+             file, verb=0):
     '''
     This function produces human readable output files. The files are saved
     only if saveout = True in TEA.cfg file. The function is used by the
@@ -347,37 +345,36 @@ def fancyout(it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
     of species for current iteration, final mole numbers of molecular species
     after the iteration is done, difference between starting and final mole
     numbers, total sum of initial mole numbers, total sum of final mole numbers
-    and the change in total mole numbers of all species.  If doprint = True,
+    and the change in total mole numbers of all species.  If verb>1,
     all data written to the file is presented on-screen.
 
     Parameters
     ----------
     it_num: integer
-              Iteration number.
+       Iteration number.
     speclist: string array
-              Array containing names of molecular species.
+       Array containing names of molecular species.
     y: float array
-              Array containing initial mole numbers of molecular species for
-              current iteration.
+       Array containing initial mole numbers of molecular species for
+       current iteration.
     x: float array
-              Array containing final mole numbers of molecular species for
-              current iteration.
+       Array containing final mole numbers of molecular species for
+       current iteration.
     delta: float array
-              Array containing change in mole numbers of molecular species for
-              current iteration.
+       Array containing change in mole numbers of molecular species for
+       current iteration.
     y_bar: float
-              Array containing sum of initial mole numbers for all molecular
-              species for current iteration.
+       Array containing sum of initial mole numbers for all molecular
+       species for current iteration.
     x_bar: float
-              Array containing sum of final mole numbers for all molecular
-              species for current iteration.
+       Array containing sum of final mole numbers for all molecular
+       species for current iteration.
     delta_bar: float
-              Change in total mole numbers of all species.
+       Change in total mole numbers of all species.
     file: string
-              Name of output file to be written.
-    doprint: string
-              Parameter in configuration file that allows printing for
-              debugging purposes.
+       Name of output file to be written.
+    verb: Integer
+       Verbosity level (0=mute, 1=quiet, 2=verbose).
     '''
     # Open file to write
     f = open(file, 'w+')
@@ -420,7 +417,7 @@ def fancyout(it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
 
     # Print for debugging purposes
     # Print all the data from the file on the screen
-    if doprint == True:
+    if verb > 1:
         f = open(file, 'r+')
         h = 0
         for line in f:
@@ -434,7 +431,7 @@ def fancyout(it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
 
 
 def fancyout_results(header, it_num, speclist, y, x, delta, y_bar,
-                     x_bar, delta_bar, pressure, temp, file, doprint):
+                     x_bar, delta_bar, pressure, temp, file, verb):
     '''
     This function produces the final result output for each T-P in the
     human-readable format. The final mole number for each species is divided
@@ -445,33 +442,32 @@ def fancyout_results(header, it_num, speclist, y, x, delta, y_bar,
     Parameters
     ----------
     header:   string
-              Name of the header file used.
+       Name of the header file used.
     it_num:   integer
-              Iteration number of last iteration.
+       Iteration number of last iteration.
     speclist: string array
-              Array containing names of molecular species.
+       Array containing names of molecular species.
     y: float array
-              Array containing initial mole numbers of molecular species for
-              first iteration.
+       Array containing initial mole numbers of molecular species for
+       first iteration.
     x: float array
-              Array containing final mole numbers of molecular species for
-              last iteration.
+       Array containing final mole numbers of molecular species for
+       last iteration.
     delta: float array
-              Array containing change in mole numbers of molecular species for
-              first and last iterations.
+       Array containing change in mole numbers of molecular species for
+       first and last iterations.
     y_bar: float
-              Array containing sum of initial mole numbers for all molecular
-              species for first iteration.
+       Array containing sum of initial mole numbers for all molecular
+       species for first iteration.
     x_bar: float
-              Array containing sum of final mole numbers for all molecular
-              species for last iteration.
+       Array containing sum of final mole numbers for all molecular
+       species for last iteration.
     delta_bar: float
-              Change in total mole numbers of all species.
+       Change in total mole numbers of all species.
     file: string
-              Name of output file to be written.
-    doprint:  string
-              Parameter in configuration file that allows printing for
-              debugging purposes.
+       Name of output file to be written.
+    verb: Integer
+       Verbosity level (0=mute, 1=quiet, 2=verbose).
     '''
     # Open file to read
     f = open(file, 'w+')
@@ -523,9 +519,8 @@ def fancyout_results(header, it_num, speclist, y, x, delta, y_bar,
 
     f.close()
 
-    # Print for debugging purposes
     # Print all the data from the file on the screen
-    if doprint == True:
+    if verb > 1:
         f = open(file, 'r+')
         h = 0
         for line in f:
@@ -539,24 +534,19 @@ def fancyout_results(header, it_num, speclist, y, x, delta, y_bar,
         f.close()
 
 
-def printout(str, it_num = False):
+def printout(str, it_num=False):
     '''
     Prints iteration progress number or other information in one line of
     terminal.
 
     Parameters
     ----------
-    str:    string
-            String defining what will be printed.
+    str: string
+       String defining what will be printed.
     it_num: integer
-            Iteration number to be printed. If False, will print out
-            contents of str instead.
-
-    Returns
-    -------
-    None
+       Iteration number to be printed. If False, will print out
+       contents of str instead.
     '''
-
     # Create print-out for terminal that can be overwritten
     stdout.write('\r\n')
     if np.bool(it_num):
@@ -568,4 +558,3 @@ def printout(str, it_num = False):
 
     # Clear printed value to allow overwriting for next
     stdout.flush()
-

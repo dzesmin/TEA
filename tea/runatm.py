@@ -62,7 +62,6 @@ import sys
 import ntpath
 import os
 import shutil
-import subprocess
 import time
 
 import readconf as rc
@@ -108,8 +107,14 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # =============================================================================
 
 
+# Read configuration-file parameters:
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, verb, times, \
+         abun_file, location_out, xtol = TEApars
+
 # Print license
-print("\n\
+if verb >= 1:
+  print("\n\
 ================= Thermal Equilibrium Abundances (TEA) =================\n\
 A program to calculate species abundances under thermochemical equilibrium.\n\
 \n\
@@ -124,11 +129,6 @@ https://physics.ucf.edu/mailman/listinfo/tea-user\n\
 Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
-
-# Read configuration-file parameters:
-TEApars, PREATpars = rc.read()
-maxiter, save_headers, save_outputs, doprint, times, \
-         abun_file, location_out, xtol = TEApars
 
 # Correct directory names
 if location_out[-1] != '/':
@@ -212,8 +212,8 @@ fout = open(fout_name, 'w+')
 
 # Write a header file
 fout.write(
-    "# This is a final TEA output file with calculated abundances (mixing"
-    "\nfractions) for all listed species."
+    "# This is a final TEA output file with calculated abundances (mixing "
+    "fractions) for all listed species."
     "\n# Units: pressure (bar), temperature (K), abundance (unitless).\n\n")
 fout.write('#SPECIES\n')
 
@@ -237,29 +237,30 @@ if times:
     print("pre-loop:           " + str(elapsed))
 
 # Allocate abundances matrix for all species and all T-Ps
-abun_matrix = np.zeros(nspec)
-
-# Use x, x_bar values from a previous layer as initial guess:
-guess = None
-abn   = np.zeros((n_runs, nspec))
+abn = np.zeros((n_runs, nspec))
 
 # Load gdata:
 free_energy, heat = mh.read_gdata(speclist, thermo_dir)
 stoich_arr = mh.read_stoich(speclist)
 
+temp_arr = np.array(temp_arr, np.double)
+pres_arr = np.array(pres_arr, np.double)
+atom_arr = np.array(atom_arr, np.double)
+
+# Initial abundances guess:
+guess = None
+
 # ============== Execute TEA for each T-P ==============
 # Loop over all lines in pre-atm file and execute TEA loop
 for q in np.arange(n_runs):
     # Print for debugging purposes
-    if doprint:
-        print("\nReading atm file, TP line " + str(q))
-    else:
+    if verb >= 1:
         print('\nLayer {:d}'.format(q))
 
     # Radius, pressure, and temp for the current line
-    pressure = float(pres_arr[q])
-    temp     = float(temp_arr[q])
-    b = np.array(atom_arr[q], np.double)
+    pressure = pres_arr[q]
+    temp     = temp_arr[q]
+    b        = np.array(atom_arr[q], np.double)
 
     # Produce header for the current line
     g_RT = mh.calc_gRT(free_energy, heat, temp)
@@ -274,7 +275,7 @@ for q in np.arange(n_runs):
 
     # Get balanced initial guess for the current line
     if guess is None:
-        guess = bal.balance(stoich_arr, b, doprint)
+        guess = bal.balance(stoich_arr, b, verb)
 
     # Retrieve balance runtime
     if times:
@@ -286,16 +287,14 @@ for q in np.arange(n_runs):
       save_info = location_out, desc, speclist, temp
     # Execute main TEA loop for the current line, run iterate.py
     y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr,
-              b, g_RT, maxiter, doprint, times, guess, xtol, save_info)
+              b, g_RT, maxiter, verb, times, guess, xtol, save_info)
     guess = x, x_bar
-
     abn[q] = x/x_bar
 
 # Write output:
 for q in np.arange(n_runs):
     # Insert results from the current line (T-P) to atm file
-    fout.write(pres_arr[q].rjust(10) + ' ')
-    fout.write(temp_arr[q].rjust(7) + ' ')
+    fout.write("{:.5e} {:.5f} ".format(pres_arr[q], temp_arr[q]))
     for i in np.arange(nspec):
         fout.write('{:1.4e} '.format(abn[q,i]))
     fout.write('\n')
@@ -304,7 +303,8 @@ for q in np.arange(n_runs):
 fout.close()
 
 # Print on-screen
-print("\n  Species abundances calculated.\n  Created TEA atmospheric file.")
+if verb >= 1:
+  print("\n  Species abundances calculated.\n  Created TEA atmospheric file.")
 
 # Time / speed testing
 if times:

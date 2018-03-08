@@ -61,7 +61,7 @@ from sympy.solvers import solve
 
 import format as form
 
-def lagrange(it_num, doprint, input, info, save_info=None):
+def lagrange(it_num, verb, input, info, save_info=None):
     '''
     This code applies Lagrange's method and calculates minimum based on the
     methodology elaborated in the TEA theory document in Section (3). Equations in
@@ -78,39 +78,38 @@ def lagrange(it_num, doprint, input, info, save_info=None):
     Parameters
     ----------
     it_num:  integer
-             Iteration number.
-    doprint: string
-             Parameter in configuration file that allows printing for
-             debugging purposes.
+       Iteration number.
+    verb: Integer
+       Verbosity level (0=mute, 1=quiet, 2=verbose).
     input:   List
-             The input values/data from the previous
-             calculation in lagrange.py or lambdacorr.py. It is a list
-             containing current header directory, current iteration
-             number, array of species names, array of initial guess,
-             array of non-corrected Lagrange values, and array of
-             lambdacorr corrected values.
-    info:    List
-             FINDME
+       The input values/data from the previous
+       calculation in lagrange.py or lambdacorr.py. It is a list
+       containing current header directory, current iteration
+       number, array of species names, array of initial guess,
+       array of non-corrected Lagrange values, and array of
+       lambdacorr corrected values.
+    info: List
+       FINDME
     save_info: string
-             Current directory where TEA is run.
+       Current directory where TEA is run.
 
     Returns
     -------
     y: float array
-            Input guess of molecular species.
+       Input guess of molecular species.
     x: float array
-            Final mole numbers of molecular species.
+       Final mole numbers of molecular species.
     delta: float array
-            Array containing change in initial and final mole numbers of
-            molecular species for current iteration.
+       Array containing change in initial and final mole numbers of
+       molecular species for current iteration.
     y_bar: float
-            Array containing total sum of initial guesses of all molecular
-            species for current iteration.
+       Array containing total sum of initial guesses of all molecular
+       species for current iteration.
     x_bar: float
-            Total sum of the final mole numbers of all molecular species.
+       Total sum of the final mole numbers of all molecular species.
     delta_bar: float
-            Change in total of initial and final mole numbers of molecular
-            species.
+       Change in total of initial and final mole numbers of molecular
+       species.
     '''
     # Read values from the header file
     pressure = info[0]
@@ -230,10 +229,10 @@ def lagrange(it_num, doprint, input, info, save_info=None):
               datadir, it_num)
       # Export all values into machine and human readable output files
       form.output(headerfile, it_num, speclist, y, x, delta,
-                  y_bar, x_bar, delta_bar, file, doprint)
+                  y_bar, x_bar, delta_bar, file, verb)
       file = '{:s}/lagrange_iteration-{:03d}_visual-nocorr.txt'.format(
               datadir, it_num)
       form.fancyout(it_num, speclist, y, x, delta, y_bar, x_bar,
-                    delta_bar, file, doprint)
+                    delta_bar, file, verb)
 
     return y, x, delta, y_bar, x_bar, delta_bar

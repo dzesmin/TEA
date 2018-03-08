@@ -72,9 +72,9 @@ def dF_dlam(s, i, x, y, delta, c, x_bar, y_bar, delta_bar):
     return dF_dlam
 
 
-def lambdacorr(it_num, doprint, input, info, save_info=None):
+def lambdacorr(it_num, verb, input, info, save_info=None):
     '''
-    This module applies lambda correction method (see Section 4 in the TEA theory
+    This module applies lambda correction method (Section 4 in the TEA theory
     document). When input mole numbers are negative, the code corrects them to
     positive values and pass them to the next iteration cycle. The code reads
     the values from the last lagrange output, the information from the header
@@ -89,9 +89,8 @@ def lambdacorr(it_num, doprint, input, info, save_info=None):
     ----------
     it_num:  integer
        Iteration number.
-    doprint: string
-       Parameter in configuration file that allows printing for
-       debugging purposes.
+    verb: Integer
+       Verbosity level (0=mute, 1=quiet, 2=verbose).
     input: List
        A list containing the results/data from the previous
        calculation in lagrange.py or lambdacorr.py:
@@ -101,27 +100,26 @@ def lambdacorr(it_num, doprint, input, info, save_info=None):
        lambdacorr corrected values.
     save_info: List of stuff
        If not None, save info to files.  The list contains:
-        [location_out, desc, speclist, temp]
+         [location_out, desc, speclist, temp]
 
     Returns
     -------
     y: array of floats
-             The initial guess of molecular species.
+       The initial guess of molecular species.
     x_corr:  array of floats
-             Final mole numbers of molecular species.
+       Final mole numbers of molecular species.
     delta_corr: array of floats
-             Array containing change of initial and final mole numbers of
-             molecular species for current iteration.
+       Array containing change of initial and final mole numbers of
+       molecular species for current iteration.
     y_bar: float
-             Total initial guess of all molecular species for
-             current iteration.
+       Total initial guess of all molecular species for
+       current iteration.
     x_corr_bar: float
-             Total sum of the final mole numbers of all molecular species.
+       Total sum of the final mole numbers of all molecular species.
     detla_corr_bar: float
-             Change in total number of all species.
-    doprint: string
-             Parameter in configuration file that allows printing for
-             debugging purposes.
+       Change in total number of all species.
+    verb: Integer
+       Verbosity level (0=mute, 1=quiet, 2=verbose).
 
     Notes
     -----
@@ -216,10 +214,10 @@ def lambdacorr(it_num, doprint, input, info, save_info=None):
       file = '{:s}/lagrange_iteration-{:03d}_machine-read.txt'.format(
               datadir, it_num)
       form.output(headerfile, it_num, speclist, y, x_corr, delta_corr,
-                    y_bar, x_corr_bar, delta_corr_bar, file, doprint)
+                    y_bar, x_corr_bar, delta_corr_bar, file, verb)
       file = '{:s}/lagrange_iteration-{:03d}_visual.txt'.format(
               datadir, it_num)
       form.fancyout(it_num, speclist, y, x_corr, delta_corr, y_bar,
-                     x_corr_bar, delta_corr_bar, file, doprint)
+                     x_corr_bar, delta_corr_bar, file, verb)
 
     return y, x_corr, delta_corr, y_bar, x_corr_bar, delta_corr_bar

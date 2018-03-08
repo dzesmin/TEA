@@ -76,7 +76,7 @@ def read():
        maxiter: Integer
        save_headers: Bool
        save_outputs: Bool
-       doprint: Bool
+       verb: Integer
        times: Bool
        abun_file: String
        location_out: String
@@ -98,7 +98,7 @@ def read():
   try:
       f = open(cfg_name)
   except IOError:
-      print("\nConfig file is missing. Place TEA.cfg in the working directory\n")
+      print("\nMissing config file, place TEA.cfg in the working directory.\n")
 
   # open config file
   config = ConfigParser.RawConfigParser({})
@@ -108,14 +108,16 @@ def read():
   maxiter      = config.getint    ('TEA', 'maxiter')
   save_headers = config.getboolean('TEA', 'save_headers')
   save_outputs = config.getboolean('TEA', 'save_outputs')
-  doprint      = config.getboolean('TEA', 'doprint')
+  verb         = config.getint    ('TEA', 'verb')
   times        = config.getboolean('TEA', 'times')
   abun_file    = config.get       ('TEA', 'abun_file')
   location_out = config.get       ('TEA', 'location_out')
+
+  # Optional arguments:
   if config.has_option("TEA", "xtol"):
-    xtol       = config.getfloat  ('TEA', 'xtol')
+    xtol  = config.getfloat  ('TEA', 'xtol')
   else:
-    xtol       = 1e-6
+    xtol  = 1e-6
 
   # read PRE-ATM section
   PT_file        = config.get('PRE-ATM', 'PT_file')
@@ -123,6 +125,6 @@ def read():
   input_elem     = config.get('PRE-ATM', 'input_elem')
   output_species = config.get('PRE-ATM', 'output_species')
 
-  return [maxiter, save_headers, save_outputs, doprint, times,
+  return [maxiter, save_headers, save_outputs, verb, times,
           abun_file, location_out, xtol], \
          [PT_file, pre_atm_name, input_elem, output_species]

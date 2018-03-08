@@ -67,7 +67,7 @@ import readconf as rc
 
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
-maxiter, save_headers, save_outputs, doprint, times, \
+maxiter, save_headers, save_outputs, verb, times, \
          abun_file, location_out, xtol = TEApars
 
 # Correct directory names

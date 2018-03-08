@@ -91,7 +91,7 @@ from   format import printout
 # =============================================================================
 
 
-def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
+def iterate(pressure, a, b, g_RT, maxiter, verb, times,
             guess, xtol=3e-6, save_info=None):
   """
   Run iterative Lagrangian minimization and lambda correction.
@@ -108,8 +108,8 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
      Species chemical potentials.
   maxiter: Integer
      Maximum number of iterations.
-  doprint: Bool
-     If True, print information to screen.
+  verb: Integer
+     Verbosity level (0=mute, 1=quiet, 2=verbose).
   times: Bool
      If True, track excecution times.
   guess: 1D list
@@ -162,7 +162,7 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
   it_num  = 1
   while it_num <= maxiter:
       # Output iteration number
-      if not doprint  and  not times  and  it_num%10==0:
+      if verb >= 1  and  (it_num%10) == 0:
           stdout.write(' {:d}\r'.format(it_num))
           stdout.flush()
 
@@ -171,7 +171,7 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
           ini = time.time()
 
       # Execute Lagrange minimization
-      lc_data = lg.lagrange(it_num, doprint, lc_data, info, save_info)
+      lc_data = lg.lagrange(it_num, verb, lc_data, info, save_info)
 
       # Time / speed testing for lagrange.py
       if times:
@@ -180,14 +180,14 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
           print("lagrange {:>4d}:  {:f} s." + format(it_num, elapsed))
 
       # Print for debugging purposes
-      if doprint:
+      if verb > 1:
           printout("Iteration {:d} Lagrange complete.  Starting lambda "
                    "correction...".format(it_num))
 
       # Check if x_i have negative mole numbers, if so, do lambda correction
       if np.any(lc_data[1] < 0):
           # Print for debugging purposes
-          if doprint:
+          if verb > 1:
               printout('Correction required. Initializing...')
 
           # Time / speed testing for lambdacorr.py
@@ -195,7 +195,7 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
               ini = time.time()
 
           # Execute lambda correction
-          lc_data = lc.lambdacorr(it_num, doprint, lc_data, info, save_info)
+          lc_data = lc.lambdacorr(it_num, verb, lc_data, info, save_info)
 
           # Print for debugging purposes
           if times:
@@ -204,32 +204,33 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
               print("lambcorr {:>4d}:  {:f} s." + format(it_num, elapsed))
 
           # Print for debugging purposes
-          if doprint:
+          if verb > 1:
               printout("Iteration {:d} lambda correction complete.  "
                        "Checking precision...".format(it_num))
 
       # Lambda correction is not needed
       else:
           # Print for debugging purposes
-          if doprint:
+          if verb > 1:
               printout('Iteration {:d} did not need lambda correction.'.
                         format(it_num))
 
       xdiff = (lc_data[1]/lc_data[4])/(lc_data[0]/lc_data[3]) - 1
       if np.sum(np.abs(xdiff))/len(xdiff) <= xtol:
+        if verb >= 1:
           stdout.write(' {:d}\r'.format(it_num))
           printout("The solution has converged to the given tolerance error.\n")
-          break
+        break
 
       it_num += 1
       # If max iteration not met, continue with next iteration cycle
-      if doprint:
+      if verb > 1:
           printout('Max interation not met. Starting next iteration...\n')
 
 
   # ============== Stop the loop, max iteration reached ============== #
   # Stop if max iteration is reached
-  if it_num == maxiter+1:
+  if verb >= 1 and it_num == maxiter+1:
       printout('Maximum iteration reached.\n')
 
   # Retrieve most recent iteration values
@@ -259,11 +260,10 @@ def iterate(pressure, a, b, g_RT, maxiter, doprint, times,
     # Export all values into machine and human readable output files
     file = "{:s}/results-machine-read.txt".format(datadirr)
     form.output(headerfile, it_num, speclist, x, x_new, delta,
-                x_bar, x_bar_new, delta_bar, file, doprint)
+                x_bar, x_bar_new, delta_bar, file, verb)
 
     file = "{:s}/results-visual.txt".format(datadirr)
-    form.fancyout_results(headerfile, it_num, speclist, x, x_new,
-                          delta, x_bar, x_bar_new, delta_bar, pressure,
-                          temp, file, doprint)
+    form.fancyout_results(headerfile, it_num, speclist, x, x_new, delta,
+                x_bar, x_bar_new, delta_bar, pressure, temp, file, verb)
 
   return input_new

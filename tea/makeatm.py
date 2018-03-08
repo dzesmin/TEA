@@ -93,8 +93,15 @@ import readconf as rc
 #    with their correct names
 # =============================================================================
 
+# Read configuration-file parameters:
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, verb, times, \
+         abun_file, location_out, xtol = TEApars
+PT_file, pre_atm_name, input_elem, output_species = PREATpars
+
 # Print license
-print("\n\
+if verb >= 1:
+  print("\n\
 ================= Thermal Equilibrium Abundances (TEA) =================\n\
 A program to calculate species abundances under thermochemical equilibrium.\n\
 \n\
@@ -110,12 +117,6 @@ Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
 
-# Read configuration-file parameters:
-TEApars, PREATpars = rc.read()
-maxiter, save_headers, save_outputs, doprint, times, \
-         abun_file, location_out, xtol = TEApars
-PT_file, pre_atm_name, input_elem, output_species = PREATpars
-
 # Correct directory names
 if location_out[-1] != '/':
     location_out += '/'
@@ -125,7 +126,8 @@ desc  = sys.argv[1:][0]
 
 # Check if output directory exists and inform user
 if os.path.exists(location_out + desc):
-    raw_input("  Output directory " + str(location_out + desc) + "/ already exists.\n"
+    raw_input("  Output directory " + str(location_out + desc)
+                 + "/ already exists.\n"
               "  Press enter to continue and overwrite existing files,\n"
               "  or quit and choose another output name.\n")
 
@@ -151,7 +153,6 @@ def readPT(PT_file):
     temp: 1D array of floats
           Array containing temperatures in each layer.
     """
-
     # Read abundance data and convert to array:
     f = open(PT_file, 'r')
     data = []
@@ -203,40 +204,39 @@ def makeatm():
     -------
     None
     '''
-
     # Check if config file exists
     TEA_config = 'TEA.cfg'
     try:
         f = open(TEA_config)
     except IOError:
-        print("\nConfig file is missing. Place TEA.cfg in the working directory.\n")
+      print("\nMissing config file, place TEA.cfg in the working directory.\n")
 
     # Inform user if TEA.cfg file already exists in inputs/ directory
-    if os.path.isfile(inputs_dir + TEA_config):
-        print("  " + str(TEA_config) + " overwritten in atm_inputs/ directory.")
+    if verb >= 1 and os.path.isfile(inputs_dir + TEA_config):
+        print("  {:s} overwritten in atm_inputs/ dir.".format(TEA_config))
     # Copy TEA.cfg file to current inputs directory
     shutil.copy2(TEA_config, inputs_dir + TEA_config)
 
     # Inform user if PT file already exists in inputs/ directory
     head, PT_filename   = ntpath.split(PT_file)
-    if os.path.isfile(inputs_dir + PT_filename):
-        print("  " + str(PT_filename) + " overwritten in atm_inputs/ directory.")
+    if verb >= 1 and os.path.isfile(inputs_dir + PT_filename):
+        print("  {:s} overwritten in atm_inputs/ dir.".format(PT_filename))
     # Copy PT file to current inputs directory
     shutil.copy2(PT_file, inputs_dir + PT_filename)
 
     # Inform user if abundances file already exists in inputs/ directory
     head, abun_filename = ntpath.split(abun_file)
-    if os.path.isfile(inputs_dir + abun_filename):
-        print("  " + str(abun_filename) + " overwritten in atm_inputs/ directory.")
+    if verb >= 1 and os.path.isfile(inputs_dir + abun_filename):
+        print("  {:s} overwritten in atm_inputs/ dir.".format(abun_filename))
     # Copy abundances file to inputs/ directory
     shutil.copy2(abun_file, inputs_dir + abun_filename)
 
     # Inform user if pre-atm file already exists in inputs/ directory
     if os.path.isfile(inputs_dir + pre_atm_name):
-        raw_input("\n  Pre-atmospheric file " + str(pre_atm_name) + \
+        raw_input("\n  Pre-atmospheric file " + str(pre_atm_name) +
         " already exists in atm_inputs/ directory.\n"
-        "  Press enter to continue and overwrite existing file, or quit and choose\n"
-        "  another pre-atm name.")
+        "  Press enter to continue and overwrite existing file, or\n"
+        "  quit and choose another pre-atm name.")
 
     # Read pressure and temperature data
     pressure, temp = readPT(PT_file)
@@ -270,8 +270,9 @@ def makeatm():
     # Catch if input elements not included in output species
     for i in in_elem_split:
         if not any(i in j for j in out_elem):
-            raise IOError ("\n\n  Some input elements not included in output species.\n"
-                             "  Correct TEA.cfg and rerun.\n")
+            raise IOError(
+                    "\n\nSome input elements not included in output species."
+                      "\nCorrect TEA.cfg and rerun.\n")
 
     # Trim abundata to elements we need
     data_slice = np.zeros(abundata.shape[0], dtype=bool)
@@ -312,8 +313,7 @@ def makeatm():
 
     # Fill in data list
     for i in np.arange(n_layers):
-        out.append(['%8.4e'%pressure[i]] + \
-                          ['%7.2f'%temp[i]] + out_abn)
+        out.append(['%8.4e'%pressure[i]] + ['%7.2f'%temp[i]] + out_abn)
 
     # Pre-atm header with basic instructions
     header = ("# This is a TEA pre-atmosphere input file.\n"
@@ -342,7 +342,9 @@ def makeatm():
         f.write('\n')
     f.close()
 
-    print("\nCreated pre-atmospheric file:\n" + str(inputs_dir + pre_atm_name) + "\n")
+    if verb >= 1:
+      print("\nCreated pre-atmospheric file:\n"
+            + str(inputs_dir + pre_atm_name) + "\n")
 
 
 if __name__ == "__main__":

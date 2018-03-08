@@ -94,8 +94,14 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # Example: ../TEA/tea/runsingle.py ../TEA/doc/examples/singleTP/inputs/singleTP_Example.txt Single_Example
 # =============================================================================
 
+# Read configuration-file parameters:
+TEApars, PREATpars = rc.read()
+maxiter, save_headers, save_outputs, verb, times, \
+         abun_file, location_out, xtol = TEApars
+
 # Print license
-print("\n\
+if verb >= 1:
+  print("\n\
 ================= Thermal Equilibrium Abundances (TEA) =================\n\
 A program to calculate species abundances under thermochemical equilibrium.\n\
 \n\
@@ -110,11 +116,6 @@ https://physics.ucf.edu/mailman/listinfo/tea-user\n\
 Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
-
-# Read configuration-file parameters:
-TEApars, PREATpars = rc.read()
-maxiter, save_headers, save_outputs, doprint, times, \
-         abun_file, location_out, xtol = TEApars
 
 # Correct location name
 if location_out[-1] != '/':
@@ -157,21 +158,22 @@ except IOError:
     print("\nConfig file is missing. Place TEA.cfg in the working directory.\n")
 
 # Inform user if TEA.cfg file already exists in inputs/ directory
-if os.path.isfile(inputs_dir + TEA_config):
+if verb >= 1 and os.path.isfile(inputs_dir + TEA_config):
     print("  " + str(TEA_config) + " overwritten in inputs/ directory.")
 # Copy TEA.cfg file to current inputs directory
 shutil.copy2(TEA_config, inputs_dir + TEA_config)
 
 # Inform user if abundances file already exists in inputs/ directory
 head, abun_filename = ntpath.split(abun_file)
-if os.path.isfile(inputs_dir + abun_filename):
+if verb >= 1 and os.path.isfile(inputs_dir + abun_filename):
     print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
 # Copy abundances file to inputs/ directory
 shutil.copy2(abun_file, inputs_dir + abun_filename)
 
 # Inform user if single T-P input file already exists in inputs/ directory
-if os.path.isfile(inputs_dir + infile.split("/")[-1]):
-    print("  " + str(infile.split("/")[-1]) + " overwritten in inputs/ directory.\n")
+if verb >= 1 and os.path.isfile(inputs_dir + infile.split("/")[-1]):
+    print("  " + str(infile.split("/")[-1])
+          + " overwritten in inputs/ directory.\n")
 # Copy single T-P input file to inputs directory
 shutil.copy2(infile, inputs_dir + infile.split("/")[-1])
 
@@ -184,9 +186,12 @@ if times:
 # Execute main TEA loop
 mh.make_singleheader(infile, desc, thermo_dir, location_out)
 header = form.readheader(loc_headerfile)
-guess = bal.balance(header[5], header[6], doprint)
-y, x, delta, y_bar, x_bar, delta_bar = it.iterate(header, desc,
-           loc_headerfile, maxiter, doprint, times, location_out, guess, xtol)
+stoich_arr, b = header[5], header[6]
+
+guess = bal.balance(stoich_arr, b, verb)
+save_info = location_out, desc, speclist, temp
+y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr, b,
+           g_RT, maxiter, verb, times, guess, xtol, save_info)
 
 
 # Save or delete headers file
@@ -208,7 +213,8 @@ else:
     shutil.rmtree(loc_outputs)
 
 # Print on-screen
-print("\n  Species abundances calculated.\n  Created results file.")
+if verb >= 1:
+  print("\n  Species abundances calculated.\n  Created results file.")
 
 # Time / speed testing
 if times:

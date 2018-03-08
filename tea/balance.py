@@ -67,7 +67,7 @@ from sympy.solvers import solve
 import format as form
 
 
-def balance(a, b, doprint=False, loc_out=None):
+def balance(a, b, verb=0, loc_out=None):
   """
   This code produces an initial guess for the first TEA iteration by
   fulfilling the mass balance condition, sum_i(ai_j * y_i) = bj (equation (17)
@@ -105,8 +105,8 @@ def balance(a, b, doprint=False, loc_out=None):
      Stoichiometric coefficients of the species.
   b: 1D float ndarray
      Elemental mixing fractions.
-  doprint: Bool
-     Flag to increase verbosity.
+  verb: Integer
+     Verbosity level (0=mute, 1=quiet, 2=verbose).
   loc_out: String
      If not None, save results to this folder.
 
@@ -121,7 +121,7 @@ def balance(a, b, doprint=False, loc_out=None):
   # Read in values from header file
   nspec, natom = np.shape(a)
   # Print b values for debugging purposes
-  if doprint:
+  if verb > 1:
       print("b values: " + str(b))
 
   # Find chunk of ai_j array that will allow the corresponding yi values
@@ -145,7 +145,7 @@ def balance(a, b, doprint=False, loc_out=None):
       if has_zero == False:
           free_id = []
           for m in np.arange(natom):
-              if doprint:
+              if verb > 1:
                   print('Using y_{:d} as a free variable.'.format(n + m + 1))
               free_id.append(n + m)
           break
@@ -188,7 +188,7 @@ def balance(a, b, doprint=False, loc_out=None):
       # If no solution found, decrease scale size.
       if result == []:
           scale /= 10
-          if doprint:
+          if verb > 1:
               print("Correcting initial guesses for realistic mass. \
                       Trying " + str(scale) + "...")
 
@@ -202,14 +202,14 @@ def balance(a, b, doprint=False, loc_out=None):
           # If negatives found, decrease scale size
           if hasneg:
               scale /= 10
-              if doprint:
+              if verb > 1:
                   print("Negative numbers found in fit."
                       "\n  Correcting initial guesses for realistic mass."
                       "\n  Trying scale of {:.0e}.".format(scale))
           # If no negatives found, exit the loop (good fit is found)
           else:
               nofit = False
-              if doprint:
+              if verb > 1:
                   print("A scale of {:.0e} provided a viable initial guess.".
                         format(scale))
 
@@ -224,16 +224,15 @@ def balance(a, b, doprint=False, loc_out=None):
   # This part of the code is only for debugging purposes
   # It rounds the values and checks whether the balance equation is satisfied
   # No values are changed and this serves solely as a check
-  if doprint == True:
+  if verb > 1:
       print('\nChecks:')
   for m in np.arange(natom):
       flag = round((sum(a[:,m] * y_init[:])), 2) == round(b[m], 2)
       if flag:
-          if doprint:
+          if verb > 1:
               print('Equation {:d} is satisfied.'.format(m+1))
       else:
           print('Equation {:d} is NOT satisfied. Check for errors'.format(m+1))
-
 
   # Put all initial mole numbers in y array
   y     = np.array(y_init, dtype=np.double)
@@ -252,10 +251,10 @@ def balance(a, b, doprint=False, loc_out=None):
     file = '{:s}/lagrange-iteration-{:d}-machine-read.txt'.format(
                                                             loc_out, it_num)
     form.output(datadir, header, it_num, speclist, y, y, delta,
-                y_bar, y_bar, delta_bar, file, doprint)
+                y_bar, y_bar, delta_bar, file, verb)
     # Put results into human readable file
     file = '{:s}/lagrange-iteration-{:d}-visual.txt'.format(loc_out, it_num)
     form.fancyout(datadir, it_num, speclist, y, y, delta, y_bar,
-                  y_bar, delta_bar, file, doprint)
+                  y_bar, delta_bar, file, verb)
 
   return y, y_bar
