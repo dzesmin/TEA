@@ -97,6 +97,9 @@ def read_stoich(spec_list, stoich_file='lib/stoich.txt'):
     spec_stoich: 2D float ndarray
        Array containing values from stoich_file that correspond to the
        species used.
+    atom_stoich: 1D String ndarray
+       Array of elements with non-zero stoichiometric values from
+       spec_stoich species.
     """
     # Get number of elements that occur in species of interest
     nspec = len(spec_list)
@@ -120,7 +123,8 @@ def read_stoich(spec_list, stoich_file='lib/stoich.txt'):
     # All species names:
     allspec = stoich_data[2:,0]
     # Elemental abundances:
-    dex = stoich_data[0, 1:]
+    dex      = stoich_data[0, 1:]
+    elements = stoich_data[1, 1:]
     # Trim species names and cast to float:
     stoich_data = np.asarray(stoich_data[2:,1:], np.double)
 
@@ -135,8 +139,9 @@ def read_stoich(spec_list, stoich_file='lib/stoich.txt'):
     ielem = np.sum(spec_stoich, axis=0) > 0
     b = np.array(dex[ielem], np.double)
     spec_stoich = spec_stoich[:,ielem]
+    atom_stoich = elements[ielem]
 
-    return spec_stoich
+    return spec_stoich, atom_stoich
 
 
 def read_gdata(spec_list, thermo_dir):

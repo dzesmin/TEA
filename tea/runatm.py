@@ -276,11 +276,15 @@ chunksize = int(n_runs/float(ncpu)+1)
 
 # Load gdata:
 free_energy, heat = mh.read_gdata(speclist, thermo_dir)
-stoich_arr = mh.read_stoich(speclist)
+stoich_arr, elem_arr = mh.read_stoich(speclist)
 
 temp_arr = np.array(temp_arr, np.double)
 pres_arr = np.array(pres_arr, np.double)
 atom_arr = np.array(atom_arr, np.double)
+
+# Use only elements with non-null stoichiometric values:
+eidx = np.in1d(atom_name, elem_arr)
+atom_arr = atom_arr[:,eidx]
 
 # Time / speed testing for balance.py
 if times:
