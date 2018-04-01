@@ -123,6 +123,13 @@ if location_out[-1] != '/':
 # Retrieve user inputs file
 infile  = sys.argv[1:][0]
 
+# Check if config file exists in current working directory
+TEA_config = 'TEA.cfg'
+try:
+    f = open(TEA_config)
+except IOError:
+    print("\nConfig file is missing. Place TEA.cfg in the working directory.\n")
+
 # If input file does not exist break
 try:
     f = open(infile)
@@ -140,41 +147,39 @@ if os.path.exists(location_out + desc):
 
 # Set up locations of necessary scripts and directories of files
 thermo_dir     = location_TEA + "lib/gdata"
-loc_iterate    = location_TEA + "tea/iterate.py"
-inputs_dir     = location_out + desc + "/inputs/"
-loc_headerfile = location_out + desc + "/headers/" + "header_" + desc + ".txt"
-loc_outputs    = location_out + desc + "/outputs/"
-loc_transient  = location_out + desc + "/outputs/" + "transient/"
 
 # Create inputs directory
-if not os.path.exists(inputs_dir): os.makedirs(inputs_dir)
+if not os.path.exists(location_out + desc):
+  os.makedirs(location_out + desc)
 
-# Check if config file exists in current working directory
-TEA_config = 'TEA.cfg'
-try:
-    f = open(TEA_config)
-except IOError:
-    print("\nConfig file is missing. Place TEA.cfg in the working directory.\n")
 
-# Inform user if TEA.cfg file already exists in inputs/ directory
-if verb >= 1 and os.path.isfile(inputs_dir + TEA_config):
-    print("  " + str(TEA_config) + " overwritten in inputs/ directory.")
-# Copy TEA.cfg file to current inputs directory
-shutil.copy2(TEA_config, inputs_dir + TEA_config)
+inputs_dir     = location_out + desc + "/inputs/"
+loc_outputs    = location_out + desc + "/outputs/"
 
-# Inform user if abundances file already exists in inputs/ directory
-head, abun_filename = ntpath.split(abun_file)
-if verb >= 1 and os.path.isfile(inputs_dir + abun_filename):
-    print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
-# Copy abundances file to inputs/ directory
-shutil.copy2(abun_file, inputs_dir + abun_filename)
+if savefiles:
+  # Create inputs directory
+  if not os.path.exists(inputs_dir):
+    os.makedirs(inputs_dir)
 
-# Inform user if single T-P input file already exists in inputs/ directory
-if verb >= 1 and os.path.isfile(inputs_dir + infile.split("/")[-1]):
-    print("  " + str(infile.split("/")[-1])
-          + " overwritten in inputs/ directory.\n")
-# Copy single T-P input file to inputs directory
-shutil.copy2(infile, inputs_dir + infile.split("/")[-1])
+  # Inform user if TEA.cfg file already exists in inputs/ directory
+  if verb >= 1 and os.path.isfile(inputs_dir + TEA_config):
+      print("  " + str(TEA_config) + " overwritten in inputs/ directory.")
+  # Copy TEA.cfg file to current inputs directory
+  shutil.copy2(TEA_config, inputs_dir + TEA_config)
+
+  # Inform user if abundances file already exists in inputs/ directory
+  head, abun_filename = ntpath.split(abun_file)
+  if verb >= 1 and os.path.isfile(inputs_dir + abun_filename):
+      print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
+  # Copy abundances file to inputs/ directory
+  shutil.copy2(abun_file, inputs_dir + abun_filename)
+
+  # Inform user if single T-P input file already exists in inputs/ directory
+  if verb >= 1 and os.path.isfile(inputs_dir + infile.split("/")[-1]):
+      print("  " + str(infile.split("/")[-1])
+            + " overwritten in inputs/ directory.\n")
+  # Copy single T-P input file to inputs directory
+  shutil.copy2(infile, inputs_dir + infile.split("/")[-1])
 
 # Times / speed check for pre-loop runtime
 if times:
@@ -183,37 +188,29 @@ if times:
     print("pre-loop:           " + str(elapsed))
 
 # Execute main TEA loop
-mh.make_singleheader(infile, desc, thermo_dir, location_out)
-header = form.readheader(loc_headerfile)
-stoich_arr, b = header[5], header[6]
+temp, pressure, speclist = mh.read_single(infile)
+free_energy, heat = mh.read_gdata(speclist, thermo_dir)
+g_RT = mh.calc_gRT(free_energy, heat, temp)
+stoich_arr, stoich_atom, b = mh.read_stoich(speclist, getb=True)
 
 guess = bal.balance(stoich_arr, b, verb)
 
-save_info = None
-if savefiles:
-  save_info = location_out, desc, speclist, temp
+# Always save, then will remove if necessary:
+save_info = location_out, desc, speclist, temp
 
 y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr, b,
            g_RT, maxiter, verb, times, guess, xtol, save_info)
 
 
-# Save or delete headers file
-if not savefiles:
-    shutil.rmtree(location_out + desc + "/headers/")
-
 # Save or delete lagrange.py and lambdacorr.py outputs
 if not savefiles:
-    # Save directory for each T-P and its output files
-    if not os.path.exists(loc_outputs): os.makedirs(loc_outputs)
-    old_name = loc_transient
-    new_name = loc_outputs + desc + "_singleTP_output" + loc_outputs[-1::]
-    if os.path.exists(new_name):
-        for file in os.listdir(new_name):
-            os.remove(new_name + file)
-        shutil.rmtree(new_name)
-    os.rename(old_name, new_name)
-else:
+    datadirr = '{:s}{:s}/results/results_{:.0f}K_{:.2e}bar/'.format(
+                   location_out, desc, temp, pressure)
+    shutil.copy2(datadirr + "results-visual.txt",
+                 location_out + desc + "/results-visual.txt")
     shutil.rmtree(loc_outputs)
+    shutil.rmtree('{:s}{:s}/results'.format(location_out, desc))
+
 
 # Print on-screen
 if verb >= 1:
