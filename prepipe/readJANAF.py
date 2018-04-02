@@ -65,7 +65,7 @@ import shutil
 
 from prepipe import *
 
-location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..")
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
 # =============================================================================
 # This code makes the thermo_dir (default: 'gdata') directory that carries
