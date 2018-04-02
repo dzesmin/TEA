@@ -137,6 +137,8 @@ def worker(pressure, temp, b, free_energy, heat, stoich_arr, guess,
         abn[q] = x/x_bar
 
 
+tstart = time.time()
+
 # Read configuration-file parameters:
 TEApars, PREATpars = rc.read()
 maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
@@ -261,8 +263,8 @@ fout.write('\n')
 
 # Times / speed check for pre-loop runtime
 if times:
-    new = time.time()
-    elapsed = new - end
+    tnew = time.time()
+    elapsed = tnew - tstart
     print("pre-loop:           " + str(elapsed))
 
 # supress warning that ctypeslib will throw:
@@ -331,6 +333,6 @@ if verb >= 1:
 
 # Time / speed testing
 if times:
-    end = time.time()
-    elapsed = end - start
+    tend = time.time()
+    elapsed = tend - tstart
     print("Overall run time:   " + str(elapsed) + " seconds")

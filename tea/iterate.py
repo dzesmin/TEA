@@ -152,12 +152,6 @@ def iterate(pressure, a, b, g_RT, maxiter, verb, times,
   lc_data = x, x, 0, x_bar, x_bar, 0
   info = pressure, i, j, a, b, g_RT
 
-  # Time / speed testing
-  if times:
-      new = time.time()
-      elapsed = new - end
-      print("pre-loop setup:     " + str(elapsed))
-
   # ====================== PERFORM MAIN TEA LOOP ====================== #
   it_num  = 1
   while it_num <= maxiter:
@@ -177,7 +171,7 @@ def iterate(pressure, a, b, g_RT, maxiter, verb, times,
       if times:
           fin = time.time()
           elapsed = fin - ini
-          print("lagrange {:>4d}:  {:f} s." + format(it_num, elapsed))
+          print("lagrange {:>4d}:  {:f} s.".format(it_num, elapsed))
 
       # Print for debugging purposes
       if verb > 1:
@@ -201,7 +195,7 @@ def iterate(pressure, a, b, g_RT, maxiter, verb, times,
           if times:
               fin = time.time()
               elapsed = fin - ini
-              print("lambcorr {:>4d}:  {:f} s." + format(it_num, elapsed))
+              print("lambcorr {:>4d}:  {:f} s.".format(it_num, elapsed))
 
           # Print for debugging purposes
           if verb > 1:
