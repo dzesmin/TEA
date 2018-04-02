@@ -99,22 +99,29 @@ def read():
   except IOError:
       print("\nMissing config file, place TEA.cfg in the working directory.\n")
 
-  # open config file
+  # Open config file:
   config = ConfigParser.RawConfigParser({})
   config.read(cfg_name)
 
-  # read TEA section
-  maxiter      = config.getint    ('TEA', 'maxiter')
-  savefiles    = config.getboolean('TEA', 'savefiles')
-  times        = config.getboolean('TEA', 'times')
-  abun_file    = config.get       ('TEA', 'abun_file')
-  location_out = config.get       ('TEA', 'location_out')
+  # Read TEA section:
+  abun_file    = config.get('TEA', 'abun_file')
+  location_out = config.get('TEA', 'location_out')
 
   # Defaults:
-  xtol = 1e-6
-  verb = 1
-  ncpu = 1
+  maxiter   = 200
+  savefiles = False
+  verb      = 1
+  times     = False
+  xtol      = 1e-6
+  ncpu      = 1
+
   # Optional arguments:
+  if config.has_option("TEA", "maxiter"):
+    maxiter   = config.getint('TEA', 'maxiter')
+  if config.has_option("TEA", "savefiles"):
+    savefiles = config.getboolean('TEA', 'savefiles')
+  if config.has_option("TEA", "times"):
+    times     = config.getboolean('TEA', 'times')
   if config.has_option("TEA", "xtol"):
     xtol = config.getfloat('TEA', 'xtol')
   if config.has_option("TEA", "verb"):
