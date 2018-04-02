@@ -195,6 +195,8 @@ if savefiles:
                 "  Press enter to continue and overwrite existing files,\n"
                 "  or quit and choose another output name.\n")
   # Create directories
+  if not os.path.exists(out_dir):
+      os.makedirs(out_dir)
   if not os.path.exists(inputs_dir):
       os.makedirs(inputs_dir)
   # Copy TEA.cfg file to current inputs directory:
@@ -251,8 +253,8 @@ fout.write("\n\n")
 fout.write("#TEADATA\n")
 
 # Write data header from the pre-atm file into each column of atm file
-fout.write('#Pressure'.ljust(10) + ' ')
-fout.write('Temp'.ljust(7) + ' ')
+fout.write('#Pressure'.ljust(11) + ' ')
+fout.write('Temp'.ljust(8) + ' ')
 for i in np.arange(nspec):
     fout.write(speclist[i].ljust(10)+' ')
 fout.write('\n')
@@ -313,10 +315,9 @@ for n in np.arange(ncpu):
   processes[n].join()
 
 
-# Write output:
+# Write layers output:
 for q in np.arange(n_runs):
-    # Insert results from the current line (T-P) to atm file
-    fout.write("{:.5e} {:.5f} ".format(pres_arr[q], temp_arr[q]))
+    fout.write("{:.5e} {:8.2f} ".format(pres_arr[q], temp_arr[q]))
     for i in np.arange(nspec):
         fout.write('{:1.4e} '.format(abn[q,i]))
     fout.write('\n')
