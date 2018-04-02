@@ -241,6 +241,76 @@ def calc_gRT(free_energy, heat, temp):
     return g_RT
 
 
+def write_header(hfolder, desc, temp, pressure, speclist, atomlist,
+                 stoich_arr, b, g_RT):
+    """
+    This function writes a header file that contains all necessary data
+    for TEA to run. It is run by make_atmheader() and make_singleheader().
+
+    Parameters
+    ----------
+    hfolder: String
+       Folder where to store the header file.
+    desc: string
+       Name of output file.
+    temp: float
+       Temperature value (in Kelvin degrees).
+    pressure: float
+       Pressure value (in bar).
+    speclist: 1D list of strings
+       Names of the species.
+    atomlist: 1D list of strings
+       Names of the elements.
+    stoich_arr: array
+       Array containing the stoichiometric values of the species.
+    b: 1D float ndarray
+       Elemental mixing fractions.
+    g_RT: float array
+       Chemical potentials of the species.
+    """
+    nspec, natom = np.shape(stoich_arr)
+    # Make header directory if it does not exist to store header files
+    if not os.path.exists(hfolder):
+        os.makedirs(hfolder)
+    # Create header file to be used by the main pipeline
+    outfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+                    hfolder, desc, temp, pressure)
+
+    # Open file to write
+    f = open(outfile, 'w+')
+
+    # Comment at top of header file
+    f.write(
+    "# This is a header file for one T-P. It contains the following data:\n"
+    "# pressure (bar), temperature (K), elemental abundances (b, unitless),\n"
+    "# species names, stoichiometric values of each element in the species (a),\n"
+    "# and chemical potentials.\n\n")
+    f.write("{:.5e}\n".format(pressure))
+    f.write("{:.3f}\n".format(temp))
+
+    # Elemental abundances:
+    bstr = " ".join(["{:.6e}".format(x) for x in b])
+    f.write("b {:s}\n".format(bstr))
+
+    # Title for species names
+    f.write("# Species")
+    for j in np.arange(natom):
+      f.write("{:>3s}".format(atomlist[j]))
+    f.write("  Chemical potential\n")
+
+    # Loop over all species and titles
+    for i in np.arange(nspec):
+        # Loop over species and number of elements
+        f.write("{:>9s}".format(speclist[i]))
+        for j in np.arange(natom):
+            # Write elemental number density
+            f.write("{:>3.0f}".format(stoich_arr[i,j]))
+        # Write chemical potentials, adjust spacing for minus sign
+        f.write("  {:-14.10f}\n".format(g_RT[i]))
+
+    f.close()
+
+
 def read_single(infile):
     '''
     This is the main function that creates single-run TEA header.

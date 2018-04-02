@@ -203,7 +203,11 @@ y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr, b,
 
 
 # Save or delete lagrange.py and lambdacorr.py outputs
-if not savefiles:
+if savefiles:
+    hfolder = location_out + desc + "/headers/"
+    mh.write_header(hfolder, desc, temp, pressure, speclist,
+                    stoich_atom, stoich_arr, b, g_RT)
+else:
     datadirr = '{:s}{:s}/results/results_{:.0f}K_{:.2e}bar/'.format(
                    location_out, desc, temp, pressure)
     shutil.copy2(datadirr + "results-visual.txt",
