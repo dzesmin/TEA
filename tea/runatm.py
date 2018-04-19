@@ -288,7 +288,14 @@ atom_arr = np.array(atom_arr, np.double)
 
 # Use only elements with non-null stoichiometric values:
 eidx = np.in1d(atom_name, elem_arr)
-atom_arr = atom_arr[:,eidx]
+atom_arr  = atom_arr[:,eidx]
+atom_name = atom_name[eidx]
+
+# Sort stoich_arr according to atom_name:
+sidx = np.zeros(len(atom_name), int)
+for i in np.arange(len(atom_name)):
+  sidx[i] = np.where(elem_arr == atom_name[i])[0][0]
+stoich_arr = stoich_arr[:,sidx]
 
 # Time / speed testing for balance.py
 if times:

@@ -62,7 +62,6 @@ import os
 from scipy.interpolate import UnivariateSpline
 import scipy.constants as sc
 
-import readconf as rc
 
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
@@ -141,7 +140,6 @@ def read_stoich(spec_list, stoich_file='lib/stoich.txt', getb=False):
 
     # Now select elements:
     ielem = np.sum(spec_stoich, axis=0) > 0
-    b = np.array(dex[ielem], np.double)
     spec_stoich = spec_stoich[:,ielem]
     atom_stoich = elements[ielem]
 
