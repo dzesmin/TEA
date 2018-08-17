@@ -87,7 +87,7 @@ def lambdacorr(it_num, verb, input, info, save_info=None):
 
     Parameters
     ----------
-    it_num:  integer
+    it_num: integer
        Iteration number.
     verb: Integer
        Verbosity level (0=mute, 1=quiet, 2=verbose).
@@ -98,6 +98,8 @@ def lambdacorr(it_num, verb, input, info, save_info=None):
        number, array of species names, array of initial guess,
        array of non-corrected Lagrange values, and array of
        lambdacorr corrected values.
+    info: list
+       FINDME
     save_info: List of stuff
        If not None, save info to files.  The list contains:
          [location_out, desc, speclist, temp]

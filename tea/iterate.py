@@ -91,8 +91,8 @@ from   format import printout
 # =============================================================================
 
 
-def iterate(pressure, a, b, g_RT, maxiter, verb, times,
-            guess, xtol=3e-6, save_info=None):
+def iterate(pressure, a, b, g_RT, maxiter, verb, times, guess, xtol=3e-6,
+            save_info=None):
   """
   Run iterative Lagrangian minimization and lambda correction.
 
@@ -236,7 +236,6 @@ def iterate(pressure, a, b, g_RT, maxiter, verb, times,
 
   # Calculate delta values
   delta = x_new - x
-
   # Calculate delta_bar values
   delta_bar = x_bar_new - x_bar
 
