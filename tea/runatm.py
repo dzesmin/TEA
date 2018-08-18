@@ -111,12 +111,12 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # =============================================================================
 
 def worker(pressure, temp, b, free_energy, heat, stoich_arr, guess,
-           maxiter, verb, times, xtol, savefiles, start, end, abn):
+           maxiter, verb, times, xtol, savefiles, start, end, abn, n):
     """
     Multiprocessing thermochemical-equilibrium calculation.
     """
     # Switch off verbosity if using more than one CPU:
-    if ncpu > 1:
+    if ncpu > 1  and  n != 0:
         verb, times = 0, False
 
     save_info = None
@@ -316,7 +316,7 @@ for n in np.arange(ncpu):
   end   = np.amin(((n+1) * chunksize, n_runs))
   proc = mp.Process(target=worker, args=(pres_arr, temp_arr, atom_arr,
            free_energy, heat, stoich_arr, guess, maxiter, verb, times,
-           xtol, savefiles, start, end, abn))
+           xtol, savefiles, start, end, abn, n))
   processes.append(proc)
   proc.start()
 # Make sure all processes finish their work:
