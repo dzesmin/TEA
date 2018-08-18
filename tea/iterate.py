@@ -164,7 +164,7 @@ def iterate(pressure, a, b, g_RT, maxiter, verb, times, guess, xtol=3e-6,
       if times:
           ini = time.time()
 
-      # Execute Lagrange minimization
+      # Execute Lagrange minimization:
       lc_data = lg.lagrange(it_num, verb, lc_data, info, save_info)
 
       # Time / speed testing for lagrange.py

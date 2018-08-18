@@ -99,7 +99,12 @@ def lambdacorr(it_num, verb, input, info, save_info=None):
        array of non-corrected Lagrange values, and array of
        lambdacorr corrected values.
     info: list
-       FINDME
+       pressure: atmospheric layer's pressure (bar)
+       i: Number of species
+       j: Number of elements
+       a: Stoichiometric coefficients
+       b: Elemental mixing fractions
+       g_RT: Species chemical potential
     save_info: List of stuff
        If not None, save info to files.  The list contains:
          [location_out, desc, speclist, temp]

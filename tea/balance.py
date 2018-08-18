@@ -157,32 +157,32 @@ def balance(a, b, verb=0, loc_out=None):
   nofit = True
   while nofit:
       # Set up list of 'known' initial mole numbers before and after free chunk
-      pre_free = np.zeros(free_id[0]) + scale
+      pre_free  = np.zeros(free_id[0]) + scale
       post_free = np.zeros(nspec - free_id[-1] - 1) + scale
 
       # Set up list of free variables
       free = []
       for m in np.arange(natom):
           name = 'y_unknown_' + np.str(m)
-          free = np.append(free, Symbol(name))
+          free.append(Symbol(name))
 
       # Combine free and 'known' to make array of y_initial mole numbers
       y_init = np.append(pre_free, free)
-      y_init = np.append(y_init,   post_free)
+      y_init = np.append(y_init, post_free)
 
       # Make 'j' equations satisfying mass balance equation (17) in TEA
       # theory doc:
       # sum_i(ai_j * y_i) = b_j
-      eq = [[]]
+      eq = []
       for m in np.arange(natom):
           rhs = 0
           for n in np.arange(nspec):
               rhs += a[n, m] * y_init[n]
           rhs -= b[m]
-          eq = np.append(eq, rhs)
+          eq.append(rhs)
 
       # Solve system of linear equations to get free y_i variables
-      result = solve(list(eq), list(free), rational=False)
+      result = solve(eq, free, rational=False)
 
       # Correct for no-solution-found results.
       # If no solution found, decrease scale size.

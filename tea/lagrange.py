@@ -93,7 +93,12 @@ def lagrange(it_num, verb, input, info, save_info=None):
        array of non-corrected Lagrange values, and array of
        lambdacorr corrected values.
     info: List
-       FINDME
+       pressure: atmospheric layer's pressure (bar)
+       i: Number of species
+       j: Number of elements
+       a: Stoichiometric coefficients
+       b: Elemental mixing fractions
+       g_RT: Species chemical potential
     save_info: string
        Current directory where TEA is run.
 
@@ -145,30 +150,30 @@ def lagrange(it_num, verb, input, info, save_info=None):
         unknowns[m] = Symbol('pi_' + str(m+1))
     unknowns[j] = Symbol('u')
 
-    # =================== SET EQUATION SYSTEM  ======================= #
+    # ================= SET SYSTEM OF EQUATIONS ======================= #
     # Total number of equations is j + 1
     # Create first j'th equations equation (27) TEA theory document
     # r_1j*pi_1 + r_2j*pi_2 + ... + r_jj*pi_j + b_j*u = sum_i[a_ij * fi(Y)]
-    matrix = np.zeros((j+1,j+2))
+    system = np.zeros((j+1,j+2))
 
     # Fill out values of r_ij, equation (26) TEA theory document
     # rjk = rkj = sum_i(a_ij * a_ik) * y_i
     for l in np.arange(j):
         for m in np.arange(j):
-            matrix[m, l] = np.sum(a[:,m] * a[:,l] * y)
+            system[m, l] = np.sum(a[:,m] * a[:,l] * y)
     # Last column, b_j*u:
-    matrix[:j,j] = b
+    system[:j,j] = b
 
     # Set up a_ij * fi(Y) summations equation (27) TEA theory document
     # sum_i[a_ij * fi(Y)]
-    matrix[:j,j+1] = np.sum(a.T*fi_y, axis=1)
+    system[:j,j+1] = np.sum(a.T*fi_y, axis=1)
 
     # Last (j+1)th equation (27) TEA theory document
     # b_1*pi_1 + b_2*pi_2 + ... + b_m*pi_m  = sum_i[fi(Y)]
-    matrix[j,:j] = b
-    matrix[j, j+1] = np.sum(fi_y)
+    system[j,:j] = b
+    system[j, j+1] = np.sum(fi_y)
 
-    fsol = solve_linear_system(Matrix(matrix), *unknowns)
+    fsol = solve_linear_system(Matrix(system), *unknowns)
     # Make array of pi values
     pi_f = np.zeros(j, np.double)
     for m in np.arange(j):
