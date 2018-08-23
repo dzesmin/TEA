@@ -56,24 +56,28 @@
 
 import os
 import numpy as np
-from sympy.core    import Symbol
-from sympy.solvers import solve
+from sympy.core import Symbol
+from sympy import Matrix, solve_linear_system
 
 import format as form
 
+
 def lagrange(it_num, verb, input, info, save_info=None):
     '''
-    This code applies Lagrange's method and calculates minimum based on the
-    methodology elaborated in the TEA theory document in Section (3). Equations in
-    this code contain both references and an explicitly written definitions.
-    The program reads the last iteration's output and data from the last header
-    file, creates variables for the Lagrange equations, sets up the Lagrange
-    equations, and calculates final x_i mole numbers for the current iteration
-    cycle. Note that the mole numbers that result from this function are
-    allowed to be negative. If negatives are returned, lambda correction
-    (lambdacorr.py) is necessary. The final x_i values, as well as x_bar,
-    y_bar, delta, and delta_bar are written into machine- and human-readable
-    output files. This function is executed by iterate.py.
+    This code applies Lagrange's method and calculates minimum based
+    on the methodology elaborated in the TEA theory document in
+    Section (3).  Equations in this code contain both references and
+    an explicitly written definitions.
+    The program reads the last iteration's output and data from the
+    last header file, creates variables for the Lagrange equations,
+    sets up the Lagrange equations, and calculates final x_i mole
+    numbers for the current iteration cycle.  Note that the mole
+    numbers that result from this function are allowed to be
+    negative.  If negatives are returned, lambda correction
+    (lambdacorr.py) is necessary.  The final x_i values, as well as
+    x_bar, y_bar, delta, and delta_bar are written into machine- and
+    human-readable output files. This function is executed by
+    iterate.py.
 
     Parameters
     ----------
@@ -89,7 +93,12 @@ def lagrange(it_num, verb, input, info, save_info=None):
        array of non-corrected Lagrange values, and array of
        lambdacorr corrected values.
     info: List
-       FINDME
+       pressure: atmospheric layer's pressure (bar)
+       i: Number of species
+       j: Number of elements
+       a: Stoichiometric coefficients
+       b: Elemental mixing fractions
+       g_RT: Species chemical potential
     save_info: string
        Current directory where TEA is run.
 
@@ -113,7 +122,6 @@ def lagrange(it_num, verb, input, info, save_info=None):
     '''
     # Read values from the header file
     pressure = info[0]
-    i        = info[1]
     j        = info[2]
     a        = info[3]
     b        = info[4]
@@ -133,72 +141,50 @@ def lagrange(it_num, verb, input, info, save_info=None):
     # fi = x_i * [ci + ln(x_i/x_bar)]
     fi_y = y * (c + np.log(y / y_bar))
 
-    # Allocate values of rjk. Both j and k goes from 1 to m.
-    k = j
-    rjk = np.zeros((j,k))
-
-    # Fill out values of rjk, equation (26) TEA theory document
-    # rjk = rkj = sum_i(a_ij * a_ik) * y_i
-    for l in np.arange(k):
-        for m in np.arange(j):
-            rjk[m, l] = np.sum(a[:,m] * a[:,l] * y)
-
     # Allocate value of u, equation (28) TEA theory document
-    u = Symbol('u')
 
-    # Allocate pi_j variables, where j is element index
-    # Example: pi_2 is Lagrange multiplier of N (j = 2)
-    pi = np.empty(j, dtype=object)
+    # List all unknowns in the above set of equations
+    unknowns = [None]*(j+1)
+    # Allocate pi_j, where j is element index
     for m in np.arange(j):
-        pi[m] = Symbol('pi_' + str(m+1))
+        unknowns[m] = Symbol('pi_' + str(m+1))
+    unknowns[j] = Symbol('u')
 
-    # Allocate rjk * pi_j summations, equation (27) TEA theory document
-    # There will be j * k terms of rjk * pi_j
-    # Make square array of pi values with shape j * k
-    sq_pi = np.tile(pi, (j,1))
-
-    # Multiply rjk * sq_pi to get array of rjk * pi_j
-    # equation (27) TEA theory document
-    rpi = rjk * sq_pi
-
-    # ======================= SET FINAL EQUATIONS ======================= #
+    # ================= SET SYSTEM OF EQUATIONS ======================= #
     # Total number of equations is j + 1
+    # Create first j'th equations equation (27) TEA theory document
+    # r_1j*pi_1 + r_2j*pi_2 + ... + r_jj*pi_j + b_j*u = sum_i[a_ij * fi(Y)]
+    system = np.zeros((j+1,j+2))
+
+    # Fill out values of r_ij, equation (26) TEA theory document
+    # rjk = rkj = sum_i(a_ij * a_ik) * y_i
+    for l in np.arange(j):
+        for m in np.arange(j):
+            system[m, l] = np.sum(a[:,m] * a[:,l] * y)
+    # Last column, b_j*u:
+    system[:j,j] = b
 
     # Set up a_ij * fi(Y) summations equation (27) TEA theory document
     # sum_i[a_ij * fi(Y)]
-    aij_fiy = np.sum(a.T*fi_y, axis=1)
-
-    # Create first j'th equations equation (27) TEA theory document
-    # r_1m*pi_1 + r_2m*pi_2 + ... + r_mm*pi_m + b_m*u = sum_i[a_im * fi(Y)]
-    for m in np.arange(j):
-        if m == 0:
-            equations   = np.array([np.sum(rpi[m]) + b[m]*u - aij_fiy[m]])
-        else:
-            lagrange_eq = np.array([np.sum(rpi[m]) + b[m]*u - aij_fiy[m]])
-            equations   = np.append(equations, lagrange_eq)
+    system[:j,j+1] = np.sum(a.T*fi_y, axis=1)
 
     # Last (j+1)th equation (27) TEA theory document
-    # b_1*pi_1 + b_2*pi_2 + ... + b_m*pi_m + 0*u = sum_i[fi(Y)]
-    bpi = b * pi
-    lagrange_eq_last = np.array([np.sum(bpi) - np.sum(fi_y)])
-    equations = np.append(equations, lagrange_eq_last)
+    # b_1*pi_1 + b_2*pi_2 + ... + b_m*pi_m  = sum_i[fi(Y)]
+    system[j,:j] = b
+    system[j, j+1] = np.sum(fi_y)
 
-    # List all unknowns in the above set of equations
-    unknowns = list(pi)
-    unknowns.append(u)
-
-    # Solve final system of j+1 equations
-    fsol = solve(list(equations), unknowns, rational=False)
-
-
-    # ============ CALCULATE xi VALUES FOR CURRENT ITERATION ============ #
+    fsol = solve_linear_system(Matrix(system), *unknowns)
     # Make array of pi values
     pi_f = np.zeros(j, np.double)
     for m in np.arange(j):
-        pi_f[m] = fsol[pi[m]]
-    # Calculate x_bar from solution to get 'u', equation (28) TEA theory document
+        pi_f[m] = fsol[unknowns[m]]
+    fsolu = fsol[unknowns[j]]
+
+
+    # ============ CALCULATE xi VALUES FOR CURRENT ITERATION ============ #
+    # Calculate x_bar from solution to get 'u', eq (28) TEA theory document
     # u = -1. + (x_bar/y_bar)
-    x_bar = (fsol[u] + 1.0) * y_bar
+    x_bar = (fsolu + 1.0) * y_bar
 
     # Apply Lagrange solution for final set of x_i values for this iteration
     # equation (23) TEA theory document

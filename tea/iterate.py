@@ -91,8 +91,8 @@ from   format import printout
 # =============================================================================
 
 
-def iterate(pressure, a, b, g_RT, maxiter, verb, times,
-            guess, xtol=3e-6, save_info=None):
+def iterate(pressure, a, b, g_RT, maxiter, verb, times, guess, xtol=3e-6,
+            save_info=None):
   """
   Run iterative Lagrangian minimization and lambda correction.
 
@@ -164,7 +164,7 @@ def iterate(pressure, a, b, g_RT, maxiter, verb, times,
       if times:
           ini = time.time()
 
-      # Execute Lagrange minimization
+      # Execute Lagrange minimization:
       lc_data = lg.lagrange(it_num, verb, lc_data, info, save_info)
 
       # Time / speed testing for lagrange.py
@@ -236,7 +236,6 @@ def iterate(pressure, a, b, g_RT, maxiter, verb, times,
 
   # Calculate delta values
   delta = x_new - x
-
   # Calculate delta_bar values
   delta_bar = x_bar_new - x_bar
 

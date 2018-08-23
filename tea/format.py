@@ -391,21 +391,21 @@ def fancyout(it_num, speclist, y, x, delta, y_bar, x_bar, delta_bar,
     for n in np.arange(i):
         if n == 0:
             # Write labels for columns
-            f.write('Species |'.rjust(10) + 'y_i |'.rjust(12) + \
-                     'x_i |'.rjust(12) + 'delta \n'.rjust(12))
+            f.write('Species |'.rjust(14) + 'y_i |'.rjust(14) + \
+                     'x_i |'.rjust(14) + 'delta \n'.rjust(15))
 
         # Fill out variables
-        xs   = '%8.6f'%x[n]         # Final mole numbers
-        ys   = '%8.6f'%y[n]         # Initial mole numbers
-        ds   = '%8.6f'%delta[n]     # Difference between initial and final
-        xbs  = '%8.6f'%x_bar        # Total sum of final mole numbers
-        ybs  = '%8.6f'%y_bar        # Total sum of initial mole numbers
-        dbs  = '%8.6f'%delta_bar    # Difference of total sums
+        xs   = '%.4e'%x[n]         # Final mole numbers
+        ys   = '%.4e'%y[n]         # Initial mole numbers
+        ds   = '%.4e'%delta[n]     # Difference between initial and final
+        xbs  = '%.4e'%x_bar        # Total sum of final mole numbers
+        ybs  = '%.4e'%y_bar        # Total sum of initial mole numbers
+        dbs  = '%.4e'%delta_bar    # Difference of total sums
         name = speclist[n]          # Species name
 
         # Write mole numbers in aligned columns
-        f.write(name.rjust(8) + ' |' + ys.rjust(10) + ' |' + xs.rjust(10) + \
-                ' |' +ds.rjust(10) + '\n')
+        f.write(name.rjust(12) + ' |' + ys.rjust(12) + ' |' + xs.rjust(12) + \
+                ' |' +ds.rjust(13) + '\n')
 
         # Write initial, final, and difference of totals after species data
         if n == (i - 1):
@@ -476,7 +476,7 @@ def fancyout_results(header, it_num, speclist, y, x, delta, y_bar,
     f.write('This .txt file is for visual use only.\n')
     f.write('These results are for the "' + header + '" run.\n')
     f.write('Iterations complete after ' + np.str(it_num) + ' runs at ' + \
-                          np.str(pressure) + ' atm and ' + np.str(temp) + \
+                          np.str(pressure) + ' bar and ' + np.str(temp) + \
                                            ' K. Final computation:\n\n')
 
     # Count number of species
