@@ -55,8 +55,13 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-import ConfigParser
+import sys
 import os
+
+if sys.version_info.major == 3:
+  import configparser
+else:
+  import ConfigParser as configparser
 
 # =============================================================================
 # This code reads the TEA config file, TEA.cfg. There are two sections in
@@ -100,7 +105,7 @@ def read():
       print("\nMissing config file, place TEA.cfg in the working directory.\n")
 
   # Open config file:
-  config = ConfigParser.RawConfigParser({})
+  config = configparser.RawConfigParser({})
   config.read(cfg_name)
 
   # Read TEA section:
