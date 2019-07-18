@@ -1,0 +1,79 @@
+############################# BEGIN FRONTMATTER ################################ 
+#                                                                              # 
+#   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
+#                                                                              #
+#   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
+#   Blecic, who developed it with coding assistance from                       #
+#   undergraduate M. Oliver Bowman and under the advice of                     #
+#   Prof. Joseph Harrington at the University of Central Florida,              #
+#   Orlando, Florida, USA.                                                     #
+#                                                                              #
+#   Copyright © 2014-2016 University of Central Florida                        #
+#                                                                              #
+#   This program is reproducible-research software: you can                    #
+#   redistribute it and/or modify it under the terms of the                    #
+#   Reproducible Research Software License as published by                     #
+#   Prof. Joseph Harrington at the University of Central Florida,              #
+#   either version 0.3 of the License, or (at your option) any later           #
+#   version.                                                                   #
+#                                                                              #
+#   This program is distributed in the hope that it will be useful,            #
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of             #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+#   Reproducible Research Software License for more details.                   #
+#                                                                              #
+#   You should have received a copy of the Reproducible Research               #
+#   Software License along with this program.  If not, see                     #
+#   <http://planets.ucf.edu/resources/reproducible/>.  The license's           #
+#   preamble explains the situation, concepts, and reasons surrounding         #
+#   reproducible research, and answers some common questions.                  #
+#                                                                              #
+#   This project was started with the support of the NASA Earth and            #
+#   Space Science Fellowship Program, grant NNX12AL83H, held by                #
+#   Jasmina Blecic, Principal Investigator Joseph Harrington, and the          #
+#   NASA Science Mission Directorate’s Planetary Atmospheres Program,          #
+#   grant NNX12AI69G.                                                          #
+#                                                                              #
+#   See the file ACKNOWLEDGING in the top-level TEA directory for              #
+#   instructions on how to acknowledge TEA in publications.                    #
+#                                                                              #
+#   We welcome your feedback, but do not guarantee support.                    #
+#   Many questions are answered in the TEA forums:                             #
+#                                                                              #
+#   https://physics.ucf.edu/mailman/listinfo/tea-user                          #
+#   https://physics.ucf.edu/mailman/listinfo/tea-devel                         #
+#                                                                              #
+#   Visit our Github site:                                                     #
+#                                                                              #
+#   https://github.com/dzesmin/TEA/                                            #
+#                                                                              #
+#   Reach us directly at:                                                      #
+#                                                                              #
+#   Jasmina Blecic <jasmina@physics.ucf.edu>                                   #
+#   Joseph Harrington <jh@physics.ucf.edu>                                     #
+#                                                                              #
+############################## END FRONTMATTER #################################
+
+
+The Start Guide with basic instructions on how to install and run TEA
+is: doc/start_guide.txt
+
+For more detailed instructions read the TEA User Manual: doc/TEA-UserManual.pdf
+For code description read: doc/TEA-CodeDescription.pdf
+
+The TEA Theory paper is published in The Astrophysical Journal Supplement Series
+and also available here: doc/TEA-TheoryPaper.pdf 
+
+The compendium for this paper can be find on zenodo.org, entitled 
+RRC-BlecicEtal-2016-ApJS-TEA, http://dx.doi.org/10.5281/zenodo.50378
+ 
+The compendium for the arXiv version 1 of this paper, 
+http://arxiv.org/abs/1505.06392, can be find
+here: https://github.com/dzesmin/RRC-BlecicEtal-2015a-ApJS-TEA
+
+Completely executed TEA examples can be find in a separate repository: 
+https://github.com/dzesmin/TEA-Examples
+
+The reproducible-reserach license and how to acknowledge TEA files are placed 
+in the root directory: RR-LICENSE-0.3.txt, ACKNOWLEDGING-TEA
+

@@ -1,0 +1,387 @@
+############################# BEGIN FRONTMATTER ################################ 
+#                                                                              # 
+#   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
+#                                                                              #
+#   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
+#   Blecic, who developed it with coding assistance from                       #
+#   undergraduate M. Oliver Bowman and under the advice of                     #
+#   Prof. Joseph Harrington at the University of Central Florida,              #
+#   Orlando, Florida, USA.                                                     #
+#                                                                              #
+#   Copyright © 2014-2016 University of Central Florida                        #
+#                                                                              #
+#   This program is reproducible-research software: you can                    #
+#   redistribute it and/or modify it under the terms of the                    #
+#   Reproducible Research Software License as published by                     #
+#   Prof. Joseph Harrington at the University of Central Florida,              #
+#   either version 0.3 of the License, or (at your option) any later           #
+#   version.                                                                   #
+#                                                                              #
+#   This program is distributed in the hope that it will be useful,            #
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of             #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+#   Reproducible Research Software License for more details.                   #
+#                                                                              #
+#   You should have received a copy of the Reproducible Research               #
+#   Software License along with this program.  If not, see                     #
+#   <http://planets.ucf.edu/resources/reproducible/>.  The license's           #
+#   preamble explains the situation, concepts, and reasons surrounding         #
+#   reproducible research, and answers some common questions.                  #
+#                                                                              #
+#   This project was started with the support of the NASA Earth and            #
+#   Space Science Fellowship Program, grant NNX12AL83H, held by                #
+#   Jasmina Blecic, Principal Investigator Joseph Harrington, and the          #
+#   NASA Science Mission Directorate’s Planetary Atmospheres Program,          #
+#   grant NNX12AI69G.                                                          #
+#                                                                              #
+#   See the file ACKNOWLEDGING in the top-level TEA directory for              #
+#   instructions on how to acknowledge TEA in publications.                    #
+#                                                                              #
+#   We welcome your feedback, but do not guarantee support.                    #
+#   Many questions are answered in the TEA forums:                             #
+#                                                                              #
+#   https://physics.ucf.edu/mailman/listinfo/tea-user                          #
+#   https://physics.ucf.edu/mailman/listinfo/tea-devel                         #
+#                                                                              #
+#   Visit our Github site:                                                     #
+#                                                                              #
+#   https://github.com/dzesmin/TEA/                                            #
+#                                                                              #
+#   Reach us directly at:                                                      #
+#                                                                              #
+#   Jasmina Blecic <jasmina@physics.ucf.edu>                                   #
+#   Joseph Harrington <jh@physics.ucf.edu>                                     #
+#                                                                              #
+############################## END FRONTMATTER #################################
+
+
+
+            =============== Install guide for TEA ==================
+                                Version 1.0
+
+This is an installation and a quick start guide for the Thermochemical
+Equilibrium Abundances (TEA) code. The code calculates equilibrium abundances
+of the gaseous molecular species. It works with high numerical precision, 
+without adjustments, for temperatures above ~600 K. For temperatures below 
+600 K and mixing fractions below 10e-14, the code produces results with low
+precision. The output can be improved with fine adjustments to the lambda 
+exploration variables in lambdacorr.py module (see documentation). 
+
+1. ==== Packages ====
+
+   TEA works in Linux/Ubuntu and MAC enviroment.
+   Ensure following python packages are installed:
+          Python: 2.7.3+
+          NumPy:  1.6.1+
+          SymPy:  0.7.1.rc1 (This version ensures maximum performance)
+   
+          Sympy download:
+                https://github.com/sympy/sympy/releases/tag/sympy/0.7.1.rc1
+
+
+2. ==== Content ====
+
+   Download TEA from www.github.com/dzesmin/TEA
+          - git clone https://github.com/dzesmin/TEA
+
+   The the following is included:
+ 
+   1. README
+          - file with basic instructions
+
+   2. == doc ==  
+          - directory containing:
+            - 'examples' directory with:
+                 - 'multiTP' directory containing multiTP example run
+                 - 'singleTP' directory containing singleTP example run
+                 - 'quick_example' directory containing a quick example run
+                 - 'PT' directory containing an example of the 
+                    pressure and temperature profile
+                 - 'plots' directory containing the plot produced from the 
+                    multiTP example final atmospheric file
+            - TEA-Theory.pdf - document containing theory part of the code
+                               (Blecic et al. 2015)
+            - TEA-UserGuide.pdf - document containing the user guide
+            - TEA-CodeDescription.pdf - document containing the program 
+                    description
+            - install_guide.txt - this file
+
+   3. == janaf == 
+          - directory containing JANAF tables in their raw format
+                (download from October 2012)
+
+   4. == lib == 
+          - directory containing:
+            - abundances.txt - elemental abundances file, Asplund et al 2009,
+                IUPAC
+                http://adsabs.harvard.edu/abs/2009ARA%26A..47..481A
+            - TEA.cfg - configuration file
+            - gdata - directory containing thermochemical data of interest
+                from JANAF tables
+            - stoich.txt - stoichiometric data file
+            - conversion_record_sorted.txt - record of converted JANAF files
+                produced after readJANAF.py is run. The run will produce
+                unsorted the conversion_record.txt file. To sort the content
+                alphabetically, do:
+                sort conversion_record.txt >conversion_record_sorted.txt
+
+    5. == prepipe == 
+            - directory containing source files to produce thermochemical 
+              library and stoichiometric information:
+              directory gdata/, conversion_record.txt, and stoich.txt
+                prepipe.py (*)
+                makestoich.py (*)
+                readJANAF.py (*)
+    6. == tea ==
+            - directory containing tea source files:
+                balance.py (*)
+                format.py
+                iterate.py (*)
+                lagrange.py
+                lambdacorr.py
+                makeheader.py
+                readatm.py
+                runatm.py (*)
+                runsingle.py (*)
+            - and tea supporting modules:
+                makeatm.py (*)
+                plotTEA.py (*)
+                readconf.py
+
+            Asterisk (*) indicates modules that must be executable in 
+            *nix (e.g., Linux) systems.
+
+   TEA examples with the complete directory structure and files (size ~75MB) 
+   are placed in a separate repo, TEA-Examples. A shorter version of the
+   examples is provided within the main TEA repo described above. 
+   To download the TEA examples do:
+          - git clone https://github.com/dzesmin/TEA-Examples
+
+
+3. ==== Quick example ====
+
+   The following script gives an example of a TEA run on Linux operating
+   systems. Copy and paste the commands into the command prompt.
+
+   Create a working directory outside of the TEA package directory:
+
+mkdir TEA_example
+cd TEA_example
+
+   Clone the repository to the working directory:
+
+git clone https://github.com/dzesmin/TEA TEA
+cd TEA
+
+   Make run directory to place the configuration file and outputs:
+
+mkdir run
+cd run
+cp ../doc/examples/quick_example/TEA.cfg TEA.cfg
+
+   Run TEA using the pre-atmopsheric file from the doc/examples folder:
+
+../tea/runatm.py ../doc/examples/quick_example/quick_example.atm run_example
+
+   To plot results do:
+
+../tea/plotTEA.py run_example/results/run_example.tea H2,H2O,CO
+
+   Check the output by comparing the results between
+   doc/examples/quick_example/results/ with the run/run_example/results/
+   and
+   doc/examples/plots/ with run/plots/ folders.
+
+
+4. ==== Run pre-pipeline ====
+
+   Files and directory produced by this run are already distributed with the 
+          code (lib/gdata, lib/stoich.txt, and 
+                lib/conversion_record_sorted.txt),
+          thus there is no need to run the code again. However, if new
+          JANAF files become available, the user can re-run the code with the
+          new data. The code reads only the JANAF tables in the format 
+          provided in October 2012.
+
+   To re-run the code with new JANAF tables, create a working directory.
+          From 'TEA/lib/' folder, copy TEA.cfg file into the working directory.
+          Open TEA.cfg and adjust parameters. Run pre-pipeline as:
+    - run ../TEA/prepipe/prepipe.py
+
+   OPTIONAL (run separately):
+    - run ../TEA/prepipe/makestoch.py
+    - run ../TEA/prepipe/readJANAF.py
+
+   This run will produce data needed for TEA to run, and place them in lib/
+   directory:
+          1. gdata/, directory with thermochemical data
+          2. stoich.txt, stoichiometric file carrying stoichiometric values for
+             each species in JANAF tables
+          3. conversion_record.txt, a record of converted JANAF files required
+             for the user to track the species available in the JANAF tables 
+             and compare them with the names produced by TEA. This ensures the
+             correct pre-atmosphere file is made (see section below).  To sort 
+             the content of the conversion_record.txt alphabetically, do:
+             sort conversion_record.txt >conversion_record_sorted.txt
+
+   If doprint is set to 'True' in TEA.cfg, the following directory is also created:
+          stochcoeff/ - directory containing a file per species with 
+                        stoichiometric values for each species
+
+5. ==== Produce input file ====
+
+   If working directory is not made, make one. From 'TEA/lib/' folder, copy 
+             TEA.cfg file into your working directory. Open TEA.cfg 
+             and adjust parameters. Use gdata/ folder or the 
+             conversion_record_sorted.txt to look up the correct names and 
+             states of input/output species that TEA can accept.
+
+   For single-TP:
+             To create a custom input file, follow the key in the example.
+             See example in ../TEA/doc/examples/singleTP/inputs/inp_Example.txt
+
+   For multiple-TP: 
+             To create a custom pre-atmosphere file either follow design
+             of the example or execute makeatm.py. See example in 
+             ../TEA/doc/examples/multiTP/atm_inputs/multiTP.atm
+
+             Procedure to create pre-atmosphere file with makeatm.py:
+             a) If working directory is not made, make one. 
+             b) From 'TEA/lib/' folder, copy TEA.cfg file into your 
+                working directory.
+             c) Open TEA.cfg and adjust parameters. Edit both sections. 
+                Run makeatm.py as:
+                ../TEA/tea/makeatm.py <DIRECTORY_NAME>
+                note: <DIRECTORY_NAME> is the name of the directory that
+                      will be made below the current working directory
+                Example: ../TEA/tea/makeatm.py multiTP
+                The pre-atm file will be placed in the 
+                <DIRECTORY_NAME>/atm_inputs/ directory and will have an
+                extension as given in TEA.cfg (default:.atm).
+
+
+6. ==== Execute TEA ====
+
+   If working directory is not made, make one. From 'TEA/lib/' folder, copy 
+             TEA.cfg file into your working directory. Open TEA.cfg and adjust
+             parameters. Only 'TEA SECTION' is used while TEA is running. Except for
+             'maxiter' parameter, all other parameters are for debugging 
+             purposes. Setting them to 'False' will ensure the fastest execution.
+
+   For single-TP: 
+             In shell from the working directory type:
+             ../TEA/tea/runsingle.py <SINGLETP_INPUT_FILE_PATH> <DIRECTORY_NAME>
+             note: <DIRECTORY_NAME> is the name of the directory that
+                   will be made below the current working directory
+             Example: ../TEA/tea/runsingle.py ../TEA/doc/examples/singleTP/inputs/inp_Example.txt singleTP
+
+             Results will be placed in <DIRECTORY_NAME>/results/
+             note: <DIRECTORY_NAME> is the name of the directory that
+                   will be made below the current working directory
+             Example: ../TEA/doc/examples/singleTP/results/
+
+             This runs TEA for just one temperature and pressure. The current iteration
+             number is printed on-screen as the code progresses. The execution time
+             for the example given is 2-5 seconds.
+
+   For multiple-TP: 
+             In shell from the working directory type:
+             1. If multiTP input file is made with the makeatm.py:
+             ../TEA/tea/runatm.py <PATH_TO_DIRECTORY_NAME>/atm_inputs/<MULTITP_INPUT_FILE_PATH> <DIRECTORY_NAME>
+             note: <PATH_TO_DIRECTORY_NAME> is the path to the directory, 
+                   <DIRECTORY_NAME>, that you have already created when 
+                   makeatm.py is run.
+             2. If custom made multiTP input file is produced on other location:
+             ../TEA/tea/runatm.py <MULTITP_INPUT_FILE_PATH> <DIRECTORY_NAME>
+             note: <DIRECTORY_NAME> is the name of the directory that
+                   will be made below the current working directory.
+             Example: ../TEA/tea/runatm.py ../TEA/doc/examples/multiTP/atm_inputs/multiTP_Example.atm multiTP
+
+             This will run TEA for every T-P line of the pre-atm file. The current line
+             number of the pre-atm file and current iteration number is printed on-screen
+             as the code progresses. The execution time for the example given should be 
+             between 5-10 minutes on a dual core machine.
+    
+             Results will be placed in <DIRECTORY_NAME>/results/
+             note: <DIRECTORY_NAME> is the name of the directory that
+                   will be made below the current working directory
+             Example: ../TEA/doc/examples/multiTP/results/
+             The final TEA output will have an extension .tea and will
+             have the name of the <DIRECTORY_NAME>.
+
+
+7.  ==== Output ====
+
+    After running makeatm.py, the following directory and files are created
+    below the working directory:
+
+             Output directory based on the user <RESULT_DIR_NAME>.
+             Below this directory:
+
+                atm_inputs/ - stores all input files used to run makeatm.py:
+                              abundances file - abundances.txt
+                              pressure and temperature file - PTprofile.dat
+                              TEA config file - TEA.cfg
+                              multi TP pre-atmosphere file - pre-atm.atm
+    
+    After running TEA, the following directories and files are created
+    below working directory:
+
+             Output directory based on the user <RESULT_DIR_NAME>.
+             Below this directory:
+
+                inputs/    - directory that stores input files used to run TEA
+                results/   - directory that contains final results
+
+                            For single-TP:
+                                abundances file - abundances.txt
+                                TEA config file - TEA.cfg
+                                single TP input file - singleTP.txt
+
+                            For multiple-TP:
+                                abundances file - abundances.txt
+                                TEA config file - TEA.cfg
+                                multi TP pre-atmosphere file - pre-atm.txt
+
+                headers/ and outputs/ directories are temporarily made, overwritten
+                in each run/iteration and finally deleted after the full TEA run
+                is finished.
+
+                If doprint, save_headers, and save_outputs are set to 'True' in
+                TEA.cfg, the following are also created:
+    
+                headers/   - directory that preserves and stores all headers
+                outputs/   - directory that stores all intermediate files
+
+
+8. ==== Plot TEA ====
+
+   To plot the final results, run plotTEA.py. Instructions on how
+             to execute the code are found in ../TEA/tea/plotTEA.py documentation.
+             Example: ../TEA/tea/plotTEA.py ../TEA/doc/examples/multiTP/results/multiTP_Example.tea CO,CH4,H2O,NH3
+             Plots will be placed in ./plots/ directory.
+
+   Recall, for temperatures below 600 K and mixing fractions below 10e-14,
+           TEA produces results with low precision.
+
+
+======================
+POTENTIAL USER ERRORS 
+======================
+
+1. The user should have unique T-P values for each line in the
+   PT-profile file before running makeatm.py, otherwise
+   each repeated layer will be overwritten and the final atmosphere
+   file will end up with fewer lines.
+2. input_elem must have names as they appear in the periodic table.
+3. out_species must include all input elements with their states as
+   readJANAF.py produces them. See ../TEA/lib/gdata/ folder and the
+   conversion_record_sorted.txt file for the correct names of
+   the species.
+4. Should the code stall on the first iteration of the first
+   temperature, check if all elements that appear in the species
+   list are included with their correct names.
+5. Elemental hydrogen (H) and helium (He) must be included in in_elem
+   for hot-Jupiter atmosphere calculations. Similarly, the H_g, He_ref
+   and H2_ref species must also appear in out_spec for these calculations.
+

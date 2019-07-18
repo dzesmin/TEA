@@ -1,0 +1,121 @@
+% Stately margins.  Set the sizes you want, and the size of the text
+% adjusts.  Has sensible, consistent measurements.
+% Copyright (c) 1994, 2000 Joe Harrington.
+% This file and its contents may be distributed and used by anyone and
+% for any purpose, provided the copyright, this permission notice, and
+% the modification history remain prominently displayed in all copies
+% and derived works.
+%
+% Joe Harrington
+% 326 Space Sciences Building
+% Cornell University
+% Ithaca, NY 14853-6801
+% jh@alum.mit.edu (permanent)
+%
+%who		when	what
+% jh		24mar00	Do \footheight better.  Thanks to jemorris@MIT.EDU!
+% jh		21feb00	Adjusted \footheight and \paper* stuff for LaTeX2e.
+%			Eliminated painful paper size adjustment.
+%			Fixed bugs in setting of margins.  Added
+%			comments.  Reorganized.
+%
+% jh		03apr95	Added \setmar to end.
+%
+% jh		07mar94	Initial version.
+
+% New lengths we're using
+\newlength{\@dlmar}
+\newlength{\@dtmar}
+% LaTeX defines the ones commented out:
+
+% Top.
+% \topspace is the total distance from the paper edge to the main text box.
+\newlength{\topspace}
+%\newlength{\headsep} % the separation of the header box from the main text box
+%\newlength{\headheight} % the height of the header box
+
+% Margins.
+\newlength{\bindmar}
+\newlength{\leftmar}
+\newlength{\rightmar}
+
+% Bottom.
+% analogous to top
+\newlength{\footsep}
+\newlength{\botspace}
+% \footheight got deprecated in LaTeX2e to save skip registers,
+% but it's there in compatibility mode and LaTeX 2.09...
+\expandafter\ifx\csname footheight\endcsname\relax \newlength\footheight \fi
+
+% Printer stuff
+\newlength{\prshiftwidth}
+\newlength{\prshiftheight}
+
+% These are the default margins built into TeX.  They need to be
+% subtracted off because that's how TeX works.  Don't change these
+% unless you know what you're doing.
+\setlength{\@dlmar}{1in}
+\setlength{\@dtmar}{1in}
+
+% LaTeX2e's compatibility mode sets this weirdly, so set to letter size.
+\if@compatibility\setlength{\paperwidth}{8.5 in}\fi
+\if@compatibility\setlength{\paperheight}{11 in}\fi
+
+% All the things you can change.  Copy this section (without the
+% \addtolength for \footsep) into your document and play with them as
+% much as you like.  Defaults here are the Latex defaults.
+
+% Horizontal: set the margins and the text adjusts accordingly
+\setlength{\bindmar}{0in}
+\setlength{\leftmar}{\@dlmar}
+\setlength{\rightmar}{\leftmar}
+
+% Vertical: height is size of box, sep is distance between text box
+% and header/footer, space is total size of header/footer.
+\setlength{\topspace}{\@dtmar}
+\setlength{\headheight}{\headheight}
+\setlength{\headsep}{\headsep}
+\setlength{\footheight}{\footheight}
+\setlength{\footsep}{\footskip}
+\addtolength{\footsep}{-\footheight}
+\setlength{\botspace}{\topspace}
+
+% And some printers shift the page image.  A positive shift here moves
+% the printed image to the right or down.
+\setlength{\prshiftwidth}{0in}
+\setlength{\prshiftheight}{0in}
+
+% The biggie.  When you've set (or changed) the parameters above, call
+% \setmar.
+\def\setmar{
+% odd side
+	\setlength{\oddsidemargin}{\leftmar}
+	\addtolength{\oddsidemargin}{\bindmar}
+	\addtolength{\oddsidemargin}{-\@dlmar}
+	\addtolength{\oddsidemargin}{\prshiftwidth}
+% even side
+	\setlength{\evensidemargin}{\leftmar}
+%	\addtolength{\evensidemargin}{-\bindmar}
+	\addtolength{\evensidemargin}{-\@dlmar}
+	\addtolength{\evensidemargin}{\prshiftwidth}
+% width
+	\setlength{\textwidth}{\paperwidth}
+	\addtolength{\textwidth}{-\leftmar}
+	\addtolength{\textwidth}{-\rightmar}
+	\addtolength{\textwidth}{-\bindmar}
+% top
+	\setlength{\topmargin}{\topspace}
+	\addtolength{\topmargin}{-\headheight}
+	\addtolength{\topmargin}{-\headsep}
+	\addtolength{\topmargin}{-\@dtmar}
+	\addtolength{\topmargin}{\prshiftheight}
+% undo the odd footsep thingie
+	\setlength{\footskip}{\footsep}
+	\addtolength{\footskip}{+\footheight}
+% height
+	\setlength{\textheight}{\paperheight}
+	\addtolength{\textheight}{-\topspace}
+	\addtolength{\textheight}{-\botspace}
+}
+
+\setmar
