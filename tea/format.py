@@ -149,17 +149,17 @@ def readheader(file):
             if is_comment or is_blank: 
                 start += 1
             # Read pressure
-            elif (l == start):      
+            elif (l == start): 
                 pressure = np.float([value for value in line.split()][0])
             # Read temperature
-            elif (l == start+1):     
+            elif (l == start+1):
                 temp = np.float([value for value in line.split()][0])
             # Read elemental abundances
-            elif (l == start+2):     
+            elif (l == start+2):
                 val = [value for value in line.split()]
                 b   = [float(u) for u in val[1:]]
             # Read species list, stoichiometry, and chemical potentials
-            elif (l == start+3):      
+            elif (l == start+3): 
                 val = [value for value in line.split()]
                 speclist = np.append(speclist, val[0])
                 a = [[int(u) for u in val[1:-1]]]

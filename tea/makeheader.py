@@ -269,13 +269,13 @@ def single_headarr(spec_list, stoich_data, spec_stoich, is_used):
     #      stoichiometric coefficients
     for i in np.arange(n_spec):
         stoich_arr[i+2, 0] = spec_list[i]
-        stoich_arr[i+2, 1:] = map(int,spec_stoich[i+1, np.where(is_used)[0]])
+        stoich_arr[i+2, 1:] = list(map(int,spec_stoich[i+1, np.where(is_used)[0]]))
     
     # Convert logarithmic (dex) abundances into number densities
     finalstoich_conv = np.empty((n_spec + 2, np.sum(is_used) + 1), \
                                                  dtype=np.object)
     finalstoich_conv[0,0] = 'b'
-    finalstoich_conv[0,1:] = map(float, stoich_arr[0,1:])
+    finalstoich_conv[0,1:] = list(map(float, stoich_arr[0,1:]))
 
     # Number densities for elements in the system are equal to 10**(dex)
     finalstoich_conv[0,1:] = 10**(finalstoich_conv[0,1:])
@@ -346,7 +346,7 @@ def atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr, q, is_used):
     stoich_arr[1,1:] = stoich_data[1, np.where(is_used)[0] + 1]
     for i in np.arange(n_spec):
         stoich_arr[i+2, 0] = spec_list[i]
-        stoich_arr[i+2, 1:] = map(int,spec_stoich[i+1, np.where(is_used)[0]])
+        stoich_arr[i+2, 1:] = list(map(int,spec_stoich[i+1, np.where(is_used)[0]]))
     
     return stoich_arr
 

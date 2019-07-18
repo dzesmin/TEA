@@ -162,7 +162,7 @@ single_res       = ["results-machine-read.txt", "results-visual.txt"]
 
 # Check if output directory already exists and inform user
 if os.path.exists(inputs_dir):
-    raw_input("  Output directory " + str(inputs_dir) + " already exists.\n"
+    print("  Output directory " + str(inputs_dir) + " already exists.\n"
               "  Press enter to continue and overwrite existing files,\n"
               "  or quit and choose another output name.\n")
 

@@ -144,7 +144,7 @@ for i in np.arange(n_JANAF):
         outfile = stoich_dir + species[i, 0] + '_' + species[i,2] + '.txt'
 
         # Check if isomer exists for specie, and if so add additional string
-        if originals.has_key(outfile):
+        if originals.__contains__(outfile):
             outfile = stoich_dir + species[i, 0] + '_' + np.str(species[i,2]) + \
                                       '_' + np.str(species[i,3]) + '.txt'
         elif os.path.isfile(outfile):
@@ -221,7 +221,7 @@ for j in np.arange(n_JANAF):
     
     # Check for redundant chemical formulas for species. Only keep one of such
     #       formula in stoichiometry file due to identical elemental counts.
-    if originals.has_key(specie):
+    if originals.__contains__(specie):
         # Specie chemical formula is redundant; do nothing
         redundant[specie] = True
     else:

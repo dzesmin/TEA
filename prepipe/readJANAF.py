@@ -138,8 +138,9 @@ redundant = {}
 #       species with same formula is in data
 for i in np.arange(n_JANAF):
     infile = raw_dir + JANAF_files[i]
+    print("thermo_dir", thermo_dir, species[i, 0], np.str(species[i,2]))
     outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) + '.txt'
-    if originals.has_key(outfile):
+    if originals.__contains__(outfile):
         redundant[outfile] = infile
     else:
         originals[outfile] = infile
@@ -182,7 +183,7 @@ for i in np.arange(n_JANAF):
     
     # Put data into array with correct data types and labels
     n_temps = np.shape(data)[0]
-    gdata = np.empty((n_temps, 3), dtype='|S50')
+    gdata = np.empty((n_temps, 3), dtype='U100')
     for j in np.arange(n_temps):
         gdata[j,0] = data[j][0]
         gdata[j,1] = data[j][3]
@@ -206,7 +207,7 @@ for i in np.arange(n_JANAF):
                 outfile = outfile[:-5] + 'gas.txt'
 
             # Check if species is redundant and add additional string if so
-            elif redundant.has_key(outfile):
+            elif redundant.__contains__(outfile):
                 outfile = thermo_dir + species[i, 0] + '_' + np.str(species[i,2]) \
                                         + '_' + np.str(species[i,3]) + '.txt'
             elif os.path.isfile(outfile):

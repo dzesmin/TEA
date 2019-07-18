@@ -119,7 +119,7 @@ desc  = sys.argv[1:][0]
 
 # Check if output directory exists and inform user
 if os.path.exists(location_out + desc):
-    raw_input("  Output directory " + str(location_out + desc) + "/ already exists.\n"
+    print("  Output directory " + str(location_out + desc) + "/ already exists.\n"
               "  Press enter to continue and overwrite existing files,\n"
               "  or quit and choose another output name.\n")
 
@@ -280,10 +280,11 @@ def makeatm():
     out_dex  = abun_trim[:,2].tolist()
 
     # Convert strings to floats
-    out_dex  = map(float, abun_trim[:,2])
+    out_dex  = list(map(float, abun_trim[:,2]))
 
     # Convert logarithmic (dex) exponents to number density
     out_num  = 10**np.array(out_dex)
+
 
     # Get hydrogen number density
     H_num = 10**12

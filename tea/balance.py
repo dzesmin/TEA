@@ -132,7 +132,7 @@ for n in np.arange(i - j + 1):
     a_chunk = a[lower:upper]
     
     # Sum columns to get total of ai_j in chunk for each species 'j'
-    check = map(sum,zip(*a_chunk))
+    check = list(map(sum,zip(*a_chunk)))
     
     # Look for zeros in check. If a zero is found, this chunk of data can't 
     # be used for free variables, as this signifies an element is ignored

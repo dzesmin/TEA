@@ -379,7 +379,7 @@ def setup(abun_file, raw_dir = 'janaf', thermo_dir = 'lib/gdata', \
     # Get all JANAF file names and make empty array for species data extraction
     JANAF_files = os.listdir(raw_dir)
     n_JANAF = np.size(JANAF_files)
-    species = np.empty((n_JANAF, 4), dtype='|S50')
+    species = np.empty((n_JANAF, 4), dtype=np.dtype('U100'))
 
     # Loop over all JANAF files to get specie names
     for i in np.arange(n_JANAF):

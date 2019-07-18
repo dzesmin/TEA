@@ -55,7 +55,7 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-import ConfigParser
+import configparser
 import os
 
 # =============================================================================
@@ -78,7 +78,7 @@ except IOError:
     print("\nConfig file is missing. Place TEA.cfg in the working directory\n")
 
 # open config file
-config = ConfigParser.RawConfigParser({})
+config = configparser.RawConfigParser({})
 config.read(cfg_name)
 
 # read TEA section

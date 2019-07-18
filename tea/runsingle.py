@@ -138,7 +138,7 @@ desc    = sys.argv[1:][1]
 
 # Check if output directory exists and inform user
 if os.path.exists(location_out + desc):
-    raw_input("  Output directory " + str(location_out + desc) + "/ already exists.\n"
+    print("  Output directory " + str(location_out + desc) + "/ already exists.\n"
               "  Press enter to continue and overwrite existing files,\n"
               "  or quit and choose another output name.\n")
 
