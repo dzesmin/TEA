@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -56,19 +56,20 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-
-from readconf import *
-
 import numpy as np
 import ntpath
 import os
 import shutil
 import matplotlib.pyplot as plt
 import sys
+import six
+
+import readconf as rc
+
 
 # =============================================================================
 # This module produces a pre-atmospheric file in the format that TEA can read it.
-# The pre-atmospheric file will be placed in the atm_inputs/ directory. 
+# The pre-atmospheric file will be placed in the atm_inputs/ directory.
 # The module consists of 2 functions:
 # readPT()   reads pressure-temperature (PT) profile from the PT file provided
 # makeatm()  writes a pre-atm file
@@ -81,17 +82,20 @@ import sys
 # Possible user errors in configuring pre-atm section in the TEA.cfg that
 # conflicts with TEA:
 #  - in input_elem use elements' names as they appear in the periodic table
-#  - all input_elem must be included in the list of output_species with their 
-#    states. 
+#  - all input_elem must be included in the list of output_species with their
+#    states at the begining of the output_species list.
 #  - use species names as readJANAF.py produces them. See lib/gdata folder or
 #    lib/conversion_record_sorted.txt for the correct names of the species
 #  - H, and He elements as input_elem must be included for hot-Jupiters
 #  - H_g, He_ref and H2_ref species in output_species must be included for
 #    hot-Jupiters
-#  - If the code stalls at the first iteration of the first temperature, check 
-#    if all elements that appear in the output species list are included 
-#    with their correct names
+#  - TEA does not work with ionized and condensate species
 # =============================================================================
+
+# Read configuration-file parameters
+TEApars, PREATpars = rc.readcfg()
+maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
+PT_file, pre_atm_name, input_elem, output_species = PREATpars
 
 # Print license
 print("\n\
@@ -117,11 +121,13 @@ if location_out[-1] != '/':
 # Retrieve user directory name
 desc  = sys.argv[1:][0]
 
-# Check if output directory exists and inform user
-if os.path.exists(location_out + desc):
-    print("  Output directory " + str(location_out + desc) + "/ already exists.\n"
-              "  Press enter to continue and overwrite existing files,\n"
-              "  or quit and choose another output name.\n")
+if verb==2:
+    # Check if output directory exists and inform user
+    if os.path.exists(location_out + desc):
+        six.moves.input("  Output directory " + str(location_out + desc) + 
+                        "/\n  already exists.\n"
+                        "  Press enter to continue and overwrite existing files,\n"
+                        "  or quit and choose another output name.\n")
 
 # Create inputs directory
 inputs_dir = location_out + desc + "/atm_inputs/"
@@ -130,13 +136,13 @@ if not os.path.exists(inputs_dir): os.makedirs(inputs_dir)
 
 def readPT(PT_file):
     """
-    Reads a PT file containing pressure and temperature arrays. If custom made
-    must be in the format provided in doc/examples/ folder.
+    Reads a PT file containing pressure and temperature arrays. 
+    If custom made must be in the format provided in doc/examples/ folder.
 
     Parameters
     ----------
     PT_file: string
-             Name of pressure and temperature file. 
+          Path to the temperature and pressure file.
 
     Returns
     -------
@@ -146,7 +152,7 @@ def readPT(PT_file):
           Array containing temperatures in each layer.
     """
 
-    # Read abundance data and convert to array:
+    # Read abundance data and convert to array
     f = open(PT_file, 'r')
     data = []
     for line in f.readlines():
@@ -177,15 +183,15 @@ def readPT(PT_file):
 
 def makeatm():
     '''
-    This function produces a pre-atmospheric file in the format that TEA can 
-    read it. The file will be placed in atm_inputs/ directory. It calls 
-    readPT() function to take pressure and temperature array and reads the 
-    elemental abundance data file (default: abundances.txt, 
+    Produces a pre-atmospheric file in the format that TEA can
+    reads it. The file will be placed in atm_inputs/ directory. It calls
+    readPT() function to take pressure and temperature array and reads the
+    elemental abundance data file (default: abundances.txt,
     Asplund et al. 2009). The code trims the abundance data to the elements
-    of interest, converts species dex abundances (logarithmic abundances, 
+    of interest, converts species dex abundances (logarithmic abundances,
     dex stands for decimal exponent) into number densities and divides them
     by the hydrogen number densities fractional abundances. It writes data
-    (pressure, temperature, elemental abundances) into a pre-atmospheric 
+    (pressure, temperature, elemental abundances) into a pre-atmospheric
     file. The config file, pressure and temperature file, and the abundances
     file are copied to the atm_inputs/ directory.
 
@@ -203,34 +209,31 @@ def makeatm():
     try:
         f = open(TEA_config)
     except IOError:
-        print("\nConfig file is missing. Place TEA.cfg in the working directory.\n")
+        print("\nMissing config file, place TEA.cfg in the working directory.\n")
 
     # Inform user if TEA.cfg file already exists in inputs/ directory
     if os.path.isfile(inputs_dir + TEA_config):
-        print("  " + str(TEA_config) + " overwritten in atm_inputs/ directory.")
+        print("  {:s} overwritten in atm_inputs/ dir.".format(TEA_config))
     # Copy TEA.cfg file to current inputs directory
     shutil.copy2(TEA_config, inputs_dir + TEA_config)
 
     # Inform user if PT file already exists in inputs/ directory
     head, PT_filename   = ntpath.split(PT_file)
     if os.path.isfile(inputs_dir + PT_filename):
-        print("  " + str(PT_filename) + " overwritten in atm_inputs/ directory.")
+        print("  PT file, {:s}, overwritten in atm_inputs/ dir.".format(PT_filename))
     # Copy PT file to current inputs directory
     shutil.copy2(PT_file, inputs_dir + PT_filename)
 
     # Inform user if abundances file already exists in inputs/ directory
     head, abun_filename = ntpath.split(abun_file)
     if os.path.isfile(inputs_dir + abun_filename):
-        print("  " + str(abun_filename) + " overwritten in atm_inputs/ directory.")
+        print("  {:s} overwritten in atm_inputs/ dir.".format(abun_filename))
     # Copy abundances file to inputs/ directory
     shutil.copy2(abun_file, inputs_dir + abun_filename)
 
     # Inform user if pre-atm file already exists in inputs/ directory
     if os.path.isfile(inputs_dir + pre_atm_name):
-        raw_input("\n  Pre-atmospheric file " + str(pre_atm_name) + \
-        " already exists in atm_inputs/ directory.\n"
-        "  Press enter to continue and overwrite existing file, or quit and choose\n"
-        "  another pre-atm name.")
+        print("  pre_atm file, {:s}, overwritten in atm_inputs/ dir.".format(pre_atm_name))
 
     # Read pressure and temperature data
     pressure, temp = readPT(PT_file)
@@ -264,8 +267,9 @@ def makeatm():
     # Catch if input elements not included in output species
     for i in in_elem_split:
         if not any(i in j for j in out_elem):
-            raise IOError ("\n\n  Some input elements not included in output species.\n"
-                             "  Correct TEA.cfg and rerun.\n")
+            raise IOError(
+                    "\n\nSome input elements not included in output species."
+                      "\nCorrect TEA.cfg and rerun.\n")
 
     # Trim abundata to elements we need
     data_slice = np.zeros(abundata.shape[0], dtype=bool)
@@ -285,13 +289,12 @@ def makeatm():
     # Convert logarithmic (dex) exponents to number density
     out_num  = 10**np.array(out_dex)
 
-
     # Get hydrogen number density
     H_num = 10**12
 
-    # Get fractions of element number density to the hydrogen number density
+    # Get fractions of element number density to hydrogen number density
     out_abn  = (out_num / H_num).tolist()
-    
+
     # Convert fractions to strings in scientific notation
     for n in np.arange(np.size(out_abn)):
         out_abn[n] = str('%1.10e'%out_abn[n])
@@ -307,8 +310,7 @@ def makeatm():
 
     # Fill in data list
     for i in np.arange(n_layers):
-        out.append(['%8.4e'%pressure[i]] + \
-                          ['%7.2f'%temp[i]] + out_abn)
+        out.append(['%8.4e'%pressure[i]] + ['%7.2f'%temp[i]] + out_abn)
 
     # Pre-atm header with basic instructions
     header = ("# This is a TEA pre-atmosphere input file.\n"
@@ -324,20 +326,21 @@ def makeatm():
     f.write('#SPECIES\n' + output_species + '\n\n')
     f.write('#TEADATA\n')
     for i in np.arange(n_layers + 1):
-    
+
         # Pressure list
         f.write(out[i][0].ljust(10) + ' ')
-    
+
         # Temp list
         f.write(out[i][1].ljust(7) + ' ')
-    
+
         # Elemental abundance list
         for j in np.arange(nelem):
             f.write(out[i][j+2].ljust(16)+' ')
         f.write('\n')
     f.close()
-   
-    print("\nCreated pre-atmospheric file:\n" + str(inputs_dir + pre_atm_name) + "\n")
+
+    print("\nCreated pre-atmospheric file:\n"
+            + str(inputs_dir + pre_atm_name) + "\n")
 
 
 if __name__ == "__main__":

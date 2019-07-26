@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -61,24 +61,25 @@ import sys
 import os
 import string
 import re
+import warnings
 
-prepipe  = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(prepipe[:-7] + "tea/")
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
+sys.path.append(location_TEA + "tea/")
 
-from readconf import *
+import readconf as rc
+
 
 # ============================================================================
-# This program sets and/or executes the pre-pipeline TEA routines readJANAF.py 
-# and makestoich.py. It consists of two functions: comp() and setup(). The 
-# comp() function counts the number of each element in a chemical species, 
-# while the setup() function reads JANAF tables and allows sharing of common 
+# This program sets and/or executes the pre-pipeline TEA routines readJANAF.py
+# and makestoich.py. It consists of two functions: comp() and setup(). The
+# comp() function counts the number of each element in a chemical species,
+# while the setup() function reads JANAF tables and allows sharing of common
 # routines for readJANAF.py and makestoich.py. If executed as "prepipe.py", it
 # will run both routines. If desired, user can run each routine separately.
 # ============================================================================
 
-# Correct directory names
-if location_TEA[-1] != '/':
-    location_TEA += '/'
+TEApars, PREATpars = rc.readcfg()
+maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
 
 def comp(specie):
     '''
@@ -86,8 +87,8 @@ def comp(specie):
     species. Takes in a string of a chemical species (i.e., "H2O") and returns
     an array containing every element with corresponding counts found in that
     species. Called by makestoich.py and the setup() function. If desired, user
-    can return stoichiometric array containing only the elements found in the 
-    input species. Otherwise, it returns the full array of all 113 available 
+    can return stoichiometric array containing only the elements found in the
+    input species. Otherwise, it returns the full array of all 113 available
     elemental stoichiometric data.
 
     Parameters
@@ -96,16 +97,16 @@ def comp(specie):
              Chemical species in the format "atomic symbol, count, etc" such
              that the number of counts is always directly following the
              corresponding atomic symbol. The 'species' string can contain
-             redundancies, but not parentheses. Names should match the 
-             "JCODE" formulas listed in the NIST JANAF Tables listed at: 
+             redundancies, but not parentheses. Names should match the
+             "JCODE" formulas listed in the NIST JANAF Tables listed at:
              kinetics.nist.gov/janaf/formula.html.
              If 'species' is "NOUSE", function will return an array of all
-             0 counts.  
- 
+             0 counts.
+
     Returns
     -------
     elements : 2D array
-               Array containing three columns of equal length: the first 
+               Array containing three columns of equal length: the first
                column is a full list of all elements' atomic numbers from
                deuterium (#0) up to copernicium (#112), the second column
                contains the corresponding atomic symbol, and the third column
@@ -113,8 +114,8 @@ def comp(specie):
 
     Notes
     ------
-    "Weight" in the code is the count of each element occurrence in the 
-    species, and the sum of all weights for that element is the stoichiometric 
+    "Weight" in the code is the count of each element occurrence in the
+    species, and the sum of all weights for that element is the stoichiometric
     coefficient (i.e., ClSSCl that appears in JANAF tables has weight 1 for
     first occurrence of Cl, weight 1 for first occurrence of S, and the final
     stoichiometric values of Cl is 2, and for S is 2).
@@ -124,7 +125,7 @@ def comp(specie):
     the species (i.e, H2 has 2 H's and Li4 has 4 Li's).
     '''
 
-    # List of all elements' symbols from periodic table  
+    # List of all elements' symbols from periodic table
     # Start with Deuterium, end with Copernicium.
     symbols = np.array([
     'D',
@@ -240,28 +241,28 @@ def comp(specie):
     'Ds',
     'Rg',
     'Cn' ])
-    
+
     # Count elements
     n_ele = np.size(symbols)
-    
+
     # Create 2D array containing all symbols, atomic numbers, and counts
     elements = np.empty((n_ele, 3), dtype=np.object)
     elements[:, 0] = np.arange(n_ele)
     elements[:, 1] = symbols
     elements[:, 2] = 0
-    
+
     # Allocate string length and array of booleans to indicate if characters
     #          are capitals or digits
     chars   = len(specie)
     iscaps  = np.empty(chars, dtype=np.bool)
     isdigit = np.empty(chars, dtype=np.bool)
-    
+
     # Check each character in string to fill in boolean arrays for capitals
-    #       or digits; 
+    #       or digits;
     for i in np.arange(len(specie)):
         iscaps[i] = (re.findall('[A-Z]', specie[i]) != [])
         isdigit[i] = specie[i].isdigit()
-    
+
     # Indicator for ending each count and blank results array
     endele = True
     result = [[]]
@@ -272,39 +273,41 @@ def comp(specie):
             ele = ''
             weight = ''
             endele = False
-        
+
         # Check if character is a letter, if so add to element name
-        if (isdigit[i] == False): 
+        if (isdigit[i] == False):
             ele += specie[i]
-        
+
         # Check if character is a digit, if so, make this the element's weight
         if isdigit[i] == True:
             weight += specie[i]
 
-        # Check if element name ends (next capital is reached) 
+        # Check if element name ends (next capital is reached)
         #       and if no weight (count) is found, set it to 1
         if (isdigit[i] == False and                \
            (iscaps[i+1:i+2] == True or i == chars-1)):
             weight = 1
-        
-        # If next element is found or if end of species name is reached 
+
+        # If next element is found or if end of species name is reached
         #    (end of string), stop tracking
-        if (iscaps[i+1:i+2] == True or i == chars-1): 
+        if (iscaps[i+1:i+2] == True or i == chars-1):
             endele = True
-        
-        # End of element has been reached, so output weights of element 
+
+        # End of element has been reached, so output weights of element
         #     into elemental array
         if endele == True:
             # Locate element in element array and add the weight found
             index = np.where(elements[:, 1] == ele)[0]
             elements[index, 2] += np.int(weight)
-            # Create array containing only the elements used in this run 
+            # Create array containing only the elements used in this run
             # This is not explicitly returned but can easy be if desired
+            # Suppresses warnings for numpy bug, returns False, without Warning
+            warnings.simplefilter(action='ignore', category=FutureWarning)
             if result == [[]]:
                 result = np.append(result, [[ele, weight]], axis=1)
             else:
                 result = np.append(result, [[ele, weight]], axis=0)
-    
+
     # Return full array of elements and stoichiometry
     return elements
 
@@ -312,13 +315,13 @@ def comp(specie):
 def setup(abun_file, raw_dir = 'janaf', thermo_dir = 'lib/gdata', \
           stoich_dir = 'stoichcoeff/', stoich_out = 'lib/stoich.txt'):
     '''
-    This routine reads the raw JANAF tables placed in the appropriate directory 
+    This routine reads the raw JANAF tables placed in the appropriate directory
     (default: janaf/) and extracts partial thermodynamic and stoichiometric
     data. It serves as a setup for the readJANAF.py and makestoich.py routines.
     The program is given the name of the raw JANAF tables directory,
     thermodynamic output directory, and stoichiometric output directory, as
-    well as the names of the output stoichiometric file and the pre-written 
-    file containing abundance data (default: abundances.txt). 
+    well as the names of the output stoichiometric file and the pre-written
+    file containing abundance data (default: abundances.txt).
     It takes number of elements from comp() and loops over all JANAF data and
     abundance data, performing various thermodynamic calculations and
     stoichiometric functions on the appropriate species of interest.
@@ -341,15 +344,15 @@ def setup(abun_file, raw_dir = 'janaf', thermo_dir = 'lib/gdata', \
     raw_dir: string
            Directory name of raw JANAF tables.
     thermo_dir: string
-           Directory name of thermodynamic data output. 
+           Directory name of thermodynamic data output.
     stoich_dir: string
-           Directory name of stoichiometric output. 
+           Directory name of stoichiometric output.
     stoich_out: string
            Name of output file to contain stoichiometric data.
     abun_file: string
-           Name of file that contains elemental abundance data.           
+           Name of file that contains elemental abundance data.
     n_ele: integer
-           Number of all elements' symbols from comp()'s element list. 
+           Number of all elements' symbols from comp()'s element list.
     n_JANAF: integer
            Number of JANAF files in thermo_dir directory.
     species: list
@@ -398,15 +401,15 @@ def setup(abun_file, raw_dir = 'janaf', thermo_dir = 'lib/gdata', \
             specie = specie.strip('+') + '_ion_p'
         if specie[-1] == '-':
             specie = specie.strip('-') + '_ion_n'
-        
+
         # Retrieve chemical formula
         species[i, 0] = specie
-        
+
         # Add additional string for the type of the chemical compound
         compound_name = string[: start].split()
         add_string = compound_name[-1]
-        species[i, 3] = add_string     
-        
+        species[i, 3] = add_string
+
     # Loop over JANAF files to get species stoichiometric coefficients
     #      and states
     for i in np.arange(n_JANAF):
@@ -429,7 +432,7 @@ def setup(abun_file, raw_dir = 'janaf', thermo_dir = 'lib/gdata', \
            n_ele, n_JANAF, species, JANAF_files
 
 
-# Execute full pre-pipeline  
+# Execute full pre-pipeline
 # Run readJANAF.py
 if __name__ == '__main__':
     from readJANAF import *

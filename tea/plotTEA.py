@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -56,13 +56,18 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
-
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
 from PIL import Image
+
+import readconf as rc
+
+
+# Read configuration-file parameters:
+TEApars, PREATpars = rc.readcfg()
+maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
 
 # Correct directory names
 if location_out[-1] != '/':
@@ -70,8 +75,8 @@ if location_out[-1] != '/':
 
 def plotTEA():
     '''
-    This code plots a figure of temperature vs. abundances for any multiTP 
-    final output produced by TEA, RESULT_ATM_FILE. It accepts 2 arguments 
+    Plots a figure of temperature vs. abundances for any multiTP
+    final output produced by TEA, RESULT_ATM_FILE. It accepts 2 arguments
     on the command line: the path to the multiTP TEA output, and the names
     of the species user wants to plot. See notes for the full description
     of arguments. To run the code do:
@@ -95,9 +100,9 @@ def plotTEA():
     ../TEA/tea/plotTEA.py <RESULT_ATM_FILE_PATH> <SPECIES_NAMES>
 
     <RESULT_ATM_FILE> - string
-               Path to the atm_file.           
+               Path to the atm_file.
     <SPECIES_NAMES>  - list of strings
-               List of species that user wants to plot. Species names should 
+               List of species that user wants to plot. Species names should
                be given with their symbols (without their states) and no
                breaks between species names (e.g., CH4,CO,H2O).
 
@@ -105,14 +110,15 @@ def plotTEA():
     The plot is opened once execution is completed and saved in the ./plots/
     subdirectory.
 
-    The lower range on the y axis (mixing fraction) when temperatures are below ~600 K 
-    should be set at most -14. 
+    Recall that TEA works without adjustments for the temperatures above ~500 K. 
+    For temperatures below 500 K the code produces results with low precision, 
+    thus it is not recommended to use TEA below these temperatures.  
     '''
-    
+
     # Get plots directory, create if non-existent
     plots_dir = location_out + "/plots/"
     if not os.path.exists(plots_dir): os.makedirs(plots_dir)
-    
+
     # Counts number of arguments given
     noArguments = len(sys.argv)
 
@@ -120,7 +126,7 @@ def plotTEA():
     if noArguments != 3:
         print("\nUsage  : ../TEA/tea/plotTEA.py atmfile species(divided by comma, no breaks)")
         print("Example: ../TEA/tea/plotTEA.py ../TEA/doc/examples/multiTP/results/multiTP_Example.tea CO,CH4,H2O,NH3\n")
-     
+
     # Sets the first argument given as the atmospheric file
     filename = sys.argv[1]
 
@@ -139,12 +145,12 @@ def plotTEA():
     for m in np.arange(nmol):
         molecules[m] = molecules[m].partition('_')[0]
 
-    # Take user input for species and split species strings into separate strings 
+    # Take user input for species and split species strings into separate strings
     #      convert the list to tuple
     species = tuple(species.split(','))
     nspec = len(species)
 
-    # Populate column numbers for requested species and 
+    # Populate column numbers for requested species and
     #          update list of species if order is not appropriate
     columns = []
     spec    = []
@@ -168,7 +174,7 @@ def plotTEA():
     # Open a figure
     plt.figure(1)
     plt.clf()
- 
+
     # Set different colours of lines
     colors = 'bgrcmykbgrcmyk'
     color_index = 0
@@ -185,14 +191,14 @@ def plotTEA():
     plt.legend(loc='best', prop={'size':10})
 
     # Temperature range (plt.xlim) and pressure range (plt.ylim)
-    plt.ylim(max(data[0]), min(data[0]))     
-  
-    # Place plot into plots directory with appropriate name 
+    plt.ylim(max(data[0]), min(data[0]))
+
+    # Place plot into plots directory with appropriate name
     plot_out = plots_dir + filename.split("/")[-1][:-4] + '.png'
-    plt.savefig(plot_out)  
+    plt.savefig(plot_out)
     plt.close()
-    
-    # Return name of plot created 
+
+    # Return name of plot created
     return plot_out
 
 
@@ -200,7 +206,9 @@ def plotTEA():
 if __name__ == '__main__':
     # Make plot and retrieve plot's name
     plot_out = plotTEA()
-    
+
     # Open plot
     plot = Image.open(plot_out)
     plot.show()
+
+
