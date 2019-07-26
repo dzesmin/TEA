@@ -1,6 +1,6 @@
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -55,499 +55,320 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-from readconf import *
-
 import numpy as np
 import re
 import os
 
 from scipy.interpolate import UnivariateSpline
+import scipy.constants as sc
+
+
+location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
 # =============================================================================
-# This module contains functions to write headers containing all necessary 
-# chemical information for a single T-P and multiple
-# T-P runs. It consists of two main functions, make_singleheader() and 
-# make_atmheader() called by the runsingle.py and runatm.py modules
-# respectively. The header_setup(), atm_headarr(), single_headarr(), and
-# write_header() are the supporting functions for the main functions. 
-# Imported by runatm.py and runsingle.py to create the header files.
+# This module contains functions to write headers containing all necessary
+# chemical information for a single T-P and multiple T-P runs. 
 # =============================================================================
 
-# Correct directory names
-if location_TEA[-1] != '/':
-    location_TEA += '/'
-
-if location_out[-1] != '/':
-    location_out += '/'
-
-def header_setup(temp, pressure, spec_list,                      \
-                 thermo_dir, stoich_file = 'lib/stoich.txt'):
-    '''
-    This function is a common setup for both single T-P and multiple T-P runs. 
-    Given the thermochemical data and stoichiometric table, this function 
-    returns stoichiometric values and an array of chemical potentials for the 
-    species of interest at the current temperature and pressure.  It also 
-    returns an array of booleans that marks which information should be read 
-    from stoich_file for the current species. It is executed by the 
-    make_atmheader() and make_singleheader() functions.
+def read_stoich(spec_list, stoich_file='lib/stoich.txt', getb=False):
+    """
+    Reads and returns stoichiometric values for the list of input species.
+    This function is a common setup for both single T-P and multiple
+    T-P runs.  It is executed by the runatm() and runsingle().
+    modules.
 
     Parameters
     ----------
-    temp: float
-         Current temperature value.
-    pressure: float
-         Current pressure value.
     spec_list: string array
-         Array containing names of molecular species.
-    thermo_dir = 'lib/gdata':  string
-         Name of directory containing thermodynamic data.
+       Array containing names of molecular species.
     stoich_file = 'lib/stoich.txt': string
-         Name of file containing stoichiometric data.
+       Path to the stoichiometric data.
+    getb: Bool
+       If True, read and return the elemental abudances
 
     Returns
     -------
-    stoich_data: array
-         Full stoichiometric information from stoich_file for species used.
-    spec_stoich: float array
-         Array containing values from stoich_file that correspond to the 
-         species used.
-    g_RT: float array
-         Array containing species' chemical potentials.
-    is_used: boolean array
-         Array containing booleans to trim stoichiometric data to only the 
-         species of interest.
-    '''
+    spec_stoich: 2D float ndarray
+       Array containing values from stoich_file that correspond to the
+       species used.
+    atom_stoich: 1D String ndarray
+       Array of elements with non-zero stoichiometric values from
+       spec_stoich species.
+    b: 1D float ndarray
+       Elemental abundances of atom_stoich.
+    """
 
-    # Ensure that inputs are floats
-    temp     = np.float(temp)
-    pressure = np.float(pressure)
-
-    # Obtain thermo_dir files, and count both files and species
-    gdata_files = os.listdir(thermo_dir)
-    n_gdata     = np.size(gdata_files)
-    n_spec      = np.size(spec_list)
-
-    # Create index of where species listed in the input file are in thermo_dir
-    spec_ind = np.zeros(n_spec)
-    for i in np.arange(n_spec):
-        spec_file = spec_list[i] + '.txt'
-        if spec_file in gdata_files:
-            spec_ind[i] = gdata_files.index(spec_file)
-
-    # Create array of G/RT
-    g_RT = np.zeros(n_spec)
-    R = 8.3144621 # J/K/mol
-    for i in np.arange(n_spec):
-        spec_file = thermo_dir + '/' + gdata_files[np.int(spec_ind[i])]
-        f = open(spec_file, 'r')
-        data = []
-        headerline = True
-        for line in f.readlines():
-            if headerline:
-                headerline = False
-            else:
-                l = [np.float(value) for value in line.split()]
-                data.append(l)
-        
-        f.close()
-       
-        # Convert data to an array
-        data = np.asarray(data)
-
-        # Equation for g_RT term equation (10) in TEA theory document
-        #  G        G-H(298)      delta-f H(298)
-        # ---  =    -------  +    -------------
-        # R*T         R*T              R*T
-
-        # First term is divided by T in JANAF, equation (11) in TEA theory document   
-        # Second term needs to be converted to Joules (JANAF gives kJ)
-        #  G     G-H(298)             1                                    1000
-        # ---  = ------- [J/K/mol] * ---         + delta-f H(298) [kJ/mol] ------ 
-        # R*T      T                  R [J/K/mol]                          R*T [J/K/mol][K] 
-
-        # Spline interpolation of JANAF term1 values
-        spline_term1 = UnivariateSpline(data[:, 0], data[:,1], s=1)
-        gdata_term1  = spline_term1(temp)
-       
-        # Take term2 from gdata/ tables
-        for j in np.arange(len(data[:,0])):
-            if data[:,0][j] == 298.15:
-                gdata_term2  = data[:,2][j]   
-
-        # Calculate the above equation   
-        g_RT[i] = - (gdata_term1 / R) + (gdata_term2 * 1000 / (temp * R))
-        
     # Get number of elements that occur in species of interest
+    nspec = len(spec_list)
+
+    # Trim suffix from species list
     nostate = np.copy(spec_list)
-    for i in np.arange(n_spec):
+    for i in np.arange(nspec):
         nostate[i] = re.search('(.*?)_', spec_list[i]).group(1)
 
     # Location of the stoich_file
     stoich_file = location_TEA + stoich_file
 
     # Get stoichiometric information for species of interest
-    f = open(stoich_file, 'r')
-    stoich_data = []
-    bline = True
-    for line in f.readlines():
-        l = [value for value in line.split()]
-        stoich_data.append(l)
+    with open(stoich_file, 'r') as f:
+        stoich_data = []
+        for line in f.readlines():
+            l = [value for value in line.split()]
+            stoich_data.append(l)
 
-    # Store information in stoich_data array
-    stoich_data = np.asarray(stoich_data)
-    f.close()
+        # Store information in stoich_data array
+        stoich_data = np.asarray(stoich_data)
+
+    # All species names
+    allspec = stoich_data[2:,0]
+
+    # Elemental abundances
+    dex      = stoich_data[0, 1:]
+    elements = stoich_data[1, 1:]
+
+    # Trim species names and cast to float
+    stoich_data = np.asarray(stoich_data[2:,1:], np.double)
+
+    # Select species
+    # Has to be in a for-loop to keep order
+    idx = np.zeros(nspec, int)
+    for i in np.arange(nspec):
+      idx[i] = np.where(allspec == nostate[i])[0][0]
+    spec_stoich = stoich_data[idx]
+
+    # Select elements
+    ielem = np.sum(spec_stoich, axis=0) > 0
+    spec_stoich = spec_stoich[:,ielem]
+    atom_stoich = elements[ielem]
+
+    # Read and return the elemental abudances
+    if getb:
+        b = 10**np.asarray(dex[ielem], float)
+        # Get hydrogen number density
+        H_num = 10**12
+        # Get fractions of element number density to hydrogen number density
+        b /= H_num
+
+        return spec_stoich, atom_stoich, b
+
+    return spec_stoich, atom_stoich
+
+
+def read_gdata(spec_list, thermo_dir):
+    """
+    Reads the free-energy data (gdata) from JANAF
+    tables, and returns a list of spline functions and formation heat
+    values for each input species (such that they can be later
+    evaluated by the calc_gRT() function).
     
-    # Count total number of elements in stoich_file
-    n_ele = np.size(stoich_data[0, 1:])
-    
-    # Allocate array to store current element and species stoichiometric values
-    spec_stoich = np.empty((n_spec+1, n_ele), dtype=np.float)
-    spec_stoich[0] = stoich_data[0,1:]
-
-    # Place species' stoichiometric data into array
-    for i in np.arange(n_spec):
-        idx = np.where(stoich_data[:, 0] == nostate[i])[0]
-        if np.size(idx) != 1:
-            idx = idx[0]
-        spec_stoich[i+1] = stoich_data[idx,1:]
-    
-    # Determine which elements are used to trim down final stoichiometric table
-    is_used = np.empty(n_ele, dtype=np.bool)
-    for j in np.arange(n_ele):
-        if np.sum(spec_stoich[1:, j]) != 0:
-            is_used[j] = True
-        else:
-            is_used[j] = False
-
-    return stoich_data, spec_stoich, g_RT, is_used
-
-
-def single_headarr(spec_list, stoich_data, spec_stoich, is_used):
-    '''
-    This function gathers data needed for TEA to run in a single T-P case. 
-    These are: elemental abundances, species names, and their stoichiometric
-    values. For the list of elements and species used, it takes the abundances
-    and stoichiometric values and puts them in the final array. This function
-    is run by make_singleheader() and is dependent on results from 
-    header_setup().
-
     Parameters
     ----------
-    spec_list: string array
-         Array containing names of molecular species.
-    stoich_data: array
-         Full stoichiometric information from header_setup() for species of 
-         interest.
-    spec_stoich: float array
-         Array containing values from header_setup() for species of interest.
-    is_used: boolean array
-         Array containing booleans to trim stoichiometric data to only the 
-         species of interest.
+    spec_list: List of strings
+       Array containing names of molecular species.
+    thermo_dir: String
+       Path to the directory containing thermodynamic data.
 
     Returns
     -------
-    stoich_arr: array
-         Array containing elemental abundances, species names, and their 
-         stoichiometric values.
-    '''
-    
-    # Get number of species used
-    n_spec = np.size(spec_list)
-    
-    # Allocate final header array
-    stoich_arr = np.empty((n_spec + 2, np.sum(is_used) + 1), dtype=np.object)
-    
-    # First row is 'b' values (elemental abundances)
-    stoich_arr[0,0] = 'b'
-    stoich_arr[0,1:] = stoich_data[0, np.where(is_used)[0] + 1]
-    
-    # Second row is list of species
-    stoich_arr[1,0] = 'Species'
-    stoich_arr[1,1:] = stoich_data[1, np.where(is_used)[0] + 1]
-    
-    # Each row after contains the weights of each element referred to as
-    #      stoichiometric coefficients
-    for i in np.arange(n_spec):
-        stoich_arr[i+2, 0] = spec_list[i]
-        stoich_arr[i+2, 1:] = list(map(int,spec_stoich[i+1, np.where(is_used)[0]]))
-    
-    # Convert logarithmic (dex) abundances into number densities
-    finalstoich_conv = np.empty((n_spec + 2, np.sum(is_used) + 1), \
-                                                 dtype=np.object)
-    finalstoich_conv[0,0] = 'b'
-    finalstoich_conv[0,1:] = list(map(float, stoich_arr[0,1:]))
+    free_energy: 1D list of scipy splines
+       Splines (as function of temperature) of the free energies of
+       the species.
+    heat: 1D float ndarray
+       Formation heat of the species.
+    """
 
-    # Number densities for elements in the system are equal to 10**(dex)
-    finalstoich_conv[0,1:] = 10**(finalstoich_conv[0,1:])
-    
-    # Elemental abundance is equal to elemental number density divided by
-    #           total sum of all elemental number densities in the system
-    finalstoich_conv[0,1:] /= sum(finalstoich_conv[0,1:])
-    
-    # Place converted values back into final header array
-    stoich_arr[0] = finalstoich_conv[0]
-    
-    return stoich_arr
+    # Obtain thermo_dir files, and count species
+    gdata_files = os.listdir(thermo_dir)
+    nspec       = np.size(spec_list)
+
+    free_energy, heat = [], []
+    # Create index of where species listed in the input file are in thermo_dir
+    for i in np.arange(nspec):
+        spec_file = '{:s}/{:s}.txt'.format(thermo_dir, spec_list[i])
+        with open(spec_file, 'r') as f:
+          # Skip first line (header)
+          lines = f.readlines()[1:]  
+
+        # Gather free energies and heat terms for T=298.15 K
+        nlines = len(lines)
+        T     = np.zeros(nlines)
+        term1 = np.zeros(nlines)
+        for j in np.arange(nlines):
+            T[j], term1[j], term2 = lines[j].split()
+            if T[j] == 298.15:
+              heat.append(term2)
+
+        # Convert data to an array
+        free_energy.append(UnivariateSpline(T, term1, s=1))
+
+    return free_energy, np.array(heat, np.double)
 
 
-def atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr, q, is_used):
-    '''
-    This function gathers data needed for TEA to run in a multiple T-P case. 
-    These are: elemental abundances, species names, and their stoichiometric
-    values. For the list of elements and species used, it takes the abundances
-    and stoichiometric values and puts them in the final array. This function
-    is run by make_atmheader() and is dependent on results from header_setup().
+def calc_gRT(free_energy, heat, temp):
+    """
+    This function evaluates the chemical potentials for the species
+    of interest at the specified temperature. The inputs for this
+    function must be generated by the read_gdata() function.
 
     Parameters
     ----------
-    spec_list: string array
-         Array containing names of molecular species.
-    stoich_data: array
-         Full stoichiometric information from header_setup() for species of 
-         interest.
-    spec_stoich: float array
-         Array containing values from header_setup() for species of interest.
-    atom_arr: string array
-         Array containing elemental symbols and abundances.
-    q: integer
-         Current line number in pre-atm file.
-    is_used: boolean array
-         Array containing booleans to trim stoichiometric data to only the 
-         species of interest.
-
-    Returns
-    -------
-    stoich_arr: array
-         Array containing elemental abundances, species names, and their 
-         stoichiometric values.
-    '''
-
-    # Get number of species and elements used
-    n_spec = np.size(spec_list)
-    n_atom = np.size(atom_arr[0])
-    
-    # Allocate final abundance array
-    stoich_arr = np.empty((n_spec + 2, np.sum(is_used) + 1), dtype=np.object)
-    stoich_arr[0,0] = 'b'
-    
-    # Get only the abundances used in the species list
-    for n in np.arange(np.sum(is_used)):
-        # Get list of used elements from species list
-        cur_ele = stoich_data[1, np.where(is_used)[0][n] + 1]
-        
-        # Place used elemental abundances into final abundance array
-        for m in np.arange(n_atom):
-            if atom_arr[0][m] == cur_ele:
-                cur_abn = atom_arr[q][m]
-        stoich_arr[0,1+n] = cur_abn
-
-    # Fill in final abundance array
-    stoich_arr[1,0] = 'Species'
-    stoich_arr[1,1:] = stoich_data[1, np.where(is_used)[0] + 1]
-    for i in np.arange(n_spec):
-        stoich_arr[i+2, 0] = spec_list[i]
-        stoich_arr[i+2, 1:] = list(map(int,spec_stoich[i+1, np.where(is_used)[0]]))
-    
-    return stoich_arr
-
-
-def write_header(desc, pressure, temp, stoich_arr, n_spec, g_RT):
-    '''
-    This function writes a header file that contains all necessary data
-    for TEA to run. It is run by make_atmheader() and make_singleheader().
-
-    Parameters
-    ----------
-    desc: string
-         Name of output directory given by user. 
-    pressure: float
-         Current pressure value.
+    free_energy: 1D list of scipy splines
+       Splines (as function of temperature) of the free energies of
+       the species.
+    heat: 1D float ndarray
+       Formation heat of the species.
     temp: float
          Current temperature value.
-    stoich_arr: array
-         Array containing elemental abundances, species names, and their 
-         stoichiometric values.
-    n_spec: integer
-         Number of species. 
-    g_RT: float array
-         Array containing chemical potentials for each species at the 
-         current T-P.
 
     Returns
     -------
-    None
-    '''
+    g_RT: float array
+         Array containing species' chemical potentials.
+    """
 
-    # Comment at top of header file
-    header_comment = ("# This is a header file for one T-P. It contains the following data:\n"
-    "# pressure (bar), temperature (K), elemental abundances (b, unitless),\n"
-    "# species names, stoichiometric values of each element in the species (a),\n"
-    "# and chemical potentials.\n\n")
+    # Count species
+    nspec = len(free_energy)
+    g_RT = np.zeros(nspec)
+
+    # Equation for g_RT term equation (10) in TEA theory document
+    #  G        G-H(298)      delta-f H(298)
+    # ---  =    -------  +    -------------
+    # R*T         R*T              R*T
+
+    # First term is divided by T in JANAF, Eq. (11) in TEA theory document
+    # Second term needs to be converted to Joules (JANAF gives kJ)
+    #  G   G-H(298)             1                                 1000
+    # -- = ------- [J/K/mol] * ---      + delta-f H(298) [kJ/mol] ------
+    # RT    T                 R[J/K/mol]                         RT [J/K/mol][K]
+
+    for i in np.arange(nspec):
+        # Evaluate free-energy spline at given temperature
+        free_en = free_energy[i](temp)
+        # Calculate the above equation
+        g_RT[i] = -(free_en/sc.R) + (heat[i]*1000 / (temp*sc.R))
+
+    return g_RT
+
+
+def write_header(hfolder, desc, temp, pressure, speclist, atomlist,
+                 stoich_arr, b, g_RT):
+    """
+    Writes a header file that contains all necessary data
+    for TEA to run. 
+
+    Parameters
+    ----------
+    hfolder: String
+       Folder where to store the header file.
+    desc: string
+       Name of output file.
+    temp: float
+       Temperature value (in Kelvin degrees).
+    pressure: float
+       Pressure value (in bar).
+    speclist: 1D list of strings
+       Names of the species.
+    atomlist: 1D list of strings
+       Names of the elements.
+    stoich_arr: array
+       Array containing the stoichiometric values of the species.
+    b: 1D float ndarray
+       Elemental mixing fractions.
+    g_RT: float array
+       Chemical potentials of the species.
+    """
+
+    # Count species and elements
+    nspec, natom = np.shape(stoich_arr)
 
     # Make header directory if it does not exist to store header files
-    if not os.path.exists(location_out + desc + '/headers/'): os.makedirs(location_out + desc + '/headers/')
+    if not os.path.exists(hfolder):
+        os.makedirs(hfolder)
 
     # Create header file to be used by the main pipeline
-    outfile = location_out + desc + '/headers/' + 'header_' + desc + ".txt"
+    outfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+                    hfolder, desc, temp, pressure)
 
     # Open file to write
     f = open(outfile, 'w+')
 
-    # Write comments and data
-    f.write(header_comment)
-    f.write(np.str(pressure) + '\n')
-    f.write(np.str(temp)     + '\n')
+    # Comment at top of header file
+    f.write(
+    "# This is a header file for one T-P. It contains the following data:\n"
+    "# pressure (bar), temperature (K), elemental abundances (b, unitless),\n"
+    "# species names, stoichiometric values of each element in the species (a),\n"
+    "# and chemical potentials.\n\n")
+    f.write("{:.5e}\n".format(pressure))
+    f.write("{:.3f}\n".format(temp))
 
-    b_line = stoich_arr[0][0]
-    for i in np.arange(np.shape(stoich_arr)[1] - 1):
-        b_line += ' ' + np.str(stoich_arr[0][i + 1])
-    f.write(b_line + '\n')
+    # Elemental abundances:
+    bstr = " ".join(["{:.6e}".format(x) for x in b])
+    f.write("b {:s}\n".format(bstr))
 
-    # Retrieve the width of the stoichiometric array
-    width = np.shape(stoich_arr)[1]
-
-    # Add title for list of chemical potentials
-    g_RT = np.append(["Chemical potential"], g_RT)
-
-    # Add title for species names
-    stoich_arr[1][0] = "# Species"
+    # Title for species names
+    f.write("# Species")
+    for j in np.arange(natom):
+      f.write("{:>3s}".format(atomlist[j]))
+    f.write("  Chemical potential\n")
 
     # Loop over all species and titles
-    for i in np.arange(n_spec + 1):
+    for i in np.arange(nspec):
         # Loop over species and number of elements
-        for j in np.arange(width):
-            # Write species names
-            if j == 0:
-                f.write(np.str(stoich_arr[i+1][j]).rjust(9) + "  ")
+        f.write("{:>9s}".format(speclist[i]))
+        for j in np.arange(natom):
             # Write elemental number density
-            else:
-                f.write(np.str(stoich_arr[i+1][j]).ljust(3))
+            f.write("{:>3.0f}".format(stoich_arr[i,j]))
         # Write chemical potentials, adjust spacing for minus sign
-        if g_RT[i][0] == '-':
-            f.write(np.str(g_RT[i]).rjust(13) + '\n')
-        else:
-            f.write(np.str(g_RT[i]).rjust(14) + '\n')
+        f.write("  {:-14.10f}\n".format(g_RT[i]))
 
     f.close()
 
 
-def make_singleheader(infile, desc, thermo_dir):
+def read_single(infile):
     '''
-    This is the main function that creates single-run TEA header. It reads
-    the input T-P file and retrieves necessary data. It calls the
-    header_setup(), single_headarr(), and write_header() functions to create a
-    header for the single T-P point. This function is called by the 
-    runsingle.py module. 
+    Reads the input T-P file and retrieves necessary data.  
+    It is called by the runsingle() module.
 
     Parameters
     ----------
     infile: string
-         Name of the input file (single T-P file).         
-    desc: string
-         Name of output directory given by user.    
-    thermo_dir = 'lib/gdata':  string
-         Name of directory containing thermodynamic data.
+         Name of the input file (single T-P file).
 
     Returns
     -------
-    desc: string
-         Name of output directory given by user. 
-    pressure: float
-         Current pressure value.
-    temp: float
-         Current temperature value.
-    stoich_arr: array
-         Array containing elemental abundances, species names, and their 
-         stoichiometric values.
-    n_spec: integer
-         Number of species. 
-    g_RT: float array
-         Array containing chemical potentials for each species at the 
-         current T-P.
+    temp: Float
+       The layer's temperature in  Kelvin.
+    pressure: Float
+       The layer's pressure in bar.
+    speclist: List of strings
+       Name of output species names.
     '''
 
     # Read single input file
     f = open(infile, 'r')
 
     # Allocate species list
-    spec_list = []
-    
+    speclist = []
+
     # Begin by reading first line of file (l = 0)
     l = 0
-    
+
     # Loop over all lines in input file to retrieve appropriate data
     for line in f.readlines():
         # Retrieve temperature
-        if (l == 0):
-            temp = np.float([value for value in line.split()][0])
+        if l == 0:
+            temp     = float([value for value in line.split()][0])
         # Retrieve pressure
-        if (l == 1):
-            pressure = np.float([value for value in line.split()][0])
+        if l == 1:
+            pressure = float([value for value in line.split()][0])
         # Retrieve list of species
-        if (l > 1):
+        if l > 1:
             val = [value for value in line.split()][0]
-            spec_list = np.append(spec_list, val)
-        # Update line number
+            speclist = np.append(speclist, val)
         l += 1
-    
+
     f.close()
-    
-    # Retrieve number of species used
-    n_spec = np.size(spec_list)
-    
-    # Execute header setup
-    stoich_data, spec_stoich, g_RT, is_used =                              \
-                        header_setup(temp, pressure, spec_list, thermo_dir)
-    
-    # Execute single-specific header setup
-    stoich_arr = single_headarr(spec_list, stoich_data, spec_stoich, is_used)
-    
-    # Write header array to file
-    write_header(desc, pressure, temp, stoich_arr, n_spec, g_RT)
 
+    return temp, pressure, speclist
 
-def make_atmheader(q, spec_list, pressure, temp, atom_arr, desc, \
-                   thermo_dir = 'lib/gdata'):
-    '''
-    This is the main function that creates a header for one T-P of a 
-    pre-atm file. It retrieves number of elements and species used for 
-    only the q-th T-P point in the pre-atm file. It then calls the 
-    header_setup(), atm_headarr(), and write_header() functions to create a 
-    header for this point. This function is called by the runatm.py module. 
-
-    Parameters
-    ----------
-    q: integer
-         Current line number in pre-atm file.
-    spec_list: string array
-         Array containing names of molecular species.
-    pressure: float
-         Current pressure value.
-    temp float
-         Current temperature value.
-    atom_arr: string array
-         Array containing elemental symbols and abundances.
-    desc: string
-         Name of output directory given by user.    
-    thermo_dir = 'lib/gdata':  string
-         Name of directory containing thermodynamic data.
-
-    Returns
-    -------
-    None
-    '''
-
-    # Retrieve number of elements and species used
-    n_spec   = np.size(spec_list)
-    n_atom   = np.size(atom_arr[0])
-    
-    # Execute header setup
-    stoich_data, spec_stoich, g_RT, is_used =                             \
-                       header_setup(temp, pressure, spec_list, thermo_dir)
-    
-    # Execute multiple-specific header setup
-    stoich_arr = atm_headarr(spec_list, stoich_data, spec_stoich, atom_arr,\
-                                                               q, is_used)
-    # Write header array to file
-    write_header(desc, pressure, temp, stoich_arr, n_spec, g_RT)
 

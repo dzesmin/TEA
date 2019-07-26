@@ -1,6 +1,6 @@
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -68,13 +68,13 @@ def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     Parameters
     -----------
     atm_file:  ASCII file
-               Pre-atm file that contains species, radius, pressure, 
+               Pre-atm file that contains species, radius, pressure,
                temperature, and elemental abundances data.
     spec_mark: string
                Marker used to locate species data in pre-atm file
                (located in the line immediately preceding the data).
     tea_mark:  string
-               Marker used to locate radius, pressure, temperature, and 
+               Marker used to locate radius, pressure, temperature, and
                elemental abundances data (located in the line immediately
                preceding the data).
 
@@ -91,14 +91,16 @@ def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     temp_arr:  float array
                Array containing temperature data.
     atom_arr:  string array
-               Array containing elemental symbols and abundances.
+               Array containing elemental abundances.
+    atom_name: string array
+               Array containing elemental symbols.
     marker[0]: integer
                Marks line number in pre-atm file where data start.
     '''
 
     # Get current working directory and pre-atm file name
     file = atm_file
-    
+
     # Open file to read
     f = open(file, 'r')
 
@@ -106,56 +108,55 @@ def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     info = []
     for line in f.readlines():
         l = [value for value in line.split()]
-        info.append(l)    
+        info.append(l)
     f.close()
 
-    # Initiate list of species and TEA markers 
-    marker = np.zeros(2, dtype=int) 
+    # Initiate list of species and TEA markers
+    marker = np.zeros(2, dtype=int)
 
     # Number of rows in file
-    ninfo  = np.size(info)         
-    
+    ninfo  = np.size(info)
+
     # Set marker list to the lines where data start
     for i in np.arange(ninfo):
         if info[i] == [spec_mark]:
             marker[0] = i + 1
         if info[i] == [tea_mark]:
             marker[1] = i + 1
-    
-    # Retrieve species list using the species marker 
-    spec_list  = info[marker[0]]       
-    
+
+    # Retrieve species list using the species marker
+    spec_list  = info[marker[0]]
+
     # Retrieve labels for data array
-    data_label = np.array(info[marker[1]]) 
+    data_label = np.array(info[marker[1]])
 
     # Number of labels in data array
     ncols      = np.size(data_label)
- 
-    # Number of lines to read for data table (inc. label)  
-    nrows      = ninfo - marker[1]     
-    
+
+    # Number of lines to read for data table (inc. label)
+    nrows      = ninfo - marker[1]
+
     # Allocate data array
     data = np.empty((nrows, ncols), dtype=np.object)
-    
+
     # Fill in data array
     for i in np.arange(nrows):
         data[i] = np.array(info[marker[1] + i])
-    
+
     # Take column numbers of non-element data
     ipres = np.where(data_label == '#Pressure')[0][0]
     itemp = np.where(data_label == 'Temp'     )[0][0]
 
     # Mark number of columns preceding element columns
-    iatom = 2 
-    
-    # Place data into corresponding arrays     
-    pres_arr = data[:,ipres]      
-    temp_arr = data[:,itemp]      
-    atom_arr = data[:,iatom:]    
-    
+    iatom = 2
+
+    # Place data into corresponding arrays
+    pres_arr  = data[1:,ipres]
+    temp_arr  = data[1:,itemp]
+    atom_name = data[0,iatom:]
+    atom_arr  = data[1:,iatom:]
+
     # Number of times TEA will have to be executed for each T-P
-    n_runs = data.shape[0]  
-    
-    return n_runs, spec_list, pres_arr, temp_arr, atom_arr, marker[0]
+    n_runs = data.shape[0]-1
 
-
+    return n_runs, spec_list, pres_arr, temp_arr, atom_arr, atom_name, marker[0]

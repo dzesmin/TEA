@@ -1,6 +1,6 @@
 
-############################# BEGIN FRONTMATTER ################################ 
-#                                                                              # 
+############################# BEGIN FRONTMATTER ################################
+#                                                                              #
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
 #                                                                              #
 #   TEA is part of the PhD dissertation work of Dr. Jasmina                    #
@@ -58,43 +58,97 @@
 import configparser
 import os
 
-# =============================================================================
-# This code reads the TEA config file, TEA.cfg. There are two sections in 
-# TEA.cfg file: the TEA section and the PRE-ATM section. The TEA section 
-# carries parameters and booleans to run and debug TEA. The PRE-ATM section
-# carries paramaters to make pre-atmospheric file. 
-# =============================================================================
 
-# Get current working directory
-cwd = os.getcwd() + '/'
+def readcfg():
+    """
+    Read the TEA config file.
 
-# Name of the configuration file
-cfg_name = cwd + 'TEA.cfg'
+    Returns
+    -------
+    TEAlist: 1D list
+        The TEA configuration parameters:
+    maxiter: Integer
+        Defines maximum number of iterations.
+    savefiles: Bool
+        Save files for debugging purposes.
+    verb: Integer
+        Defines verbosity level (0-no prints, 1-quite, 2-verbose).
+    times: Bool
+        Displays execution times for every major part of the code.
+    abun_file: String
+        Name of the file carrying elemental abundance information.
+    location_out: String
+        Path where the output files will be stored.
+    xtol: Float
+        The precision level.
+    PREATlist: 1D list
+        The pre-atmospheric configuration parameters:
+    PT_file: String
+        Path to the temperature and pressure file.
+    pre_atm_name:String
+        Name of the pre-atmospheric file.
+    input_elem: String list
+        Input elemental species (as in periodic table)
+    output_species: String list
+        Output species as given by JANAF.   
+         
+    Note
+    ------
+    There are two sections in TEA.cfg file: TEA section and PRE-ATM section. 
+    The TEA section carries parameters and booleans to run and debug TEA. 
+    The PRE-ATM section carries paramaters to make pre-atmospheric file. 
+    """
 
-# Check if config file exists
-try:
-    f = open(cfg_name)
-except IOError:
-    print("\nConfig file is missing. Place TEA.cfg in the working directory\n")
+    # Get current working directory
+    cwd = os.getcwd() + '/'
 
-# open config file
-config = configparser.RawConfigParser({})
-config.read(cfg_name)
+    # Name of the configuration file
+    cfg_name = cwd + 'TEA.cfg'
 
-# read TEA section
-maxiter      = config.getint    ('TEA', 'maxiter')
-save_headers = config.getboolean('TEA', 'save_headers')
-save_outputs = config.getboolean('TEA', 'save_outputs')
-doprint      = config.getboolean('TEA', 'doprint')
-times        = config.getboolean('TEA', 'times')
-location_TEA = config.get       ('TEA', 'location_TEA')
-abun_file    = config.get       ('TEA', 'abun_file')
-location_out = config.get       ('TEA', 'location_out')
+    # Check if config file exists
+    try:
+        f = open(cfg_name)
+    except IOError:
+        print("\nMissing config file, place TEA.cfg in the working directory.\n")
 
-# read PRE-ATM section
-PT_file        = config.get('PRE-ATM', 'PT_file')
-pre_atm_name   = config.get('PRE-ATM', 'pre_atm_name')
-input_elem     = config.get('PRE-ATM', 'input_elem')
-output_species = config.get('PRE-ATM', 'output_species')
+    # Open config file:
+    config = configparser.RawConfigParser({})
+    config.read(cfg_name)
+
+    # Read TEA section:
+    abun_file    = config.get('TEA', 'abun_file')
+    location_out = config.get('TEA', 'location_out')
+
+    # Defaults:
+    maxiter   = 200
+    savefiles = False
+    verb      = 1
+    times     = False
+    xtol      = 1e-8
+    ncpu      = 1
+
+    # Optional arguments:
+    if config.has_option("TEA", "maxiter"):
+        maxiter   = config.getint('TEA', 'maxiter')
+    if config.has_option("TEA", "savefiles"):
+        savefiles = config.getboolean('TEA', 'savefiles')
+    if config.has_option("TEA", "times"):
+        times     = config.getboolean('TEA', 'times')
+    if config.has_option("TEA", "xtol"):
+        xtol = config.getfloat('TEA', 'xtol')
+    if config.has_option("TEA", "verb"):
+        verb = config.getint('TEA', 'verb')
+    if config.has_option("TEA", "ncpu"):
+        ncpu = config.getint('TEA', 'ncpu')
+
+    # read PRE-ATM section
+    PT_file        = config.get('PRE-ATM', 'PT_file')
+    pre_atm_name   = config.get('PRE-ATM', 'pre_atm_name')
+    input_elem     = config.get('PRE-ATM', 'input_elem')
+    output_species = config.get('PRE-ATM', 'output_species')
+
+    return [maxiter, savefiles, verb, times, abun_file,
+            location_out, xtol, ncpu], \
+           [PT_file, pre_atm_name, input_elem, output_species]
 
 
