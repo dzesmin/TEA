@@ -1,0 +1,12 @@
+3500        # Temperature in Kelvin
+51.0344729  # Pressure in atm
+H_g         # List of species allowed in the system
+H2_ref      #  Names for these must match those 
+H2O_g       #  produced by readJANAF.py
+N_g         #  (see sorted conversion-record.txt)
+NH_g        #
+NO_g        #
+N2_ref      #
+O_g         #
+OH_g        #
+O2_ref      #

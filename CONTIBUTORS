@@ -13,8 +13,8 @@ Patricio Cubillos <pcubillos@fulbrightmail.org>
          May 2016 - pointed out to case-insensitive species names for MAC users
          May 2017 - pointed out to the line in balance.py sensitive to
                     different Python versions
-         Jul 2019 - removed reading/writing files when it is not necessary 
-                    made it work in multiprocessor mode
+         Jul 2019 - sped up execution by removing reading/writing files when
+                    unnecessary and made it work in multiprocessor mode
 
 Peter Woitke
          June 2017 - pointed out to a bug when writing double-digits 

@@ -111,7 +111,7 @@ def plotTEA():
     subdirectory.
 
     Recall that TEA works without adjustments for the temperatures above ~500 K. 
-    For temperatures below 500 K the code produces results with low precision, 
+    For temperatures below 500 K, the code produces results with low precision, 
     thus it is not recommended to use TEA below these temperatures.  
     '''
 

@@ -63,7 +63,7 @@ This is an installation and a quick start guide for the Thermochemical
 Equilibrium Abundances (TEA) code that calculates equilibrium abundances
 of the gaseous molecular species. The code uses double-precision arithemtics.
 TEA reaches this numerical precision at around ~500 K, when all available 
-JANAF species are included, thus we do not recommend using TEA below 500 K. 
+JANAF species are included, thus it is not recommended using TEA below 500 K. 
 Setting xtol to 1e-8 and maxinter to 200 is most optimizing. If higher 
 tolerance level (xtol>1e-8) is desired, maxium number of iterations must be 
 increased. The result can be further improved with fine adjustments to the 
@@ -374,6 +374,20 @@ cp ../doc/examples/quick_example/TEA.cfg TEA.cfg
 POTENTIAL USER ERRORS 
 ======================
 
+  - TEA should not be run for the temperatures below 500 K, as the code
+    reaches numerical precision for these temperatures and the results
+    are not reliable.
+  - TEA works with optimal speed and produces correct results using xtol=1e-8, 
+    maxiter=200, for temperatures above 500 K. For border temperatures
+    (500-600 K), and larger number of output species, if higher tolerance level 
+    is desired (>1e-8), maxiter parameter must be increased. 
+    Use verb=1 and ncpu=1 to test what is the appropriate maxinter value 
+    (after testing ncpu parameter can be set to the desired value). 
+    If more than 2-3 planetary layers reach maxiter while running increase 
+    maxiter by 100, until only first layer reaches maxiter. This works only 
+    if xtol is less than 1e-12, and temperatures are above 500 K.
+    For xtol larger than 1e-12 set maxiter to 500 minimum, or larger. 
+    Note that, increasing xtol value slows down the execution.
   - in input_elem use elements' names as they appear in the periodic table
   - all input_elem must be included in the list of output_species with their
     states at the begining of the output_species list.
@@ -383,4 +397,9 @@ POTENTIAL USER ERRORS
   - H_g, He_ref and H2_ref species in output_species must be included for
     hot-Jupiters
   - TEA does not work with ionized and condensate species
-
+  - if NaNs are produced in the results file, most probable reason is that
+    TEA was ran for the borderline or temperatures lower than 500 K. NaNs 
+    could also appear if TEA is run for a large number of species on the 
+    borderline temperatures, if ncpu is larger than 1. Based on tests, NaNs  
+    could be avoided if the number of cpu-s, ncpu-s, is changed to 
+    a different value, as NaNs could be caused by TEA landing in a local minima.
