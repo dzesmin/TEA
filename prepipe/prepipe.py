@@ -61,11 +61,13 @@ import sys
 import os
 import string
 import re
+import warnings
 
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
-
 sys.path.append(location_TEA + "tea/")
+
 import readconf as rc
+
 
 # ============================================================================
 # This program sets and/or executes the pre-pipeline TEA routines readJANAF.py
@@ -76,9 +78,8 @@ import readconf as rc
 # will run both routines. If desired, user can run each routine separately.
 # ============================================================================
 
-TEApars, PREATpars = rc.read()
+TEApars, PREATpars = rc.readcfg()
 maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
-
 
 def comp(specie):
     '''
@@ -300,6 +301,8 @@ def comp(specie):
             elements[index, 2] += np.int(weight)
             # Create array containing only the elements used in this run
             # This is not explicitly returned but can easy be if desired
+            # Suppresses warnings for numpy bug, returns False, without Warning
+            warnings.simplefilter(action='ignore', category=FutureWarning)
             if result == [[]]:
                 result = np.append(result, [[ele, weight]], axis=1)
             else:

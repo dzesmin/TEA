@@ -60,12 +60,18 @@
                                 Version 1.0
 
 This is an installation and a quick start guide for the Thermochemical
-Equilibrium Abundances (TEA) code. The code calculates equilibrium abundances
-of the gaseous molecular species. It works with high numerical precision, 
-without adjustments, for temperatures above ~600 K. For temperatures below 
-600 K and mixing fractions below 10e-14, the code produces results with low
-precision. The output can be improved with fine adjustments to the lambda 
-exploration variables in lambdacorr.py module (see documentation). 
+Equilibrium Abundances (TEA) code that calculates equilibrium abundances
+of the gaseous molecular species. The code uses double-precision arithemtics.
+TEA reaches this numerical precision at around ~500 K, when all available 
+JANAF species are included, thus we do not recommend using TEA below 500 K. 
+Setting xtol to 1e-8 and maxinter to 200 is most optimizing. If higher 
+tolerance level (xtol>1e-8) is desired, maxium number of iterations must be 
+increased. The result can be further improved with fine adjustments to the 
+lambda exploration variables in lambdacorr.py module (see documentation). 
+
+The code now works in the multiprocessor mode. When verb variable in TEA.cfg 
+is set to zero and ncpu variable is larger then 1, the code verbosity is 
+fully muted to allow execution in retrievals. 
 
 1. ==== Packages ====
 
@@ -224,7 +230,7 @@ cp ../doc/examples/quick_example/TEA.cfg TEA.cfg
              the content of the conversion_record.txt alphabetically, do:
              sort conversion_record.txt >conversion_record_sorted.txt
 
-   If doprint is set to 'True' in TEA.cfg, the following directory is also created:
+   If verb is set to '2' in TEA.cfg, the following directory is also created:
           stochcoeff/ - directory containing a file per species with 
                         stoichiometric values for each species
 
@@ -347,8 +353,8 @@ cp ../doc/examples/quick_example/TEA.cfg TEA.cfg
                 in each run/iteration and finally deleted after the full TEA run
                 is finished.
 
-                If doprint, save_headers, and save_outputs are set to 'True' in
-                TEA.cfg, the following are also created:
+                If savefiles is set to 'True' in TEA.cfg, the following 
+                directories are also created:
     
                 headers/   - directory that preserves and stores all headers
                 outputs/   - directory that stores all intermediate files
@@ -361,27 +367,20 @@ cp ../doc/examples/quick_example/TEA.cfg TEA.cfg
              Example: ../TEA/tea/plotTEA.py ../TEA/doc/examples/multiTP/results/multiTP_Example.tea CO,CH4,H2O,NH3
              Plots will be placed in ./plots/ directory.
 
-   Recall, for temperatures below 600 K and mixing fractions below 10e-14,
-           TEA produces results with low precision.
+   Recall, for temperatures below 500 K, TEA produces results with low precision.
 
 
 ======================
 POTENTIAL USER ERRORS 
 ======================
 
-1. The user should have unique T-P values for each line in the
-   PT-profile file before running makeatm.py, otherwise
-   each repeated layer will be overwritten and the final atmosphere
-   file will end up with fewer lines.
-2. input_elem must have names as they appear in the periodic table.
-3. out_species must include all input elements with their states as
-   readJANAF.py produces them. See ../TEA/lib/gdata/ folder and the
-   conversion_record_sorted.txt file for the correct names of
-   the species.
-4. Should the code stall on the first iteration of the first
-   temperature, check if all elements that appear in the species
-   list are included with their correct names.
-5. Elemental hydrogen (H) and helium (He) must be included in in_elem
-   for hot-Jupiter atmosphere calculations. Similarly, the H_g, He_ref
-   and H2_ref species must also appear in out_spec for these calculations.
+  - in input_elem use elements' names as they appear in the periodic table
+  - all input_elem must be included in the list of output_species with their
+    states at the begining of the output_species list.
+  - use species names as readJANAF.py produces them. See lib/gdata folder or
+    lib/conversion_record_sorted.txt for the correct names of the species
+  - H, and He elements as input_elem must be included for hot-Jupiters
+  - H_g, He_ref and H2_ref species in output_species must be included for
+    hot-Jupiters
+  - TEA does not work with ionized and condensate species
 

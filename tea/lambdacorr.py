@@ -130,13 +130,18 @@ def lambdacorr(it_num, verb, input, info, save_info=None):
 
     Notes
     -----
-    The code works without adjustments and with high precision for the
-    temperatures above ~600 K. For temperatures below 600 K and
-    mixing fractions below 10e-14, the code produces results with low
-    precision. To improve the precision, adjust the lambda exploration
-    variables 'lower' and 'steps' to larger magnitudes (i.e., lower = -100,
-    steps = 1000). This will lengthen the time of execution.
+    The code works without adjustments for the temperatures above ~500 K. 
+    For temperatures below 500 K the code produces results with low
+    precision, thus it is not recommended to use TEA below 500 K. 
+    Setting xtol to 1e-8 and maxinter to 200 is most optimizing. 
+    If higher tolerance level is desired (xtol>1e-8), maxium number
+    of iterations must be increased. The result can be further improved
+    with fine adjustments to the lambda exploration variables 
+    'lower' and 'steps' to larger magnitudes 
+    (i.e., lower = -100,  steps = 1000). This will lengthen the time 
+    of execution.
     '''
+
     # Suppress nan warnings, as they are used for finding valid minima
     np.seterr(invalid='ignore')
     np.seterr(divide='ignore')
@@ -208,23 +213,25 @@ def lambdacorr(it_num, verb, input, info, save_info=None):
     delta_corr_bar = x_corr_bar - y_bar
 
     if save_info is not None:
-      location_out, desc, speclist, temp = save_info
-      hfolder = location_out + desc + "/headers/"
-      headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+        location_out, desc, speclist, temp = save_info
+        hfolder = location_out + desc + "/headers/"
+        headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
                         hfolder, desc, temp, pressure)
-      # Create and name outputs and results directories if they do not exist
-      datadir   = location_out + desc + '/outputs/'
-      datadir = "{:s}/{:s}_{:.0f}K_{:.2e}bar/".format(
-                  datadir, desc, temp, pressure)
+        # Create and name outputs and results directories if they do not exist
+        datadir   = location_out + desc + '/outputs/'
+        datadir = "{:s}/{:s}_{:.0f}K_{:.2e}bar/".format(
+                    datadir, desc, temp, pressure)
 
-      # Export all values into machine and human readable output files
-      file = '{:s}/lagrange_iteration-{:03d}_machine-read.txt'.format(
-              datadir, it_num)
-      form.output(headerfile, it_num, speclist, y, x_corr, delta_corr,
+        # Export all values into machine and human readable output files
+        file = '{:s}/lagrange_iteration-{:03d}_machine-read.txt'.format(
+                datadir, it_num)
+        form.output(headerfile, it_num, speclist, y, x_corr, delta_corr,
                     y_bar, x_corr_bar, delta_corr_bar, file, verb)
-      file = '{:s}/lagrange_iteration-{:03d}_visual.txt'.format(
+        file = '{:s}/lagrange_iteration-{:03d}_visual.txt'.format(
               datadir, it_num)
-      form.fancyout(it_num, speclist, y, x_corr, delta_corr, y_bar,
+        form.fancyout(it_num, speclist, y, x_corr, delta_corr, y_bar,
                      x_corr_bar, delta_corr_bar, file, verb)
 
     return y, x_corr, delta_corr, y_bar, x_corr_bar, delta_corr_bar
+
+

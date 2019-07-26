@@ -57,6 +57,7 @@
 
 import numpy as np
 
+
 def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     '''
     This function reads a pre-atm file and returns data that TEA will use.
@@ -160,3 +161,5 @@ def readatm(atm_file, spec_mark='#SPECIES', tea_mark='#TEADATA'):
     n_runs = data.shape[0]-1
 
     return n_runs, spec_list, pres_arr, temp_arr, atom_arr, atom_name, marker[0]
+
+

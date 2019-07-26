@@ -120,6 +120,7 @@ def lagrange(it_num, verb, input, info, save_info=None):
        Change in total of initial and final mole numbers of molecular
        species.
     '''
+
     # Read values from the header file
     pressure = info[0]
     j        = info[2]
@@ -142,9 +143,9 @@ def lagrange(it_num, verb, input, info, save_info=None):
     fi_y = y * (c + np.log(y / y_bar))
 
     # Allocate value of u, equation (28) TEA theory document
-
     # List all unknowns in the above set of equations
     unknowns = [None]*(j+1)
+
     # Allocate pi_j, where j is element index
     for m in np.arange(j):
         unknowns[m] = Symbol('pi_' + str(m+1))
@@ -173,7 +174,9 @@ def lagrange(it_num, verb, input, info, save_info=None):
     system[j,:j] = b
     system[j, j+1] = np.sum(fi_y)
 
+    # Solve final system of j+1 equations
     fsol = solve_linear_system(Matrix(system), *unknowns)
+
     # Make array of pi values
     pi_f = np.zeros(j, np.double)
     for m in np.arange(j):
@@ -183,7 +186,7 @@ def lagrange(it_num, verb, input, info, save_info=None):
 
     # ============ CALCULATE xi VALUES FOR CURRENT ITERATION ============ #
     # Calculate x_bar from solution to get 'u', eq (28) TEA theory document
-    # u = -1. + (x_bar/y_bar)
+    # u = -1. + (x_bar/y_bar), where fsolu is u
     x_bar = (fsolu + 1.0) * y_bar
 
     # Apply Lagrange solution for final set of x_i values for this iteration
@@ -200,25 +203,28 @@ def lagrange(it_num, verb, input, info, save_info=None):
 
     # Name output files with corresponding iteration number name
     if save_info:
-      location_out, desc, speclist, temp = save_info
-      hfolder = location_out + desc + "/headers/"
-      headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
+        location_out, desc, speclist, temp = save_info
+        hfolder = location_out + desc + "/headers/"
+        headerfile = "{:s}/header_{:s}_{:.0f}K_{:.2e}bar.txt".format(
                         hfolder, desc, temp, pressure)
-      # Create and name outputs and results directories if they do not exist
-      datadir   = location_out + desc + '/outputs/'
-      datadir = "{:s}/{:s}_{:.0f}K_{:.2e}bar/".format(
+        # Create and name outputs and results directories if they do not exist
+        datadir   = location_out + desc + '/outputs/'
+        datadir = "{:s}/{:s}_{:.0f}K_{:.2e}bar/".format(
                   datadir, desc, temp, pressure)
-      if not os.path.exists(datadir):
-        os.makedirs(datadir)
+        if not os.path.exists(datadir):
+            os.makedirs(datadir)
 
-      file = '{:s}/lagrange_iteration-{:03d}_machine-read-nocorr.txt'.format(
-              datadir, it_num)
-      # Export all values into machine and human readable output files
-      form.output(headerfile, it_num, speclist, y, x, delta,
+        # Export all values into machine and human readable output files
+        file = '{:s}/lagrange_iteration-{:03d}_machine-read-nocorr.txt'.format(
+                datadir, it_num)
+        form.output(headerfile, it_num, speclist, y, x, delta,
                   y_bar, x_bar, delta_bar, file, verb)
-      file = '{:s}/lagrange_iteration-{:03d}_visual-nocorr.txt'.format(
-              datadir, it_num)
-      form.fancyout(it_num, speclist, y, x, delta, y_bar, x_bar,
+
+        file = '{:s}/lagrange_iteration-{:03d}_visual-nocorr.txt'.format(
+                datadir, it_num)
+        form.fancyout(it_num, speclist, y, x, delta, y_bar, x_bar,
                     delta_bar, file, verb)
 
     return y, x, delta, y_bar, x_bar, delta_bar
+
+

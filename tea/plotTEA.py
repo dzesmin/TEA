@@ -56,7 +56,6 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -65,8 +64,9 @@ from PIL import Image
 
 import readconf as rc
 
+
 # Read configuration-file parameters:
-TEApars, PREATpars = rc.read()
+TEApars, PREATpars = rc.readcfg()
 maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
 
 # Correct directory names
@@ -75,7 +75,7 @@ if location_out[-1] != '/':
 
 def plotTEA():
     '''
-    This code plots a figure of temperature vs. abundances for any multiTP
+    Plots a figure of temperature vs. abundances for any multiTP
     final output produced by TEA, RESULT_ATM_FILE. It accepts 2 arguments
     on the command line: the path to the multiTP TEA output, and the names
     of the species user wants to plot. See notes for the full description
@@ -110,8 +110,9 @@ def plotTEA():
     The plot is opened once execution is completed and saved in the ./plots/
     subdirectory.
 
-    The lower range on the y axis (mixing fraction) when temperatures are below ~600 K
-    should be set at most -14.
+    Recall that TEA works without adjustments for the temperatures above ~500 K. 
+    For temperatures below 500 K the code produces results with low precision, 
+    thus it is not recommended to use TEA below these temperatures.  
     '''
 
     # Get plots directory, create if non-existent
@@ -209,3 +210,5 @@ if __name__ == '__main__':
     # Open plot
     plot = Image.open(plot_out)
     plot.show()
+
+

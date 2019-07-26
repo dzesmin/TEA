@@ -64,6 +64,7 @@ import shutil
 
 from prepipe import *
 
+
 # =============================================================================
 # This code makes the stoich_out file (default: stoich.txt) that carries
 # stoichiometric values of all species that appear in the JANAF tables. It
@@ -102,10 +103,8 @@ from prepipe import *
 # makestoich.py.
 # =============================================================================
 
-
 # Print indicator that makestoich.py is executing
-if verb >= 1:
-    print("\nRunning makestoich...\n")
+print("\nRunning makestoich...\n")
 
 # Retrieve pre-pipeline setup information
 raw_dir, thermo_dir, stoich_dir, stoich_out, abun_file, \
@@ -161,7 +160,6 @@ for i in np.arange(n_JANAF):
                 f.write(np.str(elements[j, h]).ljust(4))
             f.write('\n')
         f.close()
-
 
 # ============= Create all-in-one stoichiometry file =================== #
 #              with abundances and all species/elements
@@ -242,8 +240,9 @@ f.close()
 
 # Delete temporary stoichiometry directory as all information is now
 #        in one stoichiometric data file, stoich_out
-if verb == 0:
+if verb <= 2:
     shutil.rmtree(stoich_dir)
 else:
     print("Conserving stoichiometry directory for individual species.")
+
 

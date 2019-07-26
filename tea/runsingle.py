@@ -56,7 +56,6 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-
 import ntpath
 import os
 import shutil
@@ -64,27 +63,23 @@ import subprocess
 import numpy as np
 import sys
 import time
+import six
 
 import makeheader as mh
 import readconf   as rc
 import iterate    as it
 import balance    as bal
 
+
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
 # =============================================================================
 # This program runs TEA over an input file that contains only one T-P.
 # The code retrieves the input file and the current directory name given by the
-# user. It sets locations of all necessary modules and directories that
-# will be used. Then, it executes the modules in the following order:
-# makeheader.py, balance,py, and iterate.py. The final results with the input
-# and the configuration files are saved in the results/ directory. The config
-# file, abundances file, and input file used for this run will be placed in
-# inputs/ directory.
+# user. 
 #
-# This module prints on screen the code progress: the current T-P line from
-# the pre-atm file, the current iteration number, and informs the user that
-# minimization is done.
+# This module prints on screen the code progress: the current iteration number, 
+# and informs the user that minimization is done.
 # Example:
 #  100
 # Maximum iteration reached, ending minimization.
@@ -95,12 +90,11 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # =============================================================================
 
 # Read configuration-file parameters:
-TEApars, PREATpars = rc.read()
+TEApars, PREATpars = rc.readcfg()
 maxiter, savefiles, verb, times, abun_file, location_out, xtol, ncpu = TEApars
 
 # Print license
-if verb >= 1:
-  print("\n\
+print("\n\
 ================= Thermal Equilibrium Abundances (TEA) =================\n\
 A program to calculate species abundances under thermochemical equilibrium.\n\
 \n\
@@ -116,75 +110,78 @@ Direct contact: \n\
 Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
 ========================================================================\n")
 
-# Correct location name
+# Correct output location name
 if location_out[-1] != '/':
     location_out += '/'
 
 # Retrieve user inputs file
 infile  = sys.argv[1:][0]
 
+# Set start time
+tstart = time.time()
+
 # Check if config file exists in current working directory
 TEA_config = 'TEA.cfg'
 try:
     f = open(TEA_config)
 except IOError:
-    print("\nConfig file is missing. Place TEA.cfg in the working directory.\n")
+    print("\nConfig file is missing, place TEA.cfg in the working directory.\n")
 
 # If input file does not exist break
 try:
     f = open(infile)
 except:
-    raise IOError ("\n\nSingle T-P input file does not exist.\n")
+    raise IOError ("\nSingle T-P input file does not exist.\n")
 
 # Retrieve current output directory name given by user
 desc    = sys.argv[1:][1]
 
 # Check if output directory exists and inform user
 if os.path.exists(location_out + desc):
-    print("  Output directory " + str(location_out + desc) + "/ already exists.\n"
+    six.moves.input("  Output directory " + str(location_out + desc) +  
+              "/\n  already exists.\n"
               "  Press enter to continue and overwrite existing files,\n"
               "  or quit and choose another output name.\n")
 
-# Set up locations of necessary scripts and directories of files
-thermo_dir     = location_TEA + "lib/gdata"
-
-# Create inputs directory
+# If output directory does not exist, create it
 if not os.path.exists(location_out + desc):
   os.makedirs(location_out + desc)
 
+# Set up locations of necessary files
+thermo_dir     = location_TEA + "lib/gdata"
 
 inputs_dir     = location_out + desc + "/inputs/"
 loc_outputs    = location_out + desc + "/outputs/"
 
 if savefiles:
-  # Create inputs directory
-  if not os.path.exists(inputs_dir):
-    os.makedirs(inputs_dir)
+    # Create inputs directory
+    if not os.path.exists(inputs_dir):
+        os.makedirs(inputs_dir)
 
-  # Inform user if TEA.cfg file already exists in inputs/ directory
-  if verb >= 1 and os.path.isfile(inputs_dir + TEA_config):
+    # Inform user if TEA.cfg file already exists in inputs/ directory
+    if verb >= 1 and os.path.isfile(inputs_dir + TEA_config):
       print("  " + str(TEA_config) + " overwritten in inputs/ directory.")
-  # Copy TEA.cfg file to current inputs directory
-  shutil.copy2(TEA_config, inputs_dir + TEA_config)
+    # Copy TEA.cfg file to current inputs directory
+    shutil.copy2(TEA_config, inputs_dir + TEA_config)
 
-  # Inform user if abundances file already exists in inputs/ directory
-  head, abun_filename = ntpath.split(abun_file)
-  if verb >= 1 and os.path.isfile(inputs_dir + abun_filename):
-      print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
-  # Copy abundances file to inputs/ directory
-  shutil.copy2(abun_file, inputs_dir + abun_filename)
+    # Inform user if abundances file already exists in inputs/ directory
+    head, abun_filename = ntpath.split(abun_file)
+    if verb >= 1 and os.path.isfile(inputs_dir + abun_filename):
+        print("  " + str(abun_filename) + " overwritten in inputs/ directory.")
+    # Copy abundances file to inputs/ directory
+    shutil.copy2(abun_file, inputs_dir + abun_filename)
 
-  # Inform user if single T-P input file already exists in inputs/ directory
-  if verb >= 1 and os.path.isfile(inputs_dir + infile.split("/")[-1]):
-      print("  " + str(infile.split("/")[-1])
+    # Inform user if single T-P input file already exists in inputs/ directory
+    if verb >= 1 and os.path.isfile(inputs_dir + infile.split("/")[-1]):
+        print("  " + str(infile.split("/")[-1])
             + " overwritten in inputs/ directory.\n")
-  # Copy single T-P input file to inputs directory
-  shutil.copy2(infile, inputs_dir + infile.split("/")[-1])
+    # Copy single T-P input file to inputs directory
+    shutil.copy2(infile, inputs_dir + infile.split("/")[-1])
 
 # Times / speed check for pre-loop runtime
 if times:
-    new = time.time()
-    elapsed = new - end
+    tnew = time.time()
+    elapsed = tnew - tstart
     print("pre-loop:           " + str(elapsed))
 
 # Execute main TEA loop
@@ -192,15 +189,14 @@ temp, pressure, speclist = mh.read_single(infile)
 free_energy, heat = mh.read_gdata(speclist, thermo_dir)
 g_RT = mh.calc_gRT(free_energy, heat, temp)
 stoich_arr, stoich_atom, b = mh.read_stoich(speclist, getb=True)
-
 guess = bal.balance(stoich_arr, b, verb)
 
-# Always save, then will remove if necessary:
-save_info = location_out, desc, speclist, temp
+# Save info for the iteration module and remove it afterwards if neccesery
+save_info = location_out, desc, speclist, temp    
 
+# Perform iterations until reaching desired precision xtol
 y, x, delta, y_bar, x_bar, delta_bar = it.iterate(pressure, stoich_arr, b,
            g_RT, maxiter, verb, times, guess, xtol, save_info)
-
 
 # Save or delete lagrange.py and lambdacorr.py outputs
 if savefiles:
@@ -208,20 +204,23 @@ if savefiles:
     mh.write_header(hfolder, desc, temp, pressure, speclist,
                     stoich_atom, stoich_arr, b, g_RT)
 else:
+    # Results directory is automatically made when TEA is executed
     datadirr = '{:s}{:s}/results/results_{:.0f}K_{:.2e}bar/'.format(
                    location_out, desc, temp, pressure)
+    # Copy
     shutil.copy2(datadirr + "results-visual.txt",
                  location_out + desc + "/results-visual.txt")
     shutil.rmtree(loc_outputs)
     shutil.rmtree('{:s}{:s}/results'.format(location_out, desc))
-
 
 # Print on-screen
 if verb >= 1:
   print("\n  Species abundances calculated.\n  Created results file.")
 
 # Time / speed testing
-if times:
-    end = time.time()
-    elapsed = end - start
+if verb >= 1:
+    tend = time.time()
+    elapsed = tend - tstart
     print("Overall run time:   " + str(elapsed) + " seconds")
+
+

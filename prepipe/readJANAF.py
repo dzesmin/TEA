@@ -65,6 +65,7 @@ import shutil
 
 from prepipe import *
 
+
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
 # =============================================================================
@@ -103,8 +104,7 @@ location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 # =============================================================================
 
 # Print indicator that readJANAF.py is executing
-if verb >= 1:
-    print("\nRunning readJANAF...\n")
+print("\nRunning readJANAF...\n")
 
 # Retrieve pre-pipeline setup information
 raw_dir, thermo_dir, stoich_dir, stoich_out, abun_file, \
@@ -199,7 +199,7 @@ for i in np.arange(n_JANAF):
                                                                    '.txt'
             # Renaming case-insensitive species names for MAC users
             MACspecies = species[i, 0] + '_' + np.str(species[i,2])
-            if MACspecies=='CoCl2_g' or MACspecies=='CoCl_g' or \
+            if MACspecies=='CoCl2_g'  or MACspecies=='CoCl_g' or \
                 MACspecies=='CoF2_g'  or MACspecies=='Co_g'   or \
                 MACspecies=='Cs2_g'   or MACspecies=='Cs_g'   or \
                 MACspecies=='Hf_g':
@@ -243,18 +243,16 @@ for i in np.arange(n_JANAF):
         print('    ' + infile.split('/')[-1] + ' (' + species[i, 0] + '_'     \
                + np.str(species[i,2]) + ')')
 
-
-
 # Print directory names to screen
-if verb >= 1:
-    print("\nSaved " + str(n_files) + " TEA-read files to \'" + thermo_dir +
-           "\', out of the available \n      " + str(n_JANAF) +
-           " JANAF files in the \'" + raw_dir + "\' directory.")
-    
-    # Print conversion record file name to screen
-    print("\nSaved list of converted files to \'conversion_record.txt.\'")
-    print("\nTo sort the file alphabetically do:"
-          "\n  sort conversion_record.txt >conversion_record_sorted.txt\n")
+print("\nSaved " + str(n_files) + " TEA-read files to \'" + thermo_dir +      \
+       "\', out of the available \n      " + str(n_JANAF) +                    \
+       " JANAF files in the \'" + raw_dir + "\' directory.")
+
+# Print conversion record file name to screen
+print("\nSaved list of converted files to \'conversion_record.txt.\'")
+print("\nTo sort the file alphabetically do: \
+        \nsort conversion_record.txt >conversion_record_sorted.txt\n")
 
 file_list.close()
+
 
