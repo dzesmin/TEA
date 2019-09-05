@@ -55,8 +55,12 @@
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
-import configparser
 import os
+import sys
+if sys.version_info.major == 3:
+  import configparser
+else:
+  import ConfigParser as configparser
 
 
 def readcfg():
