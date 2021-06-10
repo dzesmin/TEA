@@ -1,14 +1,12 @@
 # This file (thermal_properties.py) is open-source software under the
 # GNU GENERAL PUBLIC LICENSE
 # Version 2, June 1991
-#
-# Everyone is permitted to copy and distribute verbatim copies
-# of this license document, but changing it is not allowed.
 
 __all__ = [
     # Constants:
     'ROOT',
     # Functions:
+    'setup_janaf_network',
     'get_janaf_names',
     'read_janaf',
     'read_janaf_stoich',
@@ -23,6 +21,97 @@ import scipy.interpolate as si
 
 
 ROOT = str(Path(__file__).parents[1]) + os.path.sep
+
+
+def setup_janaf_network(input_species):
+    """
+    Extract JANAF thermal data for a requested chemical network.
+
+    Parameters
+    ----------
+    species: 1D string iterable
+        Species to search in the JANAF data base.
+
+    Returns
+    -------
+    species: 1D string array
+        Species found in the JANAF database (might differ from input_species).
+    elements: 1D string array
+        Elements for this chemical network.
+    heat_capacity_splines: 1D list of numpy splines
+        Splines sampling the species heat capacity.
+    stoich_vals: 2D integer array
+        Array containing the stoichiometric values for the
+        requested species sorted according to the species and elements
+        arrays.
+
+    Examples
+    --------
+    >>> import thermal_properties as tea
+    >>> molecules = 'H2O CH4 CO CO2 NH3 N2 H2 HCN OH H He C N O'.split()
+    >>>
+    >>> species, elements, splines, stoich_vals = \
+    >>>     tea.setup_janaf_network(molecules)
+    >>> print(
+    >>>     f'species:\n  {species}\n'
+    >>>     f'elements:\n  {elements}\n'
+    >>>     f'stoichiometric values:\n{stoich_vals}')
+    species:
+      ['H2O' 'CH4' 'CO' 'CO2' 'NH3' 'N2' 'H2' 'HCN' 'OH' 'H' 'He' 'C' 'N' 'O']
+    elements:
+      ['C' 'H' 'He' 'N' 'O']
+    stoichiometric values:
+    [[0 2 0 0 1]
+     [1 4 0 0 0]
+     [1 0 0 0 1]
+     [1 0 0 0 2]
+     [0 3 0 1 0]
+     [0 0 0 2 0]
+     [0 2 0 0 0]
+     [1 1 0 1 0]
+     [0 1 0 0 1]
+     [0 1 0 0 0]
+     [0 0 1 0 0]
+     [1 0 0 0 0]
+     [0 0 0 1 0]
+     [0 0 0 0 1]]
+    """
+    # Find which species exists in data base:
+    janaf_species = get_janaf_names(input_species)
+    nspecies = len(input_species)
+    idx_missing = np.array([janaf is None for janaf in janaf_species])
+    if np.any(idx_missing):
+        missing_species = np.array(input_species)[idx_missing]
+        print(f'These input species were not found:\n  {missing_species}')
+
+    species = np.array(input_species)[~idx_missing]
+    janaf_files = np.array(janaf_species)[~idx_missing]
+
+    nspecies = len(species)
+    heat_capacity_splines = []
+    stoich_data = []
+    for i in range(nspecies):
+        janaf = janaf_files[i]
+        temp, heat_capacity = read_janaf(janaf)
+        heat_capacity_splines.append(si.interp1d(
+            temp, heat_capacity, fill_value='extrapolate'))
+
+        stoich_data.append(read_janaf_stoich(janaf_file=janaf))
+
+    elements = []
+    for s in stoich_data:
+        elements += list(s.keys())
+    elements = sorted(set(elements))
+
+    nelements = len(elements)
+    stoich_vals = np.zeros((nspecies, nelements), int)
+    for i in range(nspecies):
+        for key,val in stoich_data[i].items():
+            j = elements.index(key)
+            stoich_vals[i,j] = val
+    elements = np.array(elements)
+
+    return species, elements, heat_capacity_splines, stoich_vals
 
 
 def get_janaf_names(species):
@@ -75,7 +164,7 @@ def get_janaf_names(species):
 def read_janaf(janaf_file):
     """
     Read a JANAF file to extract tabulated thermal properties.
-    
+
     Parameters
     ----------
     janaf_file: 1D string array
@@ -117,6 +206,7 @@ def read_janaf(janaf_file):
         filling_values=np.nan,
         unpack=True,
     )
+
     idx_valid = np.isfinite(heat_capacity)
     return temps[idx_valid], heat_capacity[idx_valid]
 

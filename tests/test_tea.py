@@ -1,3 +1,7 @@
+# This file (thermal_properties.py) is open-source software under the
+# GNU GENERAL PUBLIC LICENSE
+# Version 2, June 1991
+
 import os
 from pathlib import Path
 import sys
@@ -143,4 +147,75 @@ def test_read_janaf_stoich_from_formula():
     assert stoich['H'] == 3.0
     assert stoich['O'] == 1.0
     assert stoich['e'] == -1.0
+
+
+def test_setup_janaf_network_neutrals():
+    molecules = 'H2O CH4 CO CO2 H2 C2H2 C2H4 OH H He'.split()
+    
+    species, elements, splines, stoich_vals = \
+        tea.setup_janaf_network(molecules)
+
+    expected_elements = ['He', 'C', 'H', 'O']
+    expected_stoich_vals = np.array([
+        [0, 2, 0, 1],
+        [1, 4, 0, 0],
+        [1, 0, 0, 1],
+        [1, 0, 0, 2],
+        [0, 2, 0, 0],
+        [2, 2, 0, 0],
+        [2, 4, 0, 0],
+        [0, 1, 0, 1],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0]
+    ])
+
+    np.testing.assert_equal(species, molecules)
+    np.testing.assert_equal(elements, ['C', 'H', 'He', 'O'])
+    np.testing.assert_equal(stoich_vals, expected_stoich_vals)
+
+
+def test_setup_janaf_network_ions():
+    molecules = 'H2O CH4 CO CO2 H2 C2H2 C2H4 OH H He e- H- H+ H2+ He+'.split()
+    
+    species, elements, splines, stoich_vals = \
+        tea.setup_janaf_network(molecules)
+
+    expected_stoich_vals = np.array([
+        [ 0,  2,  0,  1,  0],
+        [ 1,  4,  0,  0,  0],
+        [ 1,  0,  0,  1,  0],
+        [ 1,  0,  0,  2,  0],
+        [ 0,  2,  0,  0,  0],
+        [ 2,  2,  0,  0,  0],
+        [ 2,  4,  0,  0,  0],
+        [ 0,  1,  0,  1,  0],
+        [ 0,  1,  0,  0,  0],
+        [ 0,  0,  1,  0,  0],
+        [ 0,  0,  0,  0,  1],
+        [ 0,  1,  0,  0,  1],
+        [ 0,  1,  0,  0, -1],
+        [ 0,  2,  0,  0, -1],
+        [ 0,  0,  1,  0, -1]
+    ])
+
+    np.testing.assert_equal(species, molecules)
+    np.testing.assert_equal(elements, ['C', 'H', 'He', 'O', 'e'])
+    np.testing.assert_equal(stoich_vals, expected_stoich_vals)
+
+
+def test_setup_janaf_network_missing_species():
+    molecules = 'Ti Ti+ TiO TiO2 TiO+'.split()
+    species, elements, splines, stoich_vals = \
+        tea.setup_janaf_network(molecules)
+
+    expected_stoich_vals = np.array([
+        [ 0,  1,  0],
+        [ 0,  1, -1],
+        [ 1,  1,  0],
+        [ 2,  1,  0]
+    ])
+
+    np.testing.assert_equal(species, ['Ti', 'Ti+', 'TiO', 'TiO2'])
+    np.testing.assert_equal(elements, ['O', 'Ti', 'e'])
+    np.testing.assert_equal(stoich_vals, expected_stoich_vals)
 
