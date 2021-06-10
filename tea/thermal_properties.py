@@ -18,6 +18,7 @@ from pathlib import Path
 import more_itertools
 import numpy as np
 import scipy.interpolate as si
+import scipy.constants as sc
 
 
 ROOT = str(Path(__file__).parents[1]) + os.path.sep
@@ -39,7 +40,7 @@ def setup_janaf_network(input_species):
     elements: 1D string array
         Elements for this chemical network.
     heat_capacity_splines: 1D list of numpy splines
-        Splines sampling the species heat capacity.
+        Splines sampling the species's heat capacity/R.
     stoich_vals: 2D integer array
         Array containing the stoichiometric values for the
         requested species sorted according to the species and elements
@@ -175,7 +176,7 @@ def read_janaf(janaf_file):
     temps: 1D double array
         Tabulated JANAF temperatures (K).
     heat_capacity: 1D double array
-        Tabulated JANAF heat capacity cp (J K-1 mol-1).
+        Tabulated JANAF heat capacity cp/R (unitless).
 
     Examples
     --------
@@ -183,22 +184,22 @@ def read_janaf(janaf_file):
     >>> janaf_file = 'H-064.txt'  # Water
     >>> temps, heat = tea.read_janaf(janaf_file)
     >>> for i in range(5):
-    >>>     print(f'{temps[i]:6.2f}  {heat[i]}')
-    100.00  33.299
-    200.00  33.349
-    298.15  33.59
-    300.00  33.596
-    400.00  34.262
+    >>>     print(f'{temps[i]:6.2f}  {heat[i]:.3f}')
+    100.00  4.005
+    200.00  4.011
+    298.15  4.040
+    300.00  4.041
+    400.00  4.121
 
     >>> janaf_file = 'D-020.txt'  # electron
     >>> temps, heat = tea.read_janaf(janaf_file)
     >>> for i in range(5):  # temperatures with missing cp are ignored
-    >>>     print(f'{temps[i]:6.2f}  {heat[i]}')
-    298.15  20.786
-    300.00  20.786
-    350.00  20.786
-    400.00  20.786
-    450.00  20.786
+    >>>     print(f'{temps[i]:6.2f}  {heat[i]:.3f}')
+    298.15  2.500
+    300.00  2.500
+    350.00  2.500
+    400.00  2.500
+    450.00  2.500
     """
     temps, heat_capacity = np.genfromtxt(
         f'{ROOT}/janaf/{janaf_file}',
@@ -208,7 +209,7 @@ def read_janaf(janaf_file):
     )
 
     idx_valid = np.isfinite(heat_capacity)
-    return temps[idx_valid], heat_capacity[idx_valid]
+    return temps[idx_valid], heat_capacity[idx_valid]/sc.R
 
 
 def read_janaf_stoich(species=None, janaf_file=None, formula=None):
