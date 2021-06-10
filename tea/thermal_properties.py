@@ -11,11 +11,13 @@ __all__ = [
     # Functions:
     'get_janaf_names',
     'read_janaf',
+    'read_janaf_stoich',
 ]
 
 import os
 from pathlib import Path
 
+import more_itertools
 import numpy as np
 import scipy.interpolate as si
 
@@ -117,4 +119,76 @@ def read_janaf(janaf_file):
     )
     idx_valid = np.isfinite(heat_capacity)
     return temps[idx_valid], heat_capacity[idx_valid]
+
+
+def read_janaf_stoich(species=None, janaf_file=None, formula=None):
+    """
+    Get the stoichiometric data from the JANAF data base for the
+    requested species.
+
+    Parameters
+    ----------
+    species: String
+        A species name (takes precedence over janaf_file argument).
+    janaf_file: String
+        A JANAF filename.
+    formula: String
+        A chemical formula in JANAF format (takes precedence over
+        species and janaf_file arguments).
+
+    Returns
+    -------
+    stoich: Dictionary
+        Dictionary containing the stoichiometric values for the
+        requested species. The dict's keys are the elements/electron
+        names and their values are the respective stoich values.
+
+    Examples
+    --------
+    >>> import thermal_properties as tea
+    >>> # From species name:
+    >>> for species in 'C H2O e- H2+'.split():
+    >>>     print(f'{species}:  {tea.read_janaf_stoich(species)}')
+    C:  {'C': 1.0}
+    H2O:  {'H': 2.0, 'O': 1.0}
+    e-:  {'e': 1.0}
+    H2+:  {'e': -1, 'H': 2.0}
+
+    >>> # From JANAF filename:
+    >>> print(tea.read_janaf_stoich(janaf_file='H-064.txt'))
+    {'H': 2.0, 'O': 1.0}
+
+    >>> # Or directly from the chemical formula:
+    >>> print(tea.read_janaf_stoich(formula='H3O1+'))
+    {'e': -1, 'H': 3.0, 'O': 1.0}
+    """
+    # Get chemical formula (JANAF format):
+    if formula is None and species is not None:
+        janaf_file = get_janaf_names(species)[0]
+    if formula is None and janaf_file is not None:
+        with open(f'{ROOT}/janaf/{janaf_file}', 'r') as f:
+            header = f.readline()
+        formula = header.split('\t')[-1]
+        formula = formula[0:formula.index('(')]
+
+    if '-' in formula:
+        stoich = {'e': 1}
+    elif '+' in formula:
+        stoich = {'e': -1}
+    else:
+        stoich = {}
+
+    previous_type = formula[0].isalpha()
+    word = ''
+    groups = []
+    for letter in formula.replace('-','').replace('+',''):
+        if letter.isalpha() != previous_type:
+            groups.append(word)
+            word = ''
+        word += letter
+        previous_type = letter.isalpha()
+    groups.append(word)
+    for e, num in more_itertools.chunked(groups,2):
+        stoich[e] = float(num)
+    return stoich
 

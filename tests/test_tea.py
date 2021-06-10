@@ -92,3 +92,55 @@ def test_read_janaf_missing_cp_values():
     np.testing.assert_allclose(temps, expected_temp)
     np.testing.assert_allclose(heat, expected_heat)
 
+
+def test_read_janaf_stoich_from_species_neutral():
+    stoich = tea.read_janaf_stoich('H')
+    assert len(stoich) == 1
+    assert stoich['H'] == 1.0
+
+    stoich = tea.read_janaf_stoich('H2')
+    assert len(stoich) == 1
+    assert stoich['H'] == 2.0
+
+    stoich = tea.read_janaf_stoich('H2O')
+    assert len(stoich) == 2
+    assert stoich['H'] == 2.0
+    assert stoich['O'] == 1.0
+
+
+def test_read_janaf_stoich_from_species_ions():
+    stoich = tea.read_janaf_stoich('e-')
+    assert len(stoich) == 1
+    assert stoich['e'] == 1.0
+
+    stoich = tea.read_janaf_stoich('H-')
+    assert len(stoich) == 2
+    assert stoich['H'] == 1.0
+    assert stoich['e'] == 1.0
+
+    stoich = tea.read_janaf_stoich('H+')
+    assert len(stoich) == 2
+    assert stoich['H'] == 1.0
+    assert stoich['e'] == -1.0
+
+    stoich = tea.read_janaf_stoich('H3O+')
+    assert len(stoich) == 3
+    assert stoich['H'] == 3.0
+    assert stoich['O'] == 1.0
+    assert stoich['e'] == -1.0
+
+
+def test_read_janaf_stoich_from_janaf():
+    stoich = tea.read_janaf_stoich(janaf_file='H-064.txt')
+    assert len(stoich) == 2
+    assert stoich['H'] == 2.0
+    assert stoich['O'] == 1.0
+
+
+def test_read_janaf_stoich_from_formula():
+    stoich = tea.read_janaf_stoich(formula='H3O1+')
+    assert len(stoich) == 3
+    assert stoich['H'] == 3.0
+    assert stoich['O'] == 1.0
+    assert stoich['e'] == -1.0
+
