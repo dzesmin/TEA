@@ -162,7 +162,7 @@ def test_read_janaf_stoich_from_formula():
 
 def test_setup_janaf_network_neutrals():
     molecules = 'H2O CH4 CO CO2 H2 C2H2 C2H4 OH H He'.split()
-    
+
     species, elements, splines, stoich_vals = \
         tea.setup_janaf_network(molecules)
 
@@ -187,7 +187,7 @@ def test_setup_janaf_network_neutrals():
 
 def test_setup_janaf_network_ions():
     molecules = 'H2O CH4 CO CO2 H2 C2H2 C2H4 OH H He e- H- H+ H2+ He+'.split()
-    
+
     species, elements, splines, stoich_vals = \
         tea.setup_janaf_network(molecules)
 
@@ -229,4 +229,52 @@ def test_setup_janaf_network_missing_species():
     np.testing.assert_equal(species, ['Ti', 'Ti+', 'TiO', 'TiO2'])
     np.testing.assert_equal(elements, ['O', 'Ti', 'e'])
     np.testing.assert_equal(stoich_vals, expected_stoich_vals)
+
+
+def test_heat_capacity_single_temp():
+    molecules = 'H2O CH4 CO CO2 NH3 N2 H2 HCN OH H He C N O'.split()
+    species, elements, cp_splines, stoich_vals = \
+        tea.setup_janaf_network(molecules)
+    temperature = 1500.0
+    cp = tea.heat_capacity(temperature, cp_splines)
+
+    expected_cp = np.array([
+        5.6636252 , 10.41029396,  4.23563153,  7.02137982,  8.00580904,
+        4.19064967,  3.88455652,  6.65454913,  3.95900511,  2.49998117,
+        2.49998117,  2.5033488 ,  2.49998117,  2.50707724])
+    np.testing.assert_allclose(cp, expected_cp)
+
+
+def test_heat_capacity_temp_array():
+    molecules = 'H2O CH4 CO C He'.split()
+    species, elements, cp_splines, stoich_vals = \
+        tea.setup_janaf_network(molecules)
+    temperatures = np.arange(100.0, 4501.0, 200.0)
+    cp = tea.heat_capacity(temperatures, cp_splines)
+
+    expected_cp = np.array([
+        [ 4.00494915,  4.00001798,  3.50040662,  2.55831326,  2.49998117],
+        [ 4.04067004,  4.29468525,  3.50497697,  2.50623533,  2.49998117],
+        [ 4.23671398,  5.57366148,  3.58339455,  2.50214607,  2.49998117],
+        [ 4.50961195,  6.95102049,  3.74900958,  2.50106362,  2.49998117],
+        [ 4.80933066,  8.13053147,  3.91811251,  2.50070281,  2.49998117],
+        [ 5.11590489,  9.0840507 ,  4.05438109,  2.50058253,  2.49998117],
+        [ 5.405641  ,  9.83154339,  4.15805586,  2.5011839 ,  2.49998117],
+        [ 5.6636252 , 10.41029396,  4.23563153,  2.5033488 ,  2.49998117],
+        [ 5.88552769, 10.85854903,  4.2949258 ,  2.5076786 ,  2.49998117],
+        [ 6.07327284, 11.20794022,  4.34074957,  2.51513549,  2.49998117],
+        [ 6.23287426, 11.48324364,  4.37695154,  2.52559918,  2.49998117],
+        [ 6.36806038, 11.70262042,  4.40617773,  2.53894941,  2.49998117],
+        [ 6.48316103, 11.87954105,  4.43035247,  2.55470509,  2.49998117],
+        [ 6.58166409, 12.02374761,  4.45043795,  2.57226486,  2.49998117],
+        [ 6.66669664, 12.14269697,  4.46811799,  2.59090707,  2.49998117],
+        [ 6.74054387, 12.24156084,  4.48363312,  2.61003038,  2.49998117],
+        [ 6.80537067, 12.32478931,  4.4972239 ,  2.62903341,  2.49998117],
+        [ 6.86250003, 12.39526891,  4.50937141,  2.64743508,  2.49998117],
+        [ 6.91325497, 12.45540509,  4.52091755,  2.66511512,  2.49998117],
+        [ 6.95883819, 12.5071222 ,  4.53102043,  2.68183297,  2.49998117],
+        [ 6.99973079, 12.55198379,  4.54100304,  2.69722783,  2.49998117],
+        [ 7.03677468, 12.5910723 ,  4.55014374,  2.71141997,  2.49998117],
+        [ 7.07045094, 12.62522965,  4.55868307,  2.72440939,  2.49998117]])
+    np.testing.assert_allclose(cp, expected_cp)
 

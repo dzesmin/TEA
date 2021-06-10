@@ -10,6 +10,7 @@ __all__ = [
     'get_janaf_names',
     'read_janaf',
     'read_janaf_stoich',
+    'heat_capacity',
 ]
 
 import os
@@ -282,4 +283,78 @@ def read_janaf_stoich(species=None, janaf_file=None, formula=None):
     for e, num in more_itertools.chunked(groups,2):
         stoich[e] = float(num)
     return stoich
+
+
+def heat_capacity(temperature, cp_splines):
+    """
+    Compute the heat capacity for the input chemical network at the
+    requested temperature(s).
+
+    Parameters
+    ----------
+    temperature: float or 1D float iterable
+        Temperature (Kelvin).
+    cp_splines: 1D iterable of heat-capacity numpy splines
+        Numpy splines containing heat capacity info for species.
+
+    Returns
+    -------
+    cp: 1D or 2D float ndarray
+        The heat capacity (divided by the universal gas constant, R) for
+        each species at the requested temperature(s).
+        The shape of the output depends on the shape of the temperature input.
+
+    Examples
+    --------
+    >>> import thermal_properties as tea
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>>
+    >>> molecules = 'H2O CH4 CO CO2 NH3 N2 H2 HCN OH H He C N O'.split()
+    >>> species, elements, splines, stoich_vals = \
+    >>>     tea.setup_janaf_network(molecules)
+
+    >>> temperature = 1500.0
+    >>> cp1 = tea.heat_capacity(temperature, splines)
+    >>> temperatures = np.arange(100.0, 4501.0, 10)
+    >>> cp2 = tea.heat_capacity(temperatures, splines)
+
+    >>> cols = {
+    >>>     'H': 'blue',
+    >>>     'H2': 'deepskyblue',
+    >>>     'He': 'olive',
+    >>>     'H2O': 'navy',
+    >>>     'CH4': 'orange',
+    >>>     'CO': 'limegreen',
+    >>>     'CO2': 'red',
+    >>>     'NH3': 'magenta',
+    >>>     'HCN': '0.55',
+    >>>     'N2': 'gold',
+    >>>     'OH': 'steelblue',
+    >>>     'C': 'salmon',
+    >>>     'N': 'darkviolet',
+    >>>     'O': 'greenyellow',
+    >>> }
+    >>> nspecies = len(species)
+    >>> plt.figure('heat capacity')
+    >>> plt.clf()
+    >>> for j in range(nspecies):
+    >>>     label = species[j]
+    >>>     plt.plot(temperatures, cp2[:,j], label=label, c=cols[label])
+    >>> plt.xlim(np.amin(temperatures), np.amax(temperatures))
+    >>> plt.plot(np.tile(temperature,nspecies), cp1, 'ob', ms=4, zorder=-1)
+    >>> plt.legend(loc=(1.01, 0.01), fontsize=8)
+    >>> plt.xlabel('Temperature (K)')
+    >>> plt.ylabel('Heat capacity / R')
+    >>> plt.tight_layout()
+    """
+    temp = np.atleast_1d(temperature)
+    ntemp = np.shape(temp)[0]
+    nspecies = len(cp_splines)
+    cp = np.zeros((ntemp, nspecies))
+    for j in range(nspecies):
+        cp[:,j] = cp_splines[j](temp)
+    if np.shape(temperature) == ():
+        return cp[0]
+    return cp
 
