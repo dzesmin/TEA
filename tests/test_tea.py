@@ -278,3 +278,30 @@ def test_heat_capacity_temp_array():
         [ 7.07045094, 12.62522965,  4.55868307,  2.72440939,  2.49998117]])
     np.testing.assert_allclose(cp, expected_cp)
 
+
+def test_tea_network_cp():
+    nlayers = 81
+    temperature = np.tile(1200.0, nlayers)
+    pressure = np.logspace(-8, 3, nlayers)
+    HCNO_molecules = (
+        'H2O CH4 CO CO2 NH3 N2 H2 HCN OH H He C N O').split()
+    tea_net = tea.Tea_Network(pressure, temperature, HCNO_molecules)
+
+    cp1 = tea_net.heat_capacity()
+    temp2 = np.tile(700.0, nlayers)
+    cp2 = tea_net.heat_capacity(temp2)
+
+    expected_cp1 = np.array([
+        5.26408044, 9.48143057, 4.11030773, 6.77638503, 7.34238673,
+        4.05594463, 3.72748083, 6.3275286 , 3.79892261, 2.49998117,
+        2.49998117, 2.50082308, 2.49998117, 2.51092596])
+    expected_cp2 = np.array([
+        4.50961195, 6.95102049, 3.74900958, 5.96117901, 5.81564946,
+        3.69885601, 3.5409384 , 5.4895911 , 3.56763887, 2.49998117,
+        2.49998117, 2.50106362, 2.49998117, 2.53053035])
+
+    assert np.shape(cp1) == (nlayers, len(tea_net.species))
+    np.testing.assert_allclose(cp1[0], expected_cp1)
+    np.testing.assert_allclose(cp2[0], expected_cp2)
+    np.testing.assert_equal(tea_net.temperature, temp2)
+
