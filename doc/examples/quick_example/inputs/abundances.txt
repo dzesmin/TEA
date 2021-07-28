@@ -1,6 +1,6 @@
 # This file contains elemental solar abundances as found by Asplund et al. 2009.
 # http://adsabs.harvard.edu/abs/2009ARA%26A..47..481A
-# The file is in the public domain. Contact: jasmina@physics.ucf.edu.
+# The file is in the public domain. Contact: jasmina@nyu.edu.
 # Columns: atomic number, atomic symbol, abundance (in dex-decimal exponent), 
 # atomic name, atomic mass (in g/mol). 
 0   D   7.30  Deuterium     2.014101
