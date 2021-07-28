@@ -98,7 +98,7 @@ A program to calculate species abundances under thermochemical equilibrium.\n\
 Copyright (C) 2014-2016 University of Central Florida.\n\
 \n\
 This program is reproducible-research software.  See the Reproducible\n\
-Research Software License that accompanies the code\n\
+Research Software License that accompanies the code.\n\
 \n\
 Direct contact: \n\
 Jasmina Blecic <jasmina@nyu.edu>        \n\
