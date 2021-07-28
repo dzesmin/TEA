@@ -39,20 +39,13 @@ import numpy as np
 #   See the file ACKNOWLEDGING in the top-level TEA directory for              #
 #   instructions on how to acknowledge TEA in publications.                    #
 #                                                                              #
-#   We welcome your feedback, but do not guarantee support.                    #
-#   Many questions are answered in the TEA forums:                             #
-#                                                                              #
-#   https://physics.ucf.edu/mailman/listinfo/tea-user                          #
-#   https://physics.ucf.edu/mailman/listinfo/tea-devel                         #
-#                                                                              #
 #   Visit our Github site:                                                     #
 #                                                                              #
 #   https://github.com/dzesmin/TEA/                                            #
 #                                                                              #
 #   Reach us directly at:                                                      #
 #                                                                              #
-#   Jasmina Blecic <jasmina@physics.ucf.edu>                                   #
-#   Joseph Harrington <jh@physics.ucf.edu>                                     #
+#   Jasmina Blecic <jasmina@nyu.edu>                                           #
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
