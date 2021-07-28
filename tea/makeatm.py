@@ -104,7 +104,7 @@ Questions? Feedback? Search our mailing list archives or post a comment:\n\
 https://physics.ucf.edu/mailman/listinfo/tea-user\n\
 \n\
 Direct contact: \n\
-Jasmina Blecic <jasmina@physics.ucf.edu>        \n\
+Jasmina Blecic <jasmina@nyu.edu>        \n\
 ========================================================================\n")
 
 # Correct directory names
