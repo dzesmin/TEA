@@ -228,13 +228,13 @@ def balance(a, b, verb=0, loc_out=None):
     # No values are changed and this serves solely as a check
     if verb > 1:
         print('\nChecks:')
-    for m in np.arange(natom):
-        flag = round((sum(a[:,m] * y_init[:])), 2) == round(b[m], 2)
-        if flag:
-            if verb > 1:
-                print('Equation {:d} is satisfied.'.format(m+1))
-        else:
-            print('Equation {:d} is NOT satisfied. Check for errors'.format(m+1))
+        for m in np.arange(natom):
+            flag = round((sum(a[:,m] * y_init[:])), 2) == round(b[m], 2)
+            if flag:
+                if verb > 1:
+                    print('Equation {:d} is satisfied.'.format(m+1))
+            else:
+                print('Equation {:d} is NOT satisfied. Check for errors'.format(m+1))
 
     # Put all initial mole numbers in y array
     y     = np.array(y_init, dtype=np.double)
