@@ -74,6 +74,8 @@ import makeheader as mh
 import readatm  as ra
 import balance  as bal
 
+import warnings
+warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning) 
 
 location_TEA = os.path.realpath(os.path.dirname(__file__) + "/..") + "/"
 
