@@ -1,5 +1,3 @@
-import numpy as np
-
 ############################# BEGIN FRONTMATTER ################################ 
 #                                                                              # 
 #   TEA - calculates Thermochemical Equilibrium Abundances of chemical species #
@@ -40,15 +38,14 @@ import numpy as np
 #   instructions on how to acknowledge TEA in publications.                    #
 #                                                                              #
 #   Visit our Github site:                                                     #
-#                                                                              #
 #   https://github.com/dzesmin/TEA/                                            #
 #                                                                              #
 #   Reach us directly at:                                                      #
-#                                                                              #
 #   Jasmina Blecic <jasmina@nyu.edu>                                           #
 #                                                                              #
 ############################## END FRONTMATTER #################################
 
+import numpy as np
 
 def makeAbun(solar_abun, abun_file, COratio, solar_times=1):
     """
