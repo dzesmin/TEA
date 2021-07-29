@@ -331,7 +331,7 @@ if verb >= 1:
   print("\n  Species abundances calculated.\n  Created TEA atmospheric file.")
 
 # Time / speed testing
-if verb >= 1:
+if verb > 1:
     tend = time.time()
     elapsed = tend - tstart
     print("Overall run time:   " + str(elapsed) + " seconds")
