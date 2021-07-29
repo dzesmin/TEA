@@ -38,11 +38,9 @@
 #   instructions on how to acknowledge TEA in publications.                    #
 #                                                                              #
 #   Visit our Github site:                                                     #
-#                                                                              #
 #   https://github.com/dzesmin/TEA/                                            #
 #                                                                              #
 #   Reach us directly at:                                                      #
-#                                                                              #
 #   Jasmina Blecic <jasmina@nyu.edu>                                           #
 #                                                                              #
 ############################## END FRONTMATTER #################################
