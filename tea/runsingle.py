@@ -40,11 +40,9 @@
 #   instructions on how to acknowledge TEA in publications.                    #
 #                                                                              #
 #   Visit our Github site:                                                     #
-#                                                                              #
 #   https://github.com/dzesmin/TEA/                                            #
 #                                                                              #
 #   Reach us directly at:                                                      #
-#                                                                              #
 #   Jasmina Blecic <jasmina@nyu.edu>                                           #
 #                                                                              #
 ############################## END FRONTMATTER #################################
@@ -208,7 +206,7 @@ if verb >= 1:
   print("\n  Species abundances calculated.\n  Created results file.")
 
 # Time / speed testing
-if verb >= 1:
+if verb > 1:
     tend = time.time()
     elapsed = tend - tstart
     print("Overall run time:   " + str(elapsed) + " seconds")
