@@ -96,6 +96,9 @@ fully muted to allow execution in retrievals.
                     pressure and temperature profile
                  - 'plots' directory containing the plot produced from the 
                     multiTP example final atmospheric file
+                 - 'jupyter_tutorial' directory containing necessary files
+                    to execute TEA_tutorial.ipynb jupyter notebook provided
+                    in the same directory
             - TEA-Theory.pdf - document containing theory part of the code
                                (Blecic et al. 2015)
             - TEA-UserGuide.pdf - document containing the user guide
