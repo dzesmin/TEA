@@ -63,12 +63,12 @@ def makeAbun(solar_abun, abun_file, COratio, solar_times=1):
        Input Solar abundances filename.
     abun_file: String
        Output filename to store the modified elemental abundances.
-
-    Optional parameters
-    -------------------
     COratio: Float
        Desired C/O ratio.
-    solar_times: Integer
+       
+    Optional parameters
+    -------------------
+    solar_times: Float
        Multiplication factor for metal elemental abundances (everything
        except H and He).
 
